@@ -1,0 +1,14 @@
+
+20221224 jens heine p
+
+
+dependencies for p
+
+termcolor
+colorama
+clipboard
+cryptography
+progressbar
+dropbox
+requests
+
