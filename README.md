@@ -4,7 +4,7 @@ Password database
 
 2022 written by Jens Heine <binbash@gmx.net>
 
-If. you are paranoid when it comes to passwords and privacy you may want
+If you are paranoid when it comes to passwords and privacy you may want
 to have a password safe for your accounts. Then you do not trust all the
 password safes that exist and you write the password safe by yourself.
 
