@@ -59,8 +59,6 @@ If you have a version on an usb stick and one on a laptop and so on, you can syn
 
 This will update both databases to the same state.
 
-# WHAT FEATURES CAN I USE?
-
 Use the -h option to show all options:
 
 >./p -h
@@ -70,6 +68,7 @@ Use the -h option to show all options:
 Use 
 
 >./p -q
+DB: p.db> _
 
 to access the p shell. There you can execute all commands in an interactive shell without always typing your password again.
 
