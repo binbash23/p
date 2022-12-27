@@ -890,7 +890,8 @@ class PDatabase:
             if database_connection:
                 database_connection.rollback()
             print("Process canceled by user.")
-            sys.exit(0)
+            return
+            # sys.exit(0)
         except Exception as e:
             if database_connection:
                 database_connection.rollback()
@@ -1007,7 +1008,8 @@ class PDatabase:
         except Exception as e:
             if str(e) == "database disk image is malformed":
                 print(colored("Error: " + str(e), "red"))
-                sys.exit(1)
+                return
+                # sys.exit(1)
         finally:
             if database_connection is not None:
                 database_connection.close()
