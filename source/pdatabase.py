@@ -1098,11 +1098,13 @@ class PDatabase:
         else:
             print(colored("Error: There is no last known database.", "red"))
 
-    def merge_database(self, merge_database_filename: str):
+    # returns -1 in error case, 0 when no error and no changes where made,
+    # 1 when changes where made locally and 2 when changes where made in remote db
+    # and 3 when changes where made locally and remote
+    def merge_database(self, merge_database_filename: str) -> int:
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
-            return
-            # sys.exit(1)
+            return -1
         print("Using merge database: " + merge_database_filename)
         # Check remote db for password
         print("Checking merge database password...")
@@ -1111,8 +1113,7 @@ class PDatabase:
                           " is not valid!", "red"))
             print("The database passwords must be the same in both databases.")
             print("")
-            return
-            # sys.exit(1)
+            return -1
         # Set some attribute values in configuration table and create some attributes if not exist
         set_attribute_value_in_configuration_table(self.database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE,
@@ -1162,6 +1163,11 @@ class PDatabase:
             print("Origin database is now up to date (" +
                   colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local +
                               count_uuids_in_remote_that_do_not_exist_in_local), "red") + " changes have been done)")
+            # remember that there where changes in local db for return code:
+            return_code = 0
+            if count_uuids_in_remote_with_newer_update_date_than_in_local + \
+                    count_uuids_in_remote_that_do_not_exist_in_local > 0:
+                return_code = 1
             database_connection.commit()
             # Step #2 Sync new accounts from main database into remote database
             print(colored("Step #2: Analyzing Remote Database - " + merge_database_filename, "green"))
@@ -1185,10 +1191,15 @@ class PDatabase:
             print("Remote database is now up to date (" +
                   colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote +
                               count_uuids_in_local_that_do_not_exist_in_remote), "red") + " changes have been done)")
+            # remember that there where changes in remote db for return code:
+            if count_uuids_in_local_with_newer_update_date_than_in_remote + \
+                    count_uuids_in_local_that_do_not_exist_in_remote > 0:
+                return_code += 2
         except Exception as e:
             raise
         finally:
             database_connection.close()
+        return return_code
 
 
 def main():
