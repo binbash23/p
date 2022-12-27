@@ -13,7 +13,9 @@ a new proprietary encryption function. I use open source cryptography
 which has been tested and which is hopefully bugfree :)
 For the people who want to know, I use this for the symetric encryption method:
 > _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+
 > key = base64.urlsafe_b64encode(_hash.derive(password))
+
 and the salt is static but long and random (see source code)
 
 Try it out. Gimme feedback. 
@@ -35,6 +37,7 @@ I copy the linux and the windows binary to an usb stick and also my p.db file (w
 
 # HOW DO I START?
 
+I recommend to use the pshell (see below), but a good way to start is maybe to use the command line.
 You can start with creating a new account (the initial master database password will be requested):
 
 >./p -a
@@ -67,14 +70,14 @@ Use the -h option to show all options:
 
 >./p -h
 
-# HOWTO use the p Shell
+# HOWTO use the pshell
 
 Use 
 
 >./p -q
 DB: p.db> _
 
-to access the p shell. There you can execute all commands in an interactive shell without always typing your password again.
+to access the pshell. There you can execute all commands in an interactive shell without always typing your password again.
 
 # BINARIES for Windows and Linux
 
