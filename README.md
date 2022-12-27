@@ -29,7 +29,7 @@ or
 
 I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
-HOW DO I START?
+# HOW DO I START?
 
 You can start with creating a new account (the initial master database password will be requested):
 
@@ -59,11 +59,20 @@ If you have a version on an usb stick and one on a laptop and so on, you can syn
 
 This will update both databases to the same state.
 
-WHAT FEATURES CAN I USE?
-
 Use the -h option to show all options:
 
 >./p -h
+
+# HOWTO use the p Shell
+
+Use 
+
+>./p -q
+DB: p.db> _
+
+to access the p shell. There you can execute all commands in an interactive shell without always typing your password again.
+
+# BINARIES for Windows and Linux
 
 You can also move the binary to a folder in your path and set an environment variable LASTBASE_DATABASE=<path_to_database_file>. Then you can call "p <search_string>" from everywhere in your console.
 
