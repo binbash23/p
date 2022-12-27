@@ -225,6 +225,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
         if shell_command.command == "showconfig":
             print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
             print("Shadow passwords                    : " + str(p_database.shadow_passwords))
+            print("Show accounts verbose               : " + str(p_database.show_account_details))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
