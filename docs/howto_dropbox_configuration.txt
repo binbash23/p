@@ -1,0 +1,29 @@
+
+Enable dropbox connection in p to sync password databases online
+
+
+It makes sense to synchronize all your p databases (on your windows computer and your linux computer and so on) over an internet connection and a cloud storage. To do so, I implemented a dropbox connection in p.
+
+p will connect to your dropbox account and store a copy of your encrypted password database there. If you run p from another computer you can then synchronize your database on the other computer with the password database copy which is in your dropbox account.
+
+To enable the dropbox connection you have to do some strange stuff.
+
+#1 Create an application in your dropbox account and get the application_key and application_secret If you have done this, you need to save the application_key (as loginname) and application_secret (as password) in the p database and set the account uuid into the p configuration (-z option from p).
+
+#2 Generate and retrieve your application access code
+
+#3 Generate and retrieve the refresh access token for accessing your dropbox account from p If you have done this, you need to save the refresh_access_token in the p database and set the account uuid into the p configuration (-y option from p).
+
+NOTE:
+
+I implemented a procedure which you can follow to do all this. Use:
+
+p.exe -Z
+
+and follow the instructions.
+
+This.is.crazy. Yes. But if you have done all this stuff, you have a cloud enabled password manager...
+
+Now you can synchronize your local password database with your database copy in dropbox with:
+
+p.exe -Y
