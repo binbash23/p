@@ -51,6 +51,7 @@ SHELL_COMMANDS = [
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
                  "Set the dropbox token account uuid in configuration"),
     ShellCommand("shadowpasswords", "shadowpasswords on/off", "Shadow passwords true or false"),
+    ShellCommand("showconfig", "showconfig", "Show current configuration"),
     ShellCommand("showinvalidated", "showinvalidated on/off", "Show invalidated accounts true or false"),
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES"),
@@ -69,7 +70,12 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
         # print("x" + first_token + "x in x" + shell_command.command + "x")
         # if first_token.lower() in shell_command.command.lower():
         if shell_command.command.startswith(first_token):
-            shell_command.arguments = [tokens[0], string[len(tokens[0]) + 1:len(string)]]
+            # print("xx-" + str(string[len(tokens[0]) + 1:len(string)]) + "-")
+            # print("--" + str(len(tokens)))
+            if len(tokens) == 1:
+                shell_command.arguments = [tokens[0]]
+            else:
+                shell_command.arguments = [tokens[0], string[len(tokens[0]) + 1:len(string)]]
             return shell_command
     return None
 
@@ -206,6 +212,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "shadowpasswords":
             # print(shell_command.arguments)
+            # print("x" + str(len(shell_command.arguments)))
             if len(shell_command.arguments) == 1:
                 print("on/off is missing.")
                 print(shell_command)
@@ -214,6 +221,10 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 p_database.shadow_passwords = True
             if shell_command.arguments[1] == "off":
                 p_database.shadow_passwords = False
+            continue
+        if shell_command.command == "showconfig":
+            print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
+            print("Shadow passwords                    : " + str(p_database.shadow_passwords))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
