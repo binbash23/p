@@ -7,9 +7,11 @@
 
 import p
 import pdatabase
-#import pyperclip3
+import dropboxconnector
+# import pyperclip3
 import clipboard
 import datetime
+
 
 class ShellCommand:
     command = ""
@@ -46,6 +48,7 @@ SHELL_COMMANDS = [
     ShellCommand("quit", "quit", "Quit shell"),
     ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID"),
     ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database"),
+    ShellCommand("setdatabasename", "setdatabasename NAME", "Set database name"),
     ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid UUID",
                  "Set the dropbox application account uuid in configuration"),
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
@@ -56,10 +59,13 @@ SHELL_COMMANDS = [
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES"),
     ShellCommand("verbose", "verbose on/off", "Show verbose account infos true or false"),
+    ShellCommand("upload2dropbox", "upload2dropbox",
+                 "Upload local database to dropbox and overwrite eventually existing remote database. Use merge* commands to merge/sync databases."),
     ShellCommand("version", "version", "Show program version info")
 ]
 
 DEFAULT_SHELL_MAX_IDLE_TIMEOUT_MIN = 30
+
 
 def expand_string_2_shell_command(string: str) -> ShellCommand:
     if string is None or string.strip() == "":
@@ -102,7 +108,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
             return
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
-        if shell_max_idle_minutes_timeout != 0 and\
+        if shell_max_idle_minutes_timeout != 0 and \
                 int(time_diff.total_seconds() / 60) > int(shell_max_idle_minutes_timeout):
             print("Exiting shell due to idle timeout (" + str(shell_max_idle_minutes_timeout) + " min)")
             return
@@ -124,7 +130,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 continue
             password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
             try:
-                #pyperclip3.copy(password)
+                # pyperclip3.copy(password)
                 clipboard.copy(password)
                 print("Password copied to clipboard.")
             except Exception as e:
@@ -189,6 +195,16 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             p_database.search_accounts(shell_command.arguments[1])
+            continue
+        if shell_command.command == "setdatabasename":
+            if len(shell_command.arguments) == 1:
+                print("NAME is missing.")
+                print(shell_command)
+                continue
+            p.set_attribute_value_in_configuration_table(
+                p_database.database_filename,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                shell_command.arguments[1])
             continue
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
@@ -265,6 +281,16 @@ def start_p_shell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "status":
             pdatabase.print_database_statistics(p_database.database_filename)
+            continue
+        if shell_command.command == "upload2dropbox":
+            continue
+            # tobe implemented xxxxxxxxxxxxxxxxxxxx
+            print("An eventually existing database in dropbox will be overwritten!")
+            local_path = os.path.dirname(p_database.database_filename)
+            # dropbox_upload_file(access_token, local_path, p_database.database_filename,
+            #                     "/" + DROPBOX_P_DATABASE_FILENAME)
+            dropboxconnector.dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
+                                                 "/" + DROPBOX_P_DATABASE_FILENAME)
             continue
         if shell_command.command == "version":
             print(p.VERSION)
