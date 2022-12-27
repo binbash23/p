@@ -273,6 +273,7 @@ def search_string_matches_account(search_string: str, account: Account) -> bool:
     if account.invalid_date is None:
         account.invalid_date = ""
     if search_string in account.name.lower() or \
+            search_string in account.uuid.lower() or \
             search_string in account.url.lower() or \
             search_string in account.loginname.lower() or \
             search_string in account.password.lower() or \
@@ -792,6 +793,7 @@ class PDatabase:
             database_connection.close()
 
     def print_formatted_account_search_string_colored(self, account: Account, search_string: str = ""):
+        account.uuid = color_search_string(account.uuid, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.name = color_search_string(account.name, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.url = color_search_string(account.url, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.loginname = color_search_string(account.loginname, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
