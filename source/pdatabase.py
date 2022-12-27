@@ -508,10 +508,12 @@ def print_database_statistics(database_filename):
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
     print("Shell idle timeout in minutes       : " + str(shell_idle_timeout_min))
+    #print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
 
 
 def create_fernet(salt, password):
-    _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
+    # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
+    _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
     key = base64.urlsafe_b64encode(_hash.derive(password))
     f = Fernet(key)
     return f
@@ -542,8 +544,8 @@ def color_search_string(text_string, search_string, color):
 
 
 class PDatabase:
-    SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
-    #SALT = b" iwe98u9 c8qdu 098j43findjncsjdn"  # The salt for the encryption is static. This might become a problem?!
+    SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
+    #SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
 
     database_filename = "unset_database_name.db"
     DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
