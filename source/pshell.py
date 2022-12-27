@@ -75,7 +75,7 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
 
 
 def start_p_shell(p_database: pdatabase.PDatabase):
-    print("Shell mode enabled. Use 'quit' or strg-c to quit.")
+    print("Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.")
     shell_max_idle_minutes_timeout = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SHELL_MAX_IDLE_TIMEOUT_MIN)
