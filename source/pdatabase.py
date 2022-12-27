@@ -543,6 +543,8 @@ def color_search_string(text_string, search_string, color):
 
 class PDatabase:
     SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
+    #SALT = b" iwe98u9 c8qdu 098j43findjncsjdn"  # The salt for the encryption is static. This might become a problem?!
+
     database_filename = "unset_database_name.db"
     DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
     fernet = None

@@ -26,7 +26,7 @@ class ShellCommand:
         return self.command + " - Synopsis: " + self.synopsis + " - Description: " + self.description
 
 
-# SHELL_COMMANDS = ( ShellCommand(command="version", synopsis="version", description="show lastpass program version") )
+# SHELL_COMMANDS = ( ShellCommand(command="version", synopsis="version", description="show p program version") )
 SHELL_COMMANDS = [
     ShellCommand("add", "add", "Add a new account"),
     ShellCommand("changepassword", "changepassword", "Change password of current database"),
