@@ -10,5 +10,4 @@ clipboard
 cryptography
 progressbar
 dropbox
-requests
-
+pandas
