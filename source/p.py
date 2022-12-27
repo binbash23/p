@@ -90,7 +90,9 @@ def edit(p_database: PDatabase, edit_uuid: str):
         answer = input("Correct ([y]/n) : ")
     except KeyboardInterrupt:
         print()
-        sys.exit(0)
+        print("Canceled")
+        return
+        # sys.exit(0)
 
     if answer == "y" or answer == "":
         p_database.set_account_by_uuid_and_encrypt(edit_uuid,
@@ -186,15 +188,18 @@ def merge_with_dropbox(p_database: PDatabase):
     # dropbox_download_file(access_token, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
     dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
     print("Merging local database with the version from dropbox...")
-    p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
-    print("Uploading merged database back to dropbox...")
-    local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-    # print("local path: " + local_path)
-    # dropbox_upload_file(access_token, local_path, TEMP_MERGE_DATABASE_FILENAME,
-    #                     "/" + DROPBOX_P_DATABASE_FILENAME)
-    dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-                        "/" + DROPBOX_P_DATABASE_FILENAME)
-    print("Removing downloaded dropbox database version...")
+    return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+    if return_code > 1:
+        print("Uploading merged database back to dropbox...")
+        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        # print("local path: " + local_path)
+        # dropbox_upload_file(access_token, local_path, TEMP_MERGE_DATABASE_FILENAME,
+        #                     "/" + DROPBOX_P_DATABASE_FILENAME)
+        dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+                            "/" + DROPBOX_P_DATABASE_FILENAME)
+    else:
+        print("No changes in remote database. Skipping upload.")
+    # print("Removing downloaded dropbox database version...")
     os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
 
@@ -360,7 +365,11 @@ def main():
         database_password = options.database_password
     else:
         if os.path.exists(database_filename):
-            database_password = getpass.getpass("Enter database password: ")
+            try:
+                database_password = getpass.getpass("Enter database password: ")
+            except KeyboardInterrupt as k:
+                print()
+                return
         else:
             print(colored("Database does not exist.", "red"))
             database_password = getpass.getpass("Enter password for new database    : ")
