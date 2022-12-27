@@ -42,7 +42,7 @@ SHELL_COMMANDS = [
     ShellCommand("merge2file", "merge2file FILENAME",
                  "Merge local database with another database identified by FILENAME"),
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
-                 "Merge local database the last known merge database"),
+                 "Merge local database with the last known merge database"),
     ShellCommand("quit", "quit", "Quit shell"),
     ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID"),
     ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database"),
