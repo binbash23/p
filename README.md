@@ -1,8 +1,8 @@
 # p
 
-Password database
+# Password database
 
-2022 written by Jens Heine <binbash@gmx.net>
+## 2022 written by Jens Heine <binbash@gmx.net>
 
 If you are paranoid when it comes to passwords and privacy you may want
 to have a password safe for your accounts. Then you do not trust all the
@@ -20,13 +20,10 @@ and the salt is static but long and random (see source code)
 
 Try it out. Gimme feedback. 
 
-I take advantage of sqlite as a database, so you can store a huge
-amount of accounts.
-
 The program code can be understood by everyone who codes at least a 
 little it.
 
-Binaries/executeable program:
+### Binaries/executeable program:
 You can use the python code or the binaries that I have compiled to the folder 
 
 "p/dist/linux/p"
@@ -35,7 +32,7 @@ or
 
 I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
-# HOW DO I START?
+### HOW DO I START?
 
 You might doubleklick on the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all.
 
