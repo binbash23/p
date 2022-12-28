@@ -72,9 +72,9 @@ You might doubleklick on the windows binary (p.exe) and a cmd window will appear
 
 ### Cloud integration
 
-Who wants to have a master database copy in the cloud can also do this by using my dropbox connection. First you have to enable your dropbox for an API connection. The you can alway upload/sync your database with your personal dropbox account.
+Who wants to have a master database copy in the cloud can also do this by using my dropbox feature. First you have to enable your dropbox for an API connection. Then you can alway upload/sync your database with the copy in your personal dropbox account.<br>The procedure to enable dropbox is f&%$%&ing stupid complicated. So I wrote a help text for this [here](https://github.com/binbash23/p/blob/master/docs/howto_dropbox_configuration.txt).
 
-### Merging diffenrent password databases
+### Merging different password databases
 
 Usually you have different copies of your p database. One on your desktop computer, another on the laptop... To synchronize them, there is a merge feature to do this for you.
 
@@ -83,3 +83,7 @@ Usually you have different copies of your p database. One on your desktop comput
 I use the sqlite database to store the accounts (after I encrypt them). This is nice because you can use any sqlite browser to open the database and do whatever you want: use sql, import export stuff, do bulk changes...<br>
 Just decrypt all accounts before opening the database with the sqlite browser by setting an empty password and you then have a cleartext password database to browse through.<br>
 Just make shure to encrypt the account after this by changing the password again to a non empty string.
+
+### Help
+
+For help just type help in the pshell or start p.exe like "p.exe -h"
