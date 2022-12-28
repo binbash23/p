@@ -35,7 +35,7 @@ or
 
 I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
-### HOW DO I START?
+### How do I start?
 
 You might doubleklick on the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all.
 
@@ -70,5 +70,16 @@ You might doubleklick on the windows binary (p.exe) and a cmd window will appear
 >Found 1 result(s).<br>
 >DB: p.db><br>
 
+### Cloud integration
 
+Who wants to have a master database copy in the cloud can also do this by using my dropbox connection. First you have to enable your dropbox for an API connection. The you can alway upload/sync your database with your personal dropbox account.
 
+### Merging diffenrent password databases
+
+Usually you have different copies of your p database. One on your desktop computer, another on the laptop... To synchronize them, there is a merge feature to do this for you.
+
+### SQLite database
+
+I use the sqlite database to store the accounts (after I encrypt them). This is nice because you can use any sqlite browser to open the database and do whatever you want: use sql, import export stuff, do bulk changes...<br>
+Just decrypt all accounts before opening the database with the sqlite browser by setting an empty password and you then have a cleartext password database to browse through.<br>
+Just make shure to encrypt the account after this by changing the password again to a non empty string.
