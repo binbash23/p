@@ -80,7 +80,7 @@ Usually you have different copies of your p database. One on your desktop comput
 
 ### SQLite database
 
-I use the sqlite database to store the accounts (after I encrypt them). This is nice because you can use any sqlite browser to open the database and do whatever you want: use sql, import export stuff, do bulk changes...<br>
+I use the sqlite database to store the accounts (after I encrypt them). This is nice because you can use any [sqlite browser](https://sqlitebrowser.org/dl/) to open the database and do whatever you want: use sql, import export stuff, do bulk changes...<br>
 Just decrypt all accounts before opening the database with the sqlite browser by setting an empty password and you then have a cleartext password database to browse through.<br>
 Just make shure to encrypt the account after this by changing the password again to a non empty string.
 
