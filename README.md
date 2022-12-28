@@ -75,13 +75,14 @@ Use the -h option to show all options:
 Use 
 
 >./p -q
+
 DB: p.db> _
 
 to access the pshell. There you can execute all commands in an interactive shell without always typing your password again.
 
 # BINARIES for Windows and Linux
 
-You can also move the binary to a folder in your path and set an environment variable LASTBASE_DATABASE=<path_to_database_file>. Then you can call "p <search_string>" from everywhere in your console.
+You can also move the binary to a folder in your path and set an environment variable P_DATABASE=<path_to_database_file>. Then you can call "p <search_string>" from everywhere in your console.
 
 keep coding,
 Jens
