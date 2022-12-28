@@ -2,7 +2,7 @@
 
 # The Password database
 
-## 2022 written by Jens Heine <binbash@gmx.net>
+__2022 written by Jens Heine <binbash@gmx.net>__
 
 If you are paranoid when it comes to passwords and privacy you may want
 to have a password safe for your accounts. Then you do not trust all the
