@@ -37,52 +37,67 @@ I copy the linux and the windows binary to an usb stick and also my p.db file (w
 
 # HOW DO I START?
 
-I recommend to use the pshell (see below), but a good way to start is maybe to use the command line.
-You can start with creating a new account (the initial master database password will be requested):
+You might doubleklick on the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all.
 
->./p -a
 
-To search an account the includes the word "gmx" use the -s option:
+Using Database: p.db
 
->./p -s gmx
+Database does not exist.
 
-or the fast way:
+Enter password for new database    :
 
->./p gmx
+Confirm password for new database  :
 
-Maybe you want to change the master database password, then do this:
+Creating new p database: "p.db" ...
 
->./p -c
+Creating new UUID for database: 6ed88bba-a210-4150-8e10-76f57b347770
 
-You can even set an empty password which will make the database unencrypted. This is usefull if you want to make bulk changes with an sqlite browser of your choice. p uses a sqlite db which can be opened and edited with any sqlite browser. After you have edited the database with the sqlite browser, you can ecrypt the database again with a password.
+Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.
 
-You will be asked for the old and the new password and the the entire database content will be re encrypted with the new password.
+DB: p.db> add
 
-Howto syncronize multiple versions/databases?
+Add account
 
-If you have a version on an usb stick and one on a laptop and so on, you can sync them this way:
+UUID      : 8d3a4c15-4780-459c-a3f5-ba1586c043df
 
->./p -M /path/to/other/database
+Name      : New Account
 
-This will update both databases to the same state.
+URL       : www.new.de
 
-Use the -h option to show all options:
+Loginname : horst
 
->./p -h
+Password  : meinpw
 
-# HOWTO use the pshell
+Type      : Webaccount
 
-Use 
+Correct ([y]/n) :
 
->./p -q
+New account added.
 
-DB: p.db> _
+Added
 
-to access the pshell. There you can execute all commands in an interactive shell without always typing your password again.
+DB: p.db> list
 
-# BINARIES for Windows and Linux
+Searching for ** in 1 accounts:
 
-You can also move the binary to a folder in your path and set an environment variable P_DATABASE=<path_to_database_file>. Then you can call "p <search_string>" from everywhere in your console.
+ID          : 8d3a4c15-4780-459c-a3f5-ba1586c043df
+
+Name        : New Account
+
+URL         : www.new.de
+
+Loginname   : horst
+
+Password    : meinpw
+
+Type        : Webaccount
+
+
+Found 1 result(s).
+
+DB: p.db>
+
+
 
 keep coding,
 Jens
