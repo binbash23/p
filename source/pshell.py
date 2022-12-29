@@ -65,6 +65,7 @@ SHELL_COMMANDS = [
 ]
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
+pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
 
 
 def expand_string_2_shell_command(string: str) -> ShellCommand:
@@ -87,36 +88,39 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
 
 
 def load_pshell_configuration(p_database: pdatabase.PDatabase):
-    shell_max_idle_minutes_timeout = pdatabase.get_attribute_value_from_configuration_table(
+    global pshell_max_idle_minutes_timeout
+    pshell_max_idle_minutes_timeout = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN)
-    if not shell_max_idle_minutes_timeout.isnumeric() \
-            or shell_max_idle_minutes_timeout is None \
-            or shell_max_idle_minutes_timeout == "":
-        shell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
+    if not pshell_max_idle_minutes_timeout.isnumeric() \
+            or pshell_max_idle_minutes_timeout is None \
+            or pshell_max_idle_minutes_timeout == "":
+        pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
-            pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN, shell_max_idle_minutes_timeout)
+            pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN, pshell_max_idle_minutes_timeout)
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
-    if type(config_value) == bool:
+    if config_value is not None and config_value == "True" or config_value == "False":
         p_database.shadow_passwords = config_value
+        # print("->" + p_database.shadow_passwords)
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS)
-    if type(config_value) == bool:
+    if config_value is not None and config_value == "True" or config_value == "False":
         p_database.show_account_details = config_value
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS)
-    if type(config_value) == bool:
+    if config_value is not None and config_value == "True" or config_value == "False":
         p_database.show_invalidated_accounts = config_value
 
 
 def start_p_shell(p_database: pdatabase.PDatabase):
     print("Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.")
     load_pshell_configuration(p_database)
+    global pshell_max_idle_minutes_timeout
     user_input = ""
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
@@ -127,9 +131,9 @@ def start_p_shell(p_database: pdatabase.PDatabase):
             return
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
-        if shell_max_idle_minutes_timeout != 0 and \
-                int(time_diff.total_seconds() / 60) > int(shell_max_idle_minutes_timeout):
-            print("Exiting shell due to idle timeout (" + str(shell_max_idle_minutes_timeout) + " min)")
+        if pshell_max_idle_minutes_timeout != 0 and \
+                int(time_diff.total_seconds() / 60) > int(pshell_max_idle_minutes_timeout):
+            print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
             return
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
@@ -266,6 +270,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                     "False")
             continue
         if shell_command.command == "showconfig":
+            print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
             print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
             print("Shadow passwords                    : " + str(p_database.shadow_passwords))
             print("Show accounts verbose               : " + str(p_database.show_account_details))
@@ -296,11 +301,11 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             try:
-                shell_max_idle_minutes_timeout = int(shell_command.arguments[1])
+                pshell_max_idle_minutes_timeout = int(shell_command.arguments[1])
                 pdatabase.set_attribute_value_in_configuration_table(
                     p_database.database_filename,
                     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN,
-                    shell_max_idle_minutes_timeout)
+                    pshell_max_idle_minutes_timeout)
             except Exception as e:
                 print("Error setting shell timeout: " + str(e))
             continue

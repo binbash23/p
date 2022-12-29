@@ -225,9 +225,9 @@ CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION = "SCHEMA_VERSION"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "SHELL_MAX_IDLE_TIMEOUT_MIN"
-CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "False"
-CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS = "False"
-CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "False"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "PSHELL_SHADOW_PASSWORDS"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS = "PSHELL_SHOW_INVALIDATED_ACCOUNTS"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT_DETAILS"
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 
 
@@ -496,9 +496,9 @@ def print_database_statistics(database_filename):
     dropbox_application_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
-    shell_idle_timeout_min = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN)
+    # shell_idle_timeout_min = \
+    #    get_attribute_value_from_configuration_table(database_filename,
+    #                                                 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
@@ -516,8 +516,8 @@ def print_database_statistics(database_filename):
     print("Last Merge Date                     : " + str(last_merge_date))
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
-    print("Shell idle timeout in minutes       : " + str(shell_idle_timeout_min))
-    #print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
+    # print("Shell idle timeout in minutes       : " + str(shell_idle_timeout_min))
+    # print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
 
 
 def create_fernet(salt, password):
