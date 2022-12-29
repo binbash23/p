@@ -64,7 +64,7 @@ SHELL_COMMANDS = [
     ShellCommand("version", "version", "Show program version info")
 ]
 
-DEFAULT_SHELL_MAX_IDLE_TIMEOUT_MIN = 30
+DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
 
 
 def expand_string_2_shell_command(string: str) -> ShellCommand:
@@ -86,18 +86,37 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
     return None
 
 
-def start_p_shell(p_database: pdatabase.PDatabase):
-    print("Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.")
+def load_pshell_configuration(p_database: pdatabase.PDatabase):
     shell_max_idle_minutes_timeout = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
-        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SHELL_MAX_IDLE_TIMEOUT_MIN)
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN)
     if not shell_max_idle_minutes_timeout.isnumeric() \
             or shell_max_idle_minutes_timeout is None \
             or shell_max_idle_minutes_timeout == "":
-        shell_max_idle_minutes_timeout = DEFAULT_SHELL_MAX_IDLE_TIMEOUT_MIN
+        shell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
-            pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SHELL_MAX_IDLE_TIMEOUT_MIN, shell_max_idle_minutes_timeout)
+            pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN, shell_max_idle_minutes_timeout)
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
+    if type(config_value) == bool:
+        p_database.shadow_passwords = config_value
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS)
+    if type(config_value) == bool:
+        p_database.show_account_details = config_value
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS)
+    if type(config_value) == bool:
+        p_database.show_invalidated_accounts = config_value
+
+
+def start_p_shell(p_database: pdatabase.PDatabase):
+    print("Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.")
+    load_pshell_configuration(p_database)
     user_input = ""
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
@@ -235,8 +254,16 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.shadow_passwords = True
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS,
+                    "True")
             if shell_command.arguments[1] == "off":
                 p_database.shadow_passwords = False
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS,
+                    "False")
             continue
         if shell_command.command == "showconfig":
             print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
@@ -251,8 +278,17 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.show_invalidated_accounts = True
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS,
+                    "True")
             if shell_command.arguments[1] == "off":
                 p_database.show_invalidated_accounts = False
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS,
+                    "False")
+
             continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
@@ -263,7 +299,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 shell_max_idle_minutes_timeout = int(shell_command.arguments[1])
                 pdatabase.set_attribute_value_in_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SHELL_MAX_IDLE_TIMEOUT_MIN,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN,
                     shell_max_idle_minutes_timeout)
             except Exception as e:
                 print("Error setting shell timeout: " + str(e))
@@ -276,8 +312,16 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.show_account_details = True
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS,
+                    "True")
             if shell_command.arguments[1] == "off":
                 p_database.show_account_details = False
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS,
+                    "False")
             continue
         if shell_command.command == "status":
             pdatabase.print_database_statistics(p_database.database_filename)

@@ -43,7 +43,7 @@ def add(p_database: PDatabase):
     if answer == "y" or answer == "":
         # p_database.add_account_and_encrypt(None, new_name, new_url, new_loginname, new_password, new_type)
         p_database.add_account_and_encrypt(account)
-        print("Added")
+        # print("Added")
     else:
         print("Canceled")
 
