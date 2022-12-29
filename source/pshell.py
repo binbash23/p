@@ -150,6 +150,7 @@ def start_p_shell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "changepassword":
             p.change_database_password(p_database)
+            # p_database = pdatabase.PDatabase()
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
@@ -170,6 +171,9 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             p_database.delete_account(shell_command.arguments[1])
+            continue
+        if shell_command.command == "deletedropboxdatabase":
+            p.delete_dropbox_database(p_database)
             continue
         if shell_command.command == "edit":
             if len(shell_command.arguments) == 1:

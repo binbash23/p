@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2022.12.27"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2022.12.29"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 
@@ -118,16 +118,7 @@ def change_database_password(p_database: PDatabase) -> bool:
 def change_dropbox_database_password(p_database: PDatabase) -> bool:
     print("Change dropbox database password")
     dropbox_connection = create_dropbox_connection(p_database)
-    print("Checking for remote database...")
-    try:
-        exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
-    except Exception as e:
-        print("Error checking for remote database file: " + str(e))
-        return False
-    if exists:
-        print("Remote database exists.")
-    else:
-        print("Remote database not found.")
+    if not dropbox_database_exists(p_database):
         return False
     print("Downloading database from dropbox...")
     dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
@@ -149,7 +140,7 @@ def change_dropbox_database_password(p_database: PDatabase) -> bool:
     return True
 
 
-def delete_dropbox_database(p_database: PDatabase) -> bool:
+def dropbox_database_exists(p_database: PDatabase) -> bool:
     dropbox_connection = create_dropbox_connection(p_database)
     print("Checking for remote database...")
     try:
@@ -159,8 +150,15 @@ def delete_dropbox_database(p_database: PDatabase) -> bool:
         return False
     if exists:
         print("Remote database exists.")
+        return True
     else:
         print("Remote database not found.")
+        return False
+
+
+def delete_dropbox_database(p_database: PDatabase) -> bool:
+    dropbox_connection = create_dropbox_connection(p_database)
+    if not dropbox_database_exists(p_database):
         return False
     print("Deleting database from dropbox...")
     try:
@@ -229,16 +227,10 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
 def merge_with_dropbox(p_database: PDatabase):
     print("Merge with dropbox...")
     dropbox_connection = create_dropbox_connection(p_database)
-    print("Checking for remote database...")
-    try:
-        exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
-    except Exception as e:
-        print("Error checking exitance of remote database file: " + str(e))
-        sys.exit(1)
-    if exists:
-        print("Remote database exists.")
-    else:
-        print("Remote database not found.")
+    if dropbox_connection is None:
+        print("Error: Could not create dropbox connection")
+        return
+    if not dropbox_database_exists(p_database):
         print("Uploading initial database: '" +
               p_database.database_filename + "' to dropbox...")
         local_path = os.path.dirname(p_database.database_filename)

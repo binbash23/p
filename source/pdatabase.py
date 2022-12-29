@@ -912,6 +912,13 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
+        # set encryption engine to new password
+        # store password as byte[]
+        if new_password != "":
+            self.database_password = new_password.encode("UTF-8")
+            self.fernet = create_fernet(self.SALT, self.database_password)
+        else:
+            self.database_password = ""
         return True
 
     def encrypt_string_if_password_is_present(self, plain_text: str) -> str:
