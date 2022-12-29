@@ -32,8 +32,10 @@ class ShellCommand:
 SHELL_COMMANDS = [
     ShellCommand("add", "add", "Add a new account"),
     ShellCommand("changepassword", "changepassword", "Change password of current database"),
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database"),
     ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard"),
     ShellCommand("delete", "delete UUID", "Delete account with UUID"),
+    ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database"),
     ShellCommand("edit", "edit UUID", "Edit account with UUID"),
     ShellCommand("exit", "exit", "Quit shell"),
     ShellCommand("help", "help", "Show help for all shell commands"),
@@ -59,8 +61,8 @@ SHELL_COMMANDS = [
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES"),
     ShellCommand("verbose", "verbose on/off", "Show verbose account infos true or false"),
-    ShellCommand("upload2dropbox", "upload2dropbox",
-                 "Upload local database to dropbox and overwrite eventually existing remote database. Use merge* commands to merge/sync databases."),
+    # ShellCommand("upload2dropbox", "upload2dropbox",
+    #              "Upload local database to dropbox and overwrite eventually existing remote database. Use merge* commands to merge/sync databases."),
     ShellCommand("version", "version", "Show program version info")
 ]
 
@@ -142,6 +144,9 @@ def start_p_shell(p_database: pdatabase.PDatabase):
         # proceed possible commands
         if shell_command.command == "add":
             p.add(p_database)
+            continue
+        if shell_command.command == "changedropboxdbpassword":
+            p.change_dropbox_database_password(p_database)
             continue
         if shell_command.command == "changepassword":
             p.change_database_password(p_database)
@@ -293,7 +298,6 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                     p_database.database_filename,
                     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS,
                     "False")
-
             continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
@@ -331,16 +335,16 @@ def start_p_shell(p_database: pdatabase.PDatabase):
         if shell_command.command == "status":
             pdatabase.print_database_statistics(p_database.database_filename)
             continue
-        if shell_command.command == "upload2dropbox":
-            continue
-            # tobe implemented xxxxxxxxxxxxxxxxxxxx
-            print("An eventually existing database in dropbox will be overwritten!")
-            local_path = os.path.dirname(p_database.database_filename)
-            # dropbox_upload_file(access_token, local_path, p_database.database_filename,
-            #                     "/" + DROPBOX_P_DATABASE_FILENAME)
-            dropboxconnector.dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
-                                                 "/" + DROPBOX_P_DATABASE_FILENAME)
-            continue
+        # if shell_command.command == "upload2dropbox":
+        #     continue
+        #     # tobe implemented xxxxxxxxxxxxxxxxxxxx
+        #     print("An eventually existing database in dropbox will be overwritten!")
+        #     local_path = os.path.dirname(p_database.database_filename)
+        #     # dropbox_upload_file(access_token, local_path, p_database.database_filename,
+        #     #                     "/" + DROPBOX_P_DATABASE_FILENAME)
+        #     dropboxconnector.dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
+        #                                          "/" + DROPBOX_P_DATABASE_FILENAME)
+        #     continue
         if shell_command.command == "version":
             print(p.VERSION)
             continue

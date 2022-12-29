@@ -26,7 +26,7 @@ DROPBOX_P_DATABASE_FILENAME = "p.db"
 #     return dropbox_connection
 
 
-def create_dropbox_connection_with_refresh_token(_app_key, _app_secret, _refresh_token):
+def create_dropbox_connection_with_refresh_token(_app_key, _app_secret, _refresh_token) -> dropbox.Dropbox:
     try:
         dropbox_connection = dropbox.Dropbox(app_key=_app_key, app_secret=_app_secret,
                                              oauth2_refresh_token=_refresh_token)

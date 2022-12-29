@@ -106,24 +106,83 @@ def edit(p_database: PDatabase, edit_uuid: str):
         print("Canceled")
 
 
-def change_database_password(p_database: PDatabase):
+def change_database_password(p_database: PDatabase) -> bool:
     new_password = getpass.getpass("Enter new database password   : ")
     new_password_confirm = getpass.getpass("Confirm new database password : ")
     if new_password != new_password_confirm:
         logging.error("Passwords do not match.")
-        sys.exit(1)
-    p_database.change_database_password(new_password)
+        return False
+    return p_database.change_database_password(new_password)
 
 
-def merge_with_dropbox(p_database: PDatabase):
-    print("Merge with dropbox...")
+def change_dropbox_database_password(p_database: PDatabase) -> bool:
+    print("Change dropbox database password")
+    dropbox_connection = create_dropbox_connection(p_database)
+    print("Checking for remote database...")
+    try:
+        exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
+    except Exception as e:
+        print("Error checking for remote database file: " + str(e))
+        return False
+    if exists:
+        print("Remote database exists.")
+    else:
+        print("Remote database not found.")
+        return False
+    print("Downloading database from dropbox...")
+    dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
+    try:
+        remote_password = getpass.getpass("Enter current dropbox database password: ")
+        dropbox_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
+        result = change_database_password(dropbox_p_database)
+        if not result:
+            print("Error changing dropbox database password.")
+            return False
+        print("Uploading changed database back to dropbox...")
+        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+                            "/" + DROPBOX_P_DATABASE_FILENAME)
+    except Exception as e:
+        pass
+    finally:
+        os.remove(TEMP_MERGE_DATABASE_FILENAME)
+    return True
+
+
+def delete_dropbox_database(p_database: PDatabase) -> bool:
+    dropbox_connection = create_dropbox_connection(p_database)
+    print("Checking for remote database...")
+    try:
+        exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
+    except Exception as e:
+        print("Error checking for remote database file: " + str(e))
+        return False
+    if exists:
+        print("Remote database exists.")
+    else:
+        print("Remote database not found.")
+        return False
+    print("Deleting database from dropbox...")
+    try:
+        answer = input("Are you sure ([y]/n) : ")
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
+        return False
+    if answer == "y" or answer == "":
+        dropbox_delete_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME)
+    else:
+        print("Canceled")
+
+
+def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
     # #1 retrieve dropbox token account uuid...
     dropbox_account_uuid = \
         get_attribute_value_from_configuration_table(p_database.database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
         print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
-        sys.exit(1)
+        return None
     else:
         print("Using Dropbox Account Token uuid from config : " +
               colored(dropbox_account_uuid, "green"))
@@ -133,7 +192,7 @@ def merge_with_dropbox(p_database: PDatabase):
     if access_token is None or str(access_token).strip() == "":
         print(colored("Error: Dropbox Account Token is empty. Make sure the token is set in the password field.",
                       "red"))
-        sys.exit(1)
+        return None
     else:
         print("Dropbox Account Token found.")
 
@@ -143,7 +202,7 @@ def merge_with_dropbox(p_database: PDatabase):
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
     if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
         print(colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
-        sys.exit(1)
+        return None
     else:
         print("Using Dropbox Application Account uuid from config : " +
               colored(dropbox_application_account_uuid, "green"))
@@ -153,19 +212,24 @@ def merge_with_dropbox(p_database: PDatabase):
     if dropbox_application_key is None or str(dropbox_application_key).strip() == "":
         print(colored("Error: Dropbox application_key is empty. Make sure the application_key is set in the " +
                       "loginname field.", "red"))
-        sys.exit(1)
+        return None
     if dropbox_application_secret is None or str(dropbox_application_secret).strip() == "":
         print(colored("Error: Dropbox application_secret is empty. Make sure the application_secret is set in the " +
                       "password field.", "red"))
-        sys.exit(1)
+        return None
     print("Dropbox application_key and application_secret found.")
 
     print("Creating dropbox connection...")
     dropbox_connection = create_dropbox_connection_with_refresh_token(dropbox_application_key,
                                                                       dropbox_application_secret,
                                                                       access_token)
+    return dropbox_connection
 
-    print("Checking for remote p database...")
+
+def merge_with_dropbox(p_database: PDatabase):
+    print("Merge with dropbox...")
+    dropbox_connection = create_dropbox_connection(p_database)
+    print("Checking for remote database...")
     try:
         exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
     except Exception as e:
@@ -177,29 +241,21 @@ def merge_with_dropbox(p_database: PDatabase):
         print("Remote database not found.")
         print("Uploading initial database: '" +
               p_database.database_filename + "' to dropbox...")
-        # local_path = Path(p_database.database_filename)
         local_path = os.path.dirname(p_database.database_filename)
-        # dropbox_upload_file(access_token, local_path, p_database.database_filename,
-        #                     "/" + DROPBOX_P_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
                             "/" + DROPBOX_P_DATABASE_FILENAME)
         return
     print("Downloading database from dropbox...")
-    # dropbox_download_file(access_token, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
     dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
     print("Merging local database with the version from dropbox...")
     return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
     if return_code > 1:
         print("Uploading merged database back to dropbox...")
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-        # print("local path: " + local_path)
-        # dropbox_upload_file(access_token, local_path, TEMP_MERGE_DATABASE_FILENAME,
-        #                     "/" + DROPBOX_P_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
                             "/" + DROPBOX_P_DATABASE_FILENAME)
     else:
         print("No changes in remote database. Skipping upload.")
-    # print("Removing downloaded dropbox database version...")
     os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
 
