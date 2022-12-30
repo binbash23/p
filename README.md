@@ -28,8 +28,9 @@ Jens
 
 ### Binaries/executeable program:
 You can use the python code or the binaries that I have compiled to the folder 
-
-"p/dist/linux/p"
+```
+p/dist/linux/p
+```
 or
 "p/dist/windows/p.exe"
 
