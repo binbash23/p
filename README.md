@@ -42,35 +42,35 @@ I copy the linux and the windows binary to an usb stick and also my p.db file (w
 You might doubleklick on the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all.
 
 ```
-Using Database: p.db<br>
-Database does not exist.<br>
-Enter password for new database    :<br>
-Confirm password for new database  :<br>
-Creating new p database: "p.db" ...<br>
-Creating new UUID for database: 6ed88bba-a210-4150-8e10-76f57b347770<br>
-Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.<br>
-DB: p.db> add<br>
-Add account<br>
-UUID      : 8d3a4c15-4780-459c-a3f5-ba1586c043df<br>
-Name      : New Account<br>
-URL       : www.new.de<br>
-Loginname : horst<br>
-Password  : meinpw<br>
-Type      : Webaccount<br>
-Correct ([y]/n) :<br>
-New account added.<br>
+Using Database: p.db
+Database does not exist.
+Enter password for new database    :
+Confirm password for new database  :
+Creating new p database: "p.db" ...
+Creating new UUID for database: 6ed88bba-a210-4150-8e10-76f57b347770
+Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.
+DB: p.db> add
+Add account
+UUID      : 8d3a4c15-4780-459c-a3f5-ba1586c043df
+Name      : New Account
+URL       : www.new.de
+Loginname : horst
+Password  : meinpw
+Type      : Webaccount
+Correct ([y]/n) :
+New account added.
 
-DB: p.db> list<br>
-Searching for ** in 1 accounts:<br>
-ID          : 8d3a4c15-4780-459c-a3f5-ba1586c043df<br>
-Name        : New Account<br>
-URL         : www.new.de<br>
-Loginname   : horst<br>
-Password    : meinpw<br>
-Type        : Webaccount<br>
-<br>
-Found 1 result(s).<br>
-DB: p.db><br>
+DB: p.db> list
+Searching for ** in 1 accounts:
+ID          : 8d3a4c15-4780-459c-a3f5-ba1586c043df
+Name        : New Account
+URL         : www.new.de
+Loginname   : horst
+Password    : meinpw
+Type        : Webaccount
+
+Found 1 result(s).
+DB: p.db>
 ```
 ### Cloud integration
 
