@@ -32,15 +32,16 @@ You can use the python code or the binaries that I have compiled to the folder
 p/dist/linux/p
 ```
 or
-"p/dist/windows/p.exe"
-
+```
+p/dist/windows/p.exe
+```
 I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
 ### How do I start?
 
 You might doubleklick on the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all.
 
-
+```
 >Using Database: p.db<br>
 >Database does not exist.<br>
 >Enter password for new database    :<br>
@@ -70,7 +71,7 @@ You might doubleklick on the windows binary (p.exe) and a cmd window will appear
 ><br>
 >Found 1 result(s).<br>
 >DB: p.db><br>
-
+```
 ### Cloud integration
 
 Who wants to have a master database copy in the cloud can also do this by using my dropbox feature. First you have to enable your dropbox for an API connection. Then you can alway upload/sync your database with the copy in your personal dropbox account.<br>The procedure to enable dropbox is f&%$%&ing stupid complicated. So I wrote a help text for this [here](https://github.com/binbash23/p/blob/master/docs/howto_dropbox_configuration.txt).<br>By the way: [your master password for the p database NEVER leaves your computer nor will it be typed in a web form or something like that](https://github.com/binbash23/p/blob/master/docs/20221230_p_architecture.png). The "cloud integration" that I implemented is simply moving the full encrypted p database into your dropbox account. Dropbox will never see your p master password. 
@@ -87,4 +88,7 @@ Just make shure to encrypt the account after this by changing the password again
 
 ### Help
 
-For help just type help in the pshell or start p.exe like "p.exe -h"
+For help just type help in the pshell or start p.exe like 
+```
+p.exe -h
+```
