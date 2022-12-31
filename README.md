@@ -12,10 +12,9 @@ This is what I do here. The code is short, simple and I did NOT invent
 a new proprietary encryption function. I use open source cryptography
 which has been tested and which is hopefully bugfree :)
 For the people who want to know, I use this for the symetric encryption method:
-> _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
-
-> key = base64.urlsafe_b64encode(_hash.derive(password))
-
+```
+_hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+```
 and the salt is static but long and random (see source code)
 
 Try it out. Gimme feedback. 
