@@ -4,6 +4,7 @@
 #
 # Password/account database for managing all your accounts
 #
+import getpass
 
 import p
 import pdatabase
@@ -119,7 +120,7 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         p_database.show_invalidated_accounts = config_value
 
 
-def start_p_shell(p_database: pdatabase.PDatabase):
+def start_pshell(p_database: pdatabase.PDatabase):
     print("Shell mode enabled. Use 'quit' or strg-c to quit or help for more infos.")
     load_pshell_configuration(p_database)
     global pshell_max_idle_minutes_timeout
@@ -134,9 +135,17 @@ def start_p_shell(p_database: pdatabase.PDatabase):
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
         if pshell_max_idle_minutes_timeout != 0 and \
-                int(time_diff.total_seconds() / 60) > int(pshell_max_idle_minutes_timeout):
+                int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout):
             print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
-            return
+            try:
+                user_input = getpass.getpass("Enter database password: ")
+            except KeyboardInterrupt:
+                print()
+                return
+            if user_input is None or user_input.encode("UTF-8") != p_database.database_password:
+                print("Error: password is wrong.")
+                return
+            continue
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
             print("Enter 'help' for command help")
@@ -187,6 +196,9 @@ def start_p_shell(p_database: pdatabase.PDatabase):
                 print(str(shell_command))
             continue
         if shell_command.command == "idletime":
+            # print("->" + str(pshell_max_idle_minutes_timeout))
+            # print("-2 " + str(int((time_diff.total_seconds() / 60) )))
+            # print("-3 " +  str(pshell_max_idle_minutes_timeout))
             print("Idle time: " + str(time_diff.total_seconds()) + " s")
             continue
         if shell_command.command == "invalidate":

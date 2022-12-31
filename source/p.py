@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2022.12.29"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2022.12.31"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 
@@ -444,7 +444,7 @@ def main():
 
     # check if the interactive shell should be opened
     if options.query:
-        start_p_shell(p_database)
+        start_pshell(p_database)
         sys.exit(0)
 
     # check here if a dropbox database merge should be done
@@ -502,7 +502,7 @@ def main():
         p_database.search_accounts(sys.argv[1])
     # when there are no options start the interactive p shell mode
     if len(sys.argv) == 1:
-        start_p_shell(p_database)
+        start_pshell(p_database)
 
 
 if __name__ == '__main__':
