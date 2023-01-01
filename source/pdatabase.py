@@ -361,8 +361,8 @@ def get_attribute_value_from_configuration_table(_database_filename, _attribute_
     return value
 
 
-def is_encrypted_database(_database_filename):
-    value = get_attribute_value_from_configuration_table(_database_filename,
+def is_encrypted_database(database_filename):
+    value = get_attribute_value_from_configuration_table(database_filename,
                                                          CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
     if value is None or value == "":
         # print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
@@ -373,10 +373,13 @@ def is_encrypted_database(_database_filename):
         return True
 
 
-def get_database_uuid(_database_filename):
-    value = get_attribute_value_from_configuration_table(_database_filename, CONFIGURATION_TABLE_ATTRIBUTE_UUID)
+def get_database_uuid(database_filename):
+    value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_UUID)
     return value
 
+def get_database_name(database_filename):
+    value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
+    return value
 
 def get_account_count_valid(database_filename):
     count = 0
@@ -587,6 +590,13 @@ class PDatabase:
         if not self.is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             sys.exit(1)
+
+    # def __str__(self):
+    #     id_string = "[" + get_database_uuid(self.database_filename) + "] - '" + self.database_filename + "'"
+    #     if get_database_name(self) != "":
+    #         id_string = "'" + get_database_name(self) + "' - " + id_string
+
+
 
     def delete_account(self, delete_uuid):
         if delete_uuid is None or delete_uuid == "":
@@ -1119,6 +1129,9 @@ class PDatabase:
         else:
             print(colored("Error: There is no last known database.", "red"))
 
+    def get_database_password_as_string(self) -> str:
+        return bytes(self.database_password).decode("UTF-8")
+
     # returns -1 in error case, 0 when no error and no changes where made,
     # 1 when changes where made locally and 2 when changes where made in remote db
     # and 3 when changes where made locally and remote
@@ -1126,7 +1139,7 @@ class PDatabase:
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
             return -1
-        print("Using merge database: " + merge_database_filename)
+        print("Using merge database: " + merge_database_filename + " " + get_database_name(merge_database_filename))
         # Check remote db for password
         print("Checking merge database password...")
         if not self.is_valid_database_password(merge_database_filename, self.database_password):
@@ -1170,7 +1183,8 @@ class PDatabase:
             count_uuids_in_local_with_newer_update_date_than_in_remote = result[0]
 
             # Step #1 Sync new accounts from remote merge database into main database
-            print(colored("Step #1: Analyzing Origin Database - " + self.database_filename, "green"))
+            print(colored("Step #1: Analyzing Origin Database - " + self.database_filename
+                          + " " + get_database_name(self.database_filename), "green"))
             # print("Dropping update_date trigger (origin database)...")
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
             print("Updating " + colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local), "red")
@@ -1191,7 +1205,8 @@ class PDatabase:
                 return_code = 1
             database_connection.commit()
             # Step #2 Sync new accounts from main database into remote database
-            print(colored("Step #2: Analyzing Remote Database - " + merge_database_filename, "green"))
+            print(colored("Step #2: Analyzing Remote Database - " + merge_database_filename
+                          + " " + get_database_name(merge_database_filename), "green"))
             # print("Dropping update_date trigger (remote database)...")
             cursor.execute(SQL_MERGE_DROP_REMOTE_ACCOUNT_CHANGE_DATE_TRIGGER)
             print("Updating " + colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote), "red")

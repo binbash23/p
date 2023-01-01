@@ -231,11 +231,20 @@ def merge_with_dropbox(p_database: PDatabase):
         print("Error: Could not create dropbox connection")
         return
     if not dropbox_database_exists(p_database):
-        print("Uploading initial database: '" +
-              p_database.database_filename + "' to dropbox...")
-        local_path = os.path.dirname(p_database.database_filename)
-        dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
+        print("Creating initial cloud database...")
+        # print("->" + str(bytes(p_database.database_password).decode("UTF-8")))
+        cloud_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
+        set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
+                                                   CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                   "Cloud Database")
+        print("Merging current database into new database...")
+        p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+        print("Uploading initial cloud database: '" +
+              TEMP_MERGE_DATABASE_FILENAME + "' to dropbox...")
+        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
                             "/" + DROPBOX_P_DATABASE_FILENAME)
+        os.remove(TEMP_MERGE_DATABASE_FILENAME)
         return
     print("Downloading database from dropbox...")
     dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)

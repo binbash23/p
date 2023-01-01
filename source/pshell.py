@@ -148,6 +148,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
+            print("Command " + user_input + " unknown.")
             print("Enter 'help' for command help")
             continue
         # proceed possible commands
