@@ -125,10 +125,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
     load_pshell_configuration(p_database)
     global pshell_max_idle_minutes_timeout
     user_input = ""
+    prompt_string = p_database.database_filename + "> "
+    if pdatabase.get_database_name(p_database.database_filename) != "":
+        prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
         try:
-            user_input = input("DB: " + p_database.database_filename + "> ")
+            user_input = input(prompt_string)
         except KeyboardInterrupt:
             # user_input = "quit"
             return
@@ -250,6 +253,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                 shell_command.arguments[1])
+            prompt_string = p_database.database_filename + "> "
+            if pdatabase.get_database_name(p_database.database_filename) != "":
+                prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
             continue
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
