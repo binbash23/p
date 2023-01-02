@@ -567,10 +567,10 @@ class PDatabase:
     DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
     fernet = None
     salt = None
-    iteration_count = -1
-    show_account_details = False
-    show_invalidated_accounts = False
-    shadow_passwords = False
+    iteration_count: int = -1
+    show_account_details: bool = False
+    show_invalidated_accounts: bool = False
+    shadow_passwords: bool = False
     SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
 
     def __init__(self, database_filename, database_password, show_account_details=False,
