@@ -203,7 +203,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # print("->" + str(pshell_max_idle_minutes_timeout))
             # print("-2 " + str(int((time_diff.total_seconds() / 60) )))
             # print("-3 " +  str(pshell_max_idle_minutes_timeout))
-            print("Idle time: " + str(time_diff.total_seconds()) + " s")
+            print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
             continue
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
