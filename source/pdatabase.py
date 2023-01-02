@@ -507,14 +507,14 @@ def print_database_statistics(database_filename):
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
-    print("Database File                       : " + os.path.abspath(database_filename))
     print("Database Name                       : " + database_name)
     print("Database UUID                       : " + database_uuid)
-    print("Database Schema Version             : " + schema_version)
+    print("Database File                       : " + os.path.abspath(database_filename))
     print("Database Created                    : " + database_creation_date)
-    print("Database Last Changed               : " + last_change_date)
+    print("Database Schema Version             : " + schema_version)
     print("Database Encrypted                  : " + str(database_is_encrypted))
     print("Database Size                       : " + str(os.path.getsize(database_filename) / 1024) + " Kb")
+    print("Database Last Changed               : " + last_change_date)
     print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
           str(account_count_invalid) + ")")
     print("Last Merge Database                 : " + str(last_merge_database))
