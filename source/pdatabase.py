@@ -507,7 +507,7 @@ def print_database_statistics(database_filename):
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
-    print("Database File                       : " + database_filename)
+    print("Database File                       : " + os.path.abspath(database_filename))
     print("Database Name                       : " + database_name)
     print("Database UUID                       : " + database_uuid)
     print("Database Schema Version             : " + schema_version)
