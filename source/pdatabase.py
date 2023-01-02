@@ -377,9 +377,11 @@ def get_database_uuid(database_filename):
     value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_UUID)
     return value
 
+
 def get_database_name(database_filename):
     value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
     return value
+
 
 def get_account_count_valid(database_filename):
     count = 0
@@ -523,9 +525,10 @@ def print_database_statistics(database_filename):
     # print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
 
 
-def create_fernet(salt, password):
+def create_fernet(salt, password, iteration_count: int) -> Fernet:
     # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
-    _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+    # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+    _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=iteration_count)
     key = base64.urlsafe_b64encode(_hash.derive(password))
     f = Fernet(key)
     return f
@@ -556,34 +559,40 @@ def color_search_string(text_string, search_string, color):
 
 
 class PDatabase:
-    SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
-    #SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
+    DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
+    # DEFAULT_SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
+    DEFAULT_ITERATION_COUNT = 500000
 
     database_filename = "unset_database_name.db"
     DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
     fernet = None
+    salt = None
+    iteration_count = -1
     show_account_details = False
     show_invalidated_accounts = False
     shadow_passwords = False
     SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
 
     def __init__(self, database_filename, database_password, show_account_details=False,
-                 show_invalidated_accounts=False, shadow_passwords: bool = False):
+                 show_invalidated_accounts=False, shadow_passwords: bool = False,
+                 salt=DEFAULT_SALT, iteration_count: int = DEFAULT_ITERATION_COUNT):
         if database_filename is None \
                 or database_filename == "" \
                 or database_password is None:
-            print("Database filename is empty or database password is not set!")
-            sys.exit(1)
-            # raise ValueError("Database filename is empty or database password is empty!")
+            print(colored("Error: Database filename is empty or database password is not set!", "red"))
+            # sys.exit(1)
+            raise ValueError("Database filename is not set or database password is not set!")
 
         self.database_filename = database_filename
         self.show_account_details = show_account_details
         self.show_invalidated_accounts = show_invalidated_accounts
         self.shadow_passwords = shadow_passwords
+        self.salt = salt
+        self.iteration_count = iteration_count
         # store password as byte[]
         if database_password != "":
             self.database_password = database_password.encode("UTF-8")
-            self.fernet = create_fernet(self.SALT, self.database_password)
+            self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
         else:
             self.database_password = ""
         self.create_initial_database()
@@ -595,8 +604,6 @@ class PDatabase:
     #     id_string = "[" + get_database_uuid(self.database_filename) + "] - '" + self.database_filename + "'"
     #     if get_database_name(self) != "":
     #         id_string = "'" + get_database_name(self) + "' - " + id_string
-
-
 
     def delete_account(self, delete_uuid):
         if delete_uuid is None or delete_uuid == "":
@@ -822,7 +829,7 @@ class PDatabase:
         account.change_date = color_search_string(account.change_date, search_string,
                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.invalid_date = color_search_string(account.invalid_date, search_string,
-                                                  self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         self.print_formatted_account(account)
 
     def print_formatted_account(self, account: Account):
@@ -926,7 +933,7 @@ class PDatabase:
         # store password as byte[]
         if new_password != "":
             self.database_password = new_password.encode("UTF-8")
-            self.fernet = create_fernet(self.SALT, self.database_password)
+            self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
         else:
             self.database_password = ""
         return True
@@ -943,7 +950,7 @@ class PDatabase:
     def encrypt_string_with_custom_password(self, plain_text: str, password: str) -> str:
         if password == "":
             return plain_text
-        _fernet = create_fernet(self.SALT, password.encode("UTF-8"))
+        _fernet = create_fernet(self.salt, password.encode("UTF-8"), self.iteration_count)
         if plain_text is not None and plain_text != "":
             return _fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
         else:
@@ -962,8 +969,8 @@ class PDatabase:
         if encrypted_text == "" or encrypted_text is None:
             return ""
         if _database_password != "":
-            # _fernet = self.create_fernet(self.SALT, _database_password.encode("UTF-8"))
-            _fernet = create_fernet(self.SALT, _database_password)
+            # _fernet = self.create_fernet(self.DEFAULT_SALT, _database_password.encode("UTF-8"))
+            _fernet = create_fernet(self.salt, _database_password, self.iteration_count)
             decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
             return decrypted_string
         else:
