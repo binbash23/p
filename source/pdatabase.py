@@ -229,6 +229,7 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "PSHELL_SHADOW_PASSWORDS
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS = "PSHELL_SHOW_INVALIDATED_ACCOUNTS"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT_DETAILS"
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
 
 
 class Account:
@@ -486,9 +487,9 @@ def print_database_statistics(database_filename):
     last_change_date = get_last_change_date_in_database(database_filename)
     database_is_encrypted = is_encrypted_database(database_filename)
     if database_is_encrypted:
-        database_is_encrypted = colored("YES", "green")
+        database_is_encrypted = colored("Yes", "green")
     else:
-        database_is_encrypted = colored("NO", "red")
+        database_is_encrypted = colored("No", "red")
     last_merge_database = get_attribute_value_from_configuration_table(database_filename,
                                                                        CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE)
     last_merge_date = get_attribute_value_from_configuration_table(database_filename,
@@ -501,12 +502,10 @@ def print_database_statistics(database_filename):
     dropbox_application_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
-    # shell_idle_timeout_min = \
-    #    get_attribute_value_from_configuration_table(database_filename,
-    #                                                 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
+
     print("Database Name                       : " + database_name)
     print("Database UUID                       : " + database_uuid)
     print("Database File                       : " + os.path.abspath(database_filename))
@@ -519,11 +518,25 @@ def print_database_statistics(database_filename):
           str(account_count_invalid) + ")")
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
+    print("Database has unmerged changes       : " + get_database_has_unmerged_changes(database_filename))
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
     # print("Shell idle timeout in minutes       : " + str(shell_idle_timeout_min))
     # print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
 
+def get_database_has_unmerged_changes(database_filename: str) -> str:
+    last_change_date = get_last_change_date_in_database(database_filename)
+    last_merge_date = get_attribute_value_from_configuration_table(database_filename,
+                                                                   CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE)
+    if last_change_date is not None and last_merge_date is not None:
+        last_change_date_later_than_last_merge_date = last_change_date > last_merge_date
+    else:
+        last_change_date_later_than_last_merge_date = False
+    if last_change_date_later_than_last_merge_date == True:
+        last_change_date_later_than_last_merge_date = colored("Yes", "red")
+    else:
+        last_change_date_later_than_last_merge_date = colored("No", "green")
+    return last_change_date_later_than_last_merge_date
 
 def create_fernet(salt, password, iteration_count: int) -> Fernet:
     # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
