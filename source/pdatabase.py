@@ -177,7 +177,8 @@ r.change_date < o.change_date
 )
 """
 SQL_CREATE_DATABASE_SCHEMA = """
-CREATE TABLE "account" (
+-- main table with accounts
+CREATE TABLE if not EXISTS "account" (
     "uuid"	TEXT NOT NULL UNIQUE,
     "name"	TEXT,
     "url"	TEXT,
@@ -189,17 +190,23 @@ CREATE TABLE "account" (
     "invalid_date"	datetime, 
     invalid int generated always as (case when invalid_date is not null then 1 else 0 end)
 )	;
-CREATE TRIGGER update_change_date_Trigger
+CREATE TRIGGER if not EXISTS update_change_date_Trigger
 AFTER UPDATE On account
 BEGIN
    UPDATE account SET change_date = (datetime(CURRENT_TIMESTAMP, 'localtime')) WHERE uuid = NEW.uuid;
 END;    
-CREATE TABLE "configuration" (
+-- configuration values table
+CREATE TABLE if not EXISTS "configuration" (
     "attribute"	TEXT,
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert into configuration (attribute, value) values ('SCHEMA_VERSION', '1');    
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '2');   
+-- table for uuids that have been deleted
+CREATE TABLE if not EXISTS "deleted_account" (
+    "uuid"	TEXT NOT NULL UNIQUE,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
+	);
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
 SQL_SELECT_ALL_ACCOUNTS = """
@@ -631,10 +638,14 @@ class PDatabase:
             cursor = database_connection.cursor()
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
+            # remember deleted uuid in deleted_account table for merge information
+            encrypted_uuid = self.encrypt_string_if_password_is_present(str(delete_uuid))
+            sqlstring = "insert or replace into deleted_account (uuid) values ('" + encrypted_uuid + "')"
+            cursor.execute(sqlstring)
             database_connection.commit()
             print("Account with UUID " + str(delete_uuid) + " deleted.")
         except Exception as e:
-            raise
+            print(colored("Error: " + str(e)))
         finally:
             database_connection.close()
 
