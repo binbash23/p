@@ -512,6 +512,10 @@ def print_database_statistics(database_filename):
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
+    if get_database_has_unmerged_changes(database_filename) is True:
+        unmerged_changes = colored("Yes", "red")
+    else:
+        unmerged_changes = colored("No", "green")
 
     print("Database Name                       : " + database_name)
     print("Database UUID                       : " + database_uuid)
@@ -525,11 +529,9 @@ def print_database_statistics(database_filename):
           str(account_count_invalid) + ")")
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
-    print("Database has unmerged changes       : " + get_database_has_unmerged_changes(database_filename))
+    print("Database has unmerged changes       : " + unmerged_changes)
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
-    # print("Shell idle timeout in minutes       : " + str(shell_idle_timeout_min))
-    # print("Show invalidated accounts           : " + str(self.show_invalidated_accounts))
 
 def get_database_has_unmerged_changes(database_filename: str) -> str:
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -539,10 +541,10 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
         last_change_date_later_than_last_merge_date = last_change_date > last_merge_date
     else:
         last_change_date_later_than_last_merge_date = False
-    if last_change_date_later_than_last_merge_date == True:
-        last_change_date_later_than_last_merge_date = colored("Yes", "red")
-    else:
-        last_change_date_later_than_last_merge_date = colored("No", "green")
+    # if last_change_date_later_than_last_merge_date is True:
+    #     last_change_date_later_than_last_merge_date = colored("Yes", "red")
+    # else:
+    #     last_change_date_later_than_last_merge_date = colored("No", "green")
     return last_change_date_later_than_last_merge_date
 
 def create_fernet(salt, password, iteration_count: int) -> Fernet:
