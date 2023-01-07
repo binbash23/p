@@ -1305,14 +1305,14 @@ class PDatabase:
             print(colored("Step #0: Synchronizing deleted accounts in local and remote database...", "green"))
             if len(deleted_uuids_in_remote_db_NOT_IN_LOCAL) > 0:
                 print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_NOT_IN_LOCAL)), "red") +
-                      " accounts in local db which have been deleted in remote db...")
+                      " account(s) in local db which have been deleted in remote db...")
             for delete_uuid in deleted_uuids_in_remote_db_NOT_IN_LOCAL:
                 cursor.execute("delete from account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
             if len(deleted_uuids_in_local_db_NOT_IN_REMOTE) > 0:
                 print("Deleting " + colored(str(len(deleted_uuids_in_local_db_NOT_IN_REMOTE)), "red") +
-                      " accounts in remote db which have been deleted in local db...")
+                      " account(s) in remote db which have been deleted in local db...")
             for delete_uuid in deleted_uuids_in_local_db_NOT_IN_REMOTE:
                 cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
