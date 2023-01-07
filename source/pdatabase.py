@@ -50,6 +50,11 @@ SELECT
   max(change_date) as change_date
 FROM
   account
+UNION
+SELECT
+  max(create_date) as change_date
+FROM
+  deleted_account
 )
 """
 SQL_MERGE_INSERT_MISSING_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE = """
@@ -533,6 +538,7 @@ def print_database_statistics(database_filename):
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
 
+
 def get_database_has_unmerged_changes(database_filename: str) -> str:
     last_change_date = get_last_change_date_in_database(database_filename)
     last_merge_date = get_attribute_value_from_configuration_table(database_filename,
@@ -546,6 +552,7 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
     # else:
     #     last_change_date_later_than_last_merge_date = colored("No", "green")
     return last_change_date_later_than_last_merge_date
+
 
 def create_fernet(salt, password, iteration_count: int) -> Fernet:
     # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
@@ -631,6 +638,9 @@ class PDatabase:
         if delete_uuid is None or delete_uuid == "":
             print("Error deleting account: UUID is empty.")
             return
+        if self.get_account_exists(delete_uuid) is False:
+            print("Error: Account uuid " + delete_uuid + " does not exist.")
+            return
         answer = input("Delete account with UUID: " + delete_uuid + " ([y]/n) : ")
         if answer != "y" and answer != "":
             print("Canceled.")
@@ -641,15 +651,86 @@ class PDatabase:
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
             # remember deleted uuid in deleted_account table for merge information
-            encrypted_uuid = self.encrypt_string_if_password_is_present(str(delete_uuid))
-            sqlstring = "insert or replace into deleted_account (uuid) values ('" + encrypted_uuid + "')"
-            cursor.execute(sqlstring)
+            if self.get_uuid_exists_in_deleted_accounts(str(delete_uuid)) is False:
+                encrypted_uuid = self.encrypt_string_if_password_is_present(delete_uuid)
+                sqlstring = "insert into deleted_account (uuid) values ('" + encrypted_uuid + "')"
+                cursor.execute(sqlstring)
             database_connection.commit()
             print("Account with UUID " + str(delete_uuid) + " deleted.")
         except Exception as e:
             print(colored("Error: " + str(e)))
         finally:
             database_connection.close()
+
+    def get_deleted_account_uuids_decrypted(self) -> []:
+        result_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select uuid from deleted_account"
+            # sqlstring = "select uuid from " + deleted_account_table_name
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                current_uuid = row[0]
+                decrypted_uuid = self.decrypt_string_if_password_is_present(current_uuid)
+                result_array.append(decrypted_uuid)
+        except Exception as e:
+            print("Error: " + str(e))
+            return None
+        finally:
+            database_connection.close()
+        return result_array
+
+    def get_deleted_account_uuids_decrypted_from_merge_database(self, merge_database_filename: str) -> []:
+        result_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "attach '" + merge_database_filename + "' as merge_database"
+            cursor.execute(sqlstring)
+            # sqlstring = "select uuid from deleted_account"
+            sqlstring = "select uuid from " + "merge_database.deleted_account"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                current_uuid = row[0]
+                decrypted_uuid = self.decrypt_string_if_password_is_present(current_uuid)
+                result_array.append(decrypted_uuid)
+        except Exception as e:
+            print("Error: " + str(e))
+            return None
+        finally:
+            database_connection.close()
+        return result_array
+
+    def get_uuid_exists_in_deleted_accounts(self, account_uuid) -> bool:
+        if account_uuid in self.get_deleted_account_uuids_decrypted():
+            return True
+        else:
+            return False
+
+    # def get_uuid_exists_in_deleted_accounts(self, account_uuid) -> bool:
+    #     try:
+    #         database_connection = sqlite3.connect(self.database_filename)
+    #         cursor = database_connection.cursor()
+    #         sqlstring = "select uuid from deleted_account"
+    #         # print("exceuting: " + sqlstring)
+    #         sqlresult = cursor.execute(sqlstring)
+    #         result = sqlresult.fetchall()
+    #         for row in result:
+    #             current_uuid = row[0]
+    #             decrypted_uuid = self.decrypt_string_if_password_is_present(current_uuid)
+    #             print("account_uuid   -> " + account_uuid)
+    #             print("decrypted_uuid -> " + decrypted_uuid)
+    #             if decrypted_uuid == account_uuid:
+    #                 return True
+    #     except Exception as e:
+    #         print("Error: " + str(e))
+    #         return False
+    #     finally:
+    #         database_connection.close()
+    #     return False
 
     def invalidate_account(self, invalidate_uuid: str):
         if invalidate_uuid is None or invalidate_uuid == "":
@@ -763,6 +844,13 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
+
+    def get_account_exists(self, account_uuid) -> bool:
+        account = self.get_account_by_uuid_and_decrypt(account_uuid)
+        if account is not None:
+            return True
+        else:
+            return False
 
     def get_password_from_account_and_decrypt(self, account_uuid: str) -> str:
         if account_uuid is None or account_uuid.strip() == "":
@@ -1199,7 +1287,41 @@ class PDatabase:
             sqlstring = "attach '" + merge_database_filename + "' as merge_database"
             cursor.execute(sqlstring)
 
-            # Step #0 do the math
+            #
+            # step #0.1 do the complicated deleted accounts logic here:
+            #
+            deleted_uuids_in_local_db = self.get_deleted_account_uuids_decrypted()
+            # print("deleted_in_local: " + str(deleted_uuids_in_local_db))
+            deleted_uuids_in_remote_db = self.get_deleted_account_uuids_decrypted_from_merge_database(
+                merge_database_filename)
+            # print("deleted_in_remote: " + str(deleted_uuids_in_remote_db))
+            deleted_uuids_in_local_db_NOT_IN_REMOTE = []
+            deleted_uuids_in_remote_db_NOT_IN_LOCAL = []
+            if deleted_uuids_in_local_db != deleted_uuids_in_remote_db:
+                deleted_uuids_in_local_db_NOT_IN_REMOTE = \
+                    set(deleted_uuids_in_local_db) - set(deleted_uuids_in_remote_db)
+                deleted_uuids_in_remote_db_NOT_IN_LOCAL = \
+                    set(deleted_uuids_in_remote_db) - set(deleted_uuids_in_local_db)
+            print(colored("Step #0: Synchronizing deleted accounts in local and remote database...", "green"))
+            if len(deleted_uuids_in_remote_db_NOT_IN_LOCAL) > 0:
+                print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_NOT_IN_LOCAL)), "red") +
+                      " accounts in local db which have been deleted in remote db...")
+            for delete_uuid in deleted_uuids_in_remote_db_NOT_IN_LOCAL:
+                cursor.execute("delete from account where uuid = '" + delete_uuid + "'")
+                cursor.execute("insert into deleted_account (uuid) values ('" +
+                               self.encrypt_string_if_password_is_present(delete_uuid) + "')")
+            if len(deleted_uuids_in_local_db_NOT_IN_REMOTE) > 0:
+                print("Deleting " + colored(str(len(deleted_uuids_in_local_db_NOT_IN_REMOTE)), "red") +
+                      " accounts in remote db which have been deleted in local db...")
+            for delete_uuid in deleted_uuids_in_local_db_NOT_IN_REMOTE:
+                cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
+                cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
+                               self.encrypt_string_if_password_is_present(delete_uuid) + "')")
+            database_connection.commit()
+
+            #
+            # Step #0.2 do the math
+            #
             sqlresult = cursor.execute(SQL_MERGE_COUNT_LOCAL_MISSING_UUIDS_THAT_EXIST_IN_REMOTE_DATABASE)
             result = sqlresult.fetchone()
             count_uuids_in_remote_that_do_not_exist_in_local = result[0]
@@ -1215,7 +1337,9 @@ class PDatabase:
             result = sqlresult.fetchone()
             count_uuids_in_local_with_newer_update_date_than_in_remote = result[0]
 
+            #
             # Step #1 Sync new accounts from remote merge database into main database
+            #
             print(colored("Step #1: Analyzing Origin Database - " + self.database_filename
                           + " " + get_database_name(self.database_filename), "green"))
             # print("Dropping update_date trigger (origin database)...")
@@ -1230,14 +1354,17 @@ class PDatabase:
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
             print("Origin database is now up to date (" +
                   colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local +
-                              count_uuids_in_remote_that_do_not_exist_in_local), "red") + " changes have been done)")
+                              count_uuids_in_remote_that_do_not_exist_in_local +
+                              len(deleted_uuids_in_remote_db_NOT_IN_LOCAL)), "red") + " changes have been done)")
             # remember that there where changes in local db for return code:
             return_code = 0
             if count_uuids_in_remote_with_newer_update_date_than_in_local + \
                     count_uuids_in_remote_that_do_not_exist_in_local > 0:
                 return_code = 1
             database_connection.commit()
+            #
             # Step #2 Sync new accounts from main database into remote database
+            #
             print(colored("Step #2: Analyzing Remote Database - " + merge_database_filename
                           + " " + get_database_name(merge_database_filename), "green"))
             # print("Dropping update_date trigger (remote database)...")
@@ -1255,15 +1382,17 @@ class PDatabase:
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
             cursor.execute("update merge_database.configuration set value = datetime(CURRENT_TIMESTAMP, 'localtime')" +
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
-            # Finally commit it
-            database_connection.commit()
             print("Remote database is now up to date (" +
                   colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote +
-                              count_uuids_in_local_that_do_not_exist_in_remote), "red") + " changes have been done)")
+                              count_uuids_in_local_that_do_not_exist_in_remote +
+                              len(deleted_uuids_in_local_db_NOT_IN_REMOTE)), "red") + " changes have been done)")
+            # Finally commit it
+            database_connection.commit()
             # remember that there where changes in remote db for return code:
             if count_uuids_in_local_with_newer_update_date_than_in_remote + \
                     count_uuids_in_local_that_do_not_exist_in_remote > 0:
                 return_code += 2
+
         except Exception as e:
             raise
         finally:
