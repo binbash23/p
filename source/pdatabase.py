@@ -1295,28 +1295,35 @@ class PDatabase:
             deleted_uuids_in_remote_db = self.get_deleted_account_uuids_decrypted_from_merge_database(
                 merge_database_filename)
             # print("deleted_in_remote: " + str(deleted_uuids_in_remote_db))
-            deleted_uuids_in_local_db_NOT_IN_REMOTE = []
-            deleted_uuids_in_remote_db_NOT_IN_LOCAL = []
+            deleted_uuids_in_local_db_note_in_remote = []
+            deleted_uuids_in_remote_db_not_in_local = []
             if deleted_uuids_in_local_db != deleted_uuids_in_remote_db:
-                deleted_uuids_in_local_db_NOT_IN_REMOTE = \
+                deleted_uuids_in_local_db_note_in_remote = \
                     set(deleted_uuids_in_local_db) - set(deleted_uuids_in_remote_db)
-                deleted_uuids_in_remote_db_NOT_IN_LOCAL = \
+                deleted_uuids_in_remote_db_not_in_local = \
                     set(deleted_uuids_in_remote_db) - set(deleted_uuids_in_local_db)
             print(colored("Step #0: Synchronizing deleted accounts in local and remote database...", "green"))
-            if len(deleted_uuids_in_remote_db_NOT_IN_LOCAL) > 0:
-                print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_NOT_IN_LOCAL)), "red") +
+            if len(deleted_uuids_in_remote_db_not_in_local) > 0:
+                print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
                       " account(s) in local db which have been deleted in remote db...")
-            for delete_uuid in deleted_uuids_in_remote_db_NOT_IN_LOCAL:
+            for delete_uuid in deleted_uuids_in_remote_db_not_in_local:
+                self.search_account_by_uuid(delete_uuid)
+                answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
+                if answer != "y" and answer != "":
+                    print("Canceled.")
+                    continue
                 cursor.execute("delete from account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-            if len(deleted_uuids_in_local_db_NOT_IN_REMOTE) > 0:
-                print("Deleting " + colored(str(len(deleted_uuids_in_local_db_NOT_IN_REMOTE)), "red") +
+                print("Account deleted.")
+            if len(deleted_uuids_in_local_db_note_in_remote) > 0:
+                print("Deleting " + colored(str(len(deleted_uuids_in_local_db_note_in_remote)), "red") +
                       " account(s) in remote db which have been deleted in local db...")
-            for delete_uuid in deleted_uuids_in_local_db_NOT_IN_REMOTE:
+            for delete_uuid in deleted_uuids_in_local_db_note_in_remote:
                 cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
+                print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
             database_connection.commit()
 
             #
@@ -1355,7 +1362,7 @@ class PDatabase:
             print("Origin database is now up to date (" +
                   colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local +
                               count_uuids_in_remote_that_do_not_exist_in_local +
-                              len(deleted_uuids_in_remote_db_NOT_IN_LOCAL)), "red") + " changes have been done)")
+                              len(deleted_uuids_in_remote_db_not_in_local)), "red") + " changes have been done)")
             # remember that there where changes in local db for return code:
             return_code = 0
             if count_uuids_in_remote_with_newer_update_date_than_in_local + \
@@ -1385,7 +1392,7 @@ class PDatabase:
             print("Remote database is now up to date (" +
                   colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote +
                               count_uuids_in_local_that_do_not_exist_in_remote +
-                              len(deleted_uuids_in_local_db_NOT_IN_REMOTE)), "red") + " changes have been done)")
+                              len(deleted_uuids_in_local_db_note_in_remote)), "red") + " changes have been done)")
             # Finally commit it
             database_connection.commit()
             # remember that there where changes in remote db for return code:
