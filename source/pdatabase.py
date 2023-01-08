@@ -625,9 +625,22 @@ class PDatabase:
         else:
             self.database_password = ""
         self.create_initial_database()
+        self.update_database_schema(self.database_filename)
         if not self.is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             sys.exit(1)
+
+    def update_database_schema(self, database_filename: str):
+        try:
+            database_connection = sqlite3.connect(database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = SQL_CREATE_DATABASE_SCHEMA
+            cursor.executescript(sqlstring)
+            database_connection.commit()
+        except Exception as e:
+            print(colored("Error: " + str(e)))
+        finally:
+            database_connection.close()
 
     # def __str__(self):
     #     id_string = "[" + get_database_uuid(self.database_filename) + "] - '" + self.database_filename + "'"
