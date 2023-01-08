@@ -213,6 +213,38 @@ CREATE TABLE if not EXISTS "deleted_account" (
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 	);
 """
+SQL_CREATE_MERGE_DATABASE_SCHEMA = """
+-- main table with accounts
+CREATE TABLE if not EXISTS merge_database.account (
+    "uuid"	TEXT NOT NULL UNIQUE,
+    "name"	TEXT,
+    "url"	TEXT,
+    "loginname"	TEXT,
+    "password"	TEXT,
+    "type"	TEXT,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "change_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "invalid_date"	datetime, 
+    invalid int generated always as (case when invalid_date is not null then 1 else 0 end)
+)	;
+CREATE TRIGGER if not EXISTS merge_database.update_change_date_Trigger
+AFTER UPDATE On account
+BEGIN
+   UPDATE account SET change_date = (datetime(CURRENT_TIMESTAMP, 'localtime')) WHERE uuid = NEW.uuid;
+END;    
+-- configuration values table
+CREATE TABLE if not EXISTS merge_database.configuration (
+    "attribute"	TEXT,
+    "value"	TEXT,
+    PRIMARY KEY("attribute")
+);
+insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '2');   
+-- table for uuids that have been deleted
+CREATE TABLE if not EXISTS merge_database.deleted_account (
+    "uuid"	TEXT NOT NULL UNIQUE,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
+	);
+"""
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
 SQL_SELECT_ALL_ACCOUNTS = """
     select 
@@ -1299,6 +1331,11 @@ class PDatabase:
             print("Attaching merge database...")
             sqlstring = "attach '" + merge_database_filename + "' as merge_database"
             cursor.execute(sqlstring)
+
+            print("Updating merge database schema...")
+            sqlstring = SQL_CREATE_MERGE_DATABASE_SCHEMA
+            cursor.executescript(sqlstring)
+            database_connection.commit()
 
             #
             # step #0.1 do the complicated deleted accounts logic here:
