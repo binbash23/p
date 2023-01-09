@@ -147,6 +147,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     prompt_string = p_database.database_filename + "> "
     if pdatabase.get_database_name(p_database.database_filename) != "":
         prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
+    pdatabase.print_database_statistics(p_database.database_filename)
     if show_unmerged_changes_warning_on_startup is True and\
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print("Note: You have unmerged changes in your local database.")
