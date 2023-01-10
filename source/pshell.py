@@ -168,7 +168,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except KeyboardInterrupt:
                 print()
                 return
-            if user_input is None or user_input.encode("UTF-8") != p_database.database_password:
+            # if user_input is None or user_input.encode("UTF-8") != p_database.database_password:
+            if user_input is None or not p_database.is_valid_database_password(p_database.database_filename,
+                                                                               user_input):
                 print("Error: password is wrong.")
                 return
             continue
