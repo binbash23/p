@@ -5,7 +5,7 @@
 # for his example: https://practicaldatascience.co.uk/data-science/how-to-use-the-dropbox-api-with-python
 #
 import pathlib
-import pandas as pd
+# import pandas as pd
 import dropbox
 from dropbox.exceptions import AuthError
 import webbrowser
@@ -38,26 +38,26 @@ def create_dropbox_connection_with_refresh_token(_app_key, _app_secret, _refresh
 
 
 
-def dropbox_list_files(dropbox_connection, path):
-    # Return a Pandas dataframe of files in a given Dropbox folder path in the Apps directory.
-    # dropbox_connection = dropbox_connect(access_token)
-    try:
-        files = dropbox_connection.files_list_folder(path).entries
-        files_list = []
-        for file in files:
-            if isinstance(file, dropbox.files.FileMetadata):
-                metadata = {
-                    'name': file.name,
-                    'path_display': file.path_display,
-                    'client_modified': file.client_modified,
-                    'server_modified': file.server_modified
-                }
-                files_list.append(metadata)
-        df = pd.DataFrame.from_records(files_list)
-        return df.sort_values(by='server_modified', ascending=False)
-    except Exception as e:
-        print('Error getting list of files from Dropbox: ' + str(e))
-        raise
+# def dropbox_list_files(dropbox_connection, path):
+#     # Return a Pandas dataframe of files in a given Dropbox folder path in the Apps directory.
+#     # dropbox_connection = dropbox_connect(access_token)
+#     try:
+#         files = dropbox_connection.files_list_folder(path).entries
+#         files_list = []
+#         for file in files:
+#             if isinstance(file, dropbox.files.FileMetadata):
+#                 metadata = {
+#                     'name': file.name,
+#                     'path_display': file.path_display,
+#                     'client_modified': file.client_modified,
+#                     'server_modified': file.server_modified
+#                 }
+#                 files_list.append(metadata)
+#         df = pd.DataFrame.from_records(files_list)
+#         return df.sort_values(by='server_modified', ascending=False)
+#     except Exception as e:
+#         print('Error getting list of files from Dropbox: ' + str(e))
+#         raise
 
 
 
