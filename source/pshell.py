@@ -51,21 +51,21 @@ SHELL_COMMANDS = [
     ShellCommand("quit", "quit", "Quit shell"),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with <UUID>"),
     ShellCommand("search", "search <SEARCHSTRING>", "Search <SEARCHSTRING> in account database"),
+    ShellCommand("sc", "sc <SEARCHSTRING>", "Search <SEARCHSTRING> in accounts and copy the password of the" +
+                 " account found to clipboard"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to <NAME>"),
     ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
                  "Set the dropbox application account uuid in configuration"),
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
                  "Set the dropbox token account uuid in configuration"),
-    ShellCommand("shadowpasswords", "shadowpasswords on/off", "Shadow passwords true or false"),
+    ShellCommand("shadowpasswords", "shadowpasswords on/off", "Shadow passwords"),
     ShellCommand("showconfig", "showconfig", "Show current configuration"),
-    ShellCommand("showinvalidated", "showinvalidated on/off", "Show invalidated accounts true or false"),
+    ShellCommand("showinvalidated", "showinvalidated on/off", "Show invalidated accounts"),
     ShellCommand("showunmergedwarning", "showunmergedwarning on/off", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database"),
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout <MINUTES>", "Set the maximum shell inactivity timeout to <MINUTES>"),
     ShellCommand("verbose", "verbose on/off", "Show verbose account infos true or false"),
-    # ShellCommand("upload2dropbox", "upload2dropbox",
-    #              "Upload local database to dropbox and overwrite eventually existing remote database. Use merge* commands to merge/sync databases."),
     ShellCommand("version", "version", "Show program version info")
 ]
 
@@ -169,8 +169,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 return
             # if user_input is None or user_input.encode("UTF-8") != p_database.database_password:
-            if user_input is None or not p_database.is_valid_database_password(p_database.database_filename,
-                                                                               user_input):
+            # print("user_in->" + user_input+"<")
+            # print("pass->" + p_database.database_password+"<")
+            # print("user_in->" + str(user_input is None)+"<")
+            # print("pass->" + str(p_database.database_password is None)+"<")
+            # print("user_in == ''" + str(user_input==""))
+            # print("user_in == pw" + str(user_input == p_database.database_password))
+            # if user_input is None or not p_database.is_valid_database_password(p_database.database_filename,
+            # if user_input is None or str(user_input) != str(p_database.database_password):
+            if user_input is None or user_input != p_database.get_database_password_as_string():
                 print("Error: password is wrong.")
                 return
             continue
@@ -188,6 +195,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "changepassword":
             p.change_database_password(p_database)
+            # print("newpw:" + str(p_database.database_password))
             # p_database = pdatabase.PDatabase()
             continue
         if shell_command.command == "copypassword":
@@ -265,6 +273,38 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             p_database.search_accounts(shell_command.arguments[1])
+            continue
+        if shell_command.command == "sc":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            if len(account_array) == 0:
+                print("No account found.")
+                continue
+            if len(account_array) != 1:
+                i = 1
+                # print()
+                for acc in account_array:
+                    print()
+                    print("[" + str(i) + "]" + " - Name: " + acc.name)
+                    # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
+                    i = i + 1
+                print("")
+                index = input("Multiple accounts found. Please specify the # you need: ")
+                try:
+                    clipboard.copy(account_array[int(index) - 1].password)
+                    print("Password from account: " + account_array[int(index) - 1].name + " copied to clipboard.")
+                except Exception as e:
+                    print("Error: " + str(e))
+                continue
+            try:
+                # pyperclip3.copy(password)
+                clipboard.copy(account_array[0].password)
+                print("Password from account: " + account_array[0].name + " copied to clipboard.")
+            except Exception as e:
+                print("Error copying password to clipboard: " + str(e))
             continue
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:

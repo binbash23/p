@@ -656,7 +656,7 @@ class PDatabase:
             self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
         else:
             self.database_password = ""
-        self.create_initial_database()
+        self.create_and_initialize_database()
         self.update_database_schema(self.database_filename)
         if not self.is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
@@ -858,6 +858,48 @@ class PDatabase:
         finally:
             database_connection.close()
         print("Found " + str(results_found) + " result(s).")
+
+    def get_accounts_decrypted(self, search_string: str) -> []:
+        # results_found = 0
+        account_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            if self.show_invalidated_accounts:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account "
+            else:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account where invalid = 0 "
+            sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+            # print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6],
+                                  change_date=row[7],
+                                  invalid_date=row[8]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                if search_string == "" or \
+                        search_string_matches_account(search_string, decrypted_account):
+                    # results_found += 1
+                    # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                    account_array.append(decrypted_account)
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        # print("Found " + str(results_found) + " result(s).")
+        return account_array
 
     def search_account_by_uuid(self, search_uuid):
         try:
@@ -1095,6 +1137,7 @@ class PDatabase:
             self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
         else:
             self.database_password = ""
+            self.fernet = None
         return True
 
     def encrypt_string_if_password_is_present(self, plain_text: str) -> str:
@@ -1189,14 +1232,19 @@ class PDatabase:
             return False
         return True
 
-    def create_initial_database(self):
+    def create_and_initialize_database(self):
         try:
             database_connection = None
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            # Set undo mode
             logging.debug("Setting PRAGMA journal_mode = WAL for database.")
             cursor.execute("PRAGMA journal_mode = WAL")
             database_connection.commit()
+            # # Set secure_delete_mode
+            # logging.debug("Setting PRAGMA secure_delete = True for database.")
+            # cursor.execute("PRAGMA secure_delete = True")
+            # database_connection.commit()
             sqlstring = "select count(*) from account"
             sqlresult = cursor.execute(sqlstring)
             value = sqlresult.fetchone()[0]
@@ -1296,6 +1344,8 @@ class PDatabase:
             print(colored("Error: There is no last known database.", "red"))
 
     def get_database_password_as_string(self) -> str:
+        if self.database_password == "":
+            return ""
         return bytes(self.database_password).decode("UTF-8")
 
     # returns -1 in error case, 0 when no error and no changes where made,
