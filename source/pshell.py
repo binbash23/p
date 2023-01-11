@@ -180,7 +180,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if user_input is None or user_input != p_database.get_database_password_as_string():
                 print("Error: password is wrong.")
                 return
-            continue
+            # continue
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
             print("Command " + user_input + " unknown.")
@@ -288,11 +288,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print()
                 for acc in account_array:
                     print()
-                    print("[" + str(i) + "]" + " - Name: " + acc.name)
+                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
                     # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
                     i = i + 1
                 print("")
                 index = input("Multiple accounts found. Please specify the # you need: ")
+                if index == "":
+                    print("None selected.")
+                    continue
                 try:
                     clipboard.copy(account_array[int(index) - 1].password)
                     print("Password from account: " + account_array[int(index) - 1].name + " copied to clipboard.")
