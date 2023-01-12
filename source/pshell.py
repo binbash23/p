@@ -67,7 +67,8 @@ SHELL_COMMANDS = [
     ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database"),
     ShellCommand("status", "status", "Show configuration and database status."),
-    ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES"),
+    ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES before " +
+                 "locking the pshell (0 = disable timeout)"),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false"),
     ShellCommand("version", "version", "Show program version info")
 ]
@@ -165,8 +166,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 return
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
-        if manual_locked or (pshell_max_idle_minutes_timeout != 0 and \
-                int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
+        if manual_locked or (pshell_max_idle_minutes_timeout != 0 and
+                             int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
             if manual_locked:
                 print("Pshell manually locked.")
             else:
@@ -239,7 +240,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.edit(p_database, shell_command.arguments[1])
             continue
         if shell_command.command == "help":
-
             if len(shell_command.arguments) == 1:
                 print()
                 print(colored(" Pshell command help", "green"))
