@@ -303,6 +303,7 @@ def start_dropbox_configuration():
 # main
 #
 def main():
+    print(p.VERSION)
     parser = optparse.OptionParser()
     parser.add_option("-a", "--add", action="store_true", dest="add", default=False,
                       help="Add new account interactive")
