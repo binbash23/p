@@ -188,7 +188,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.change_dropbox_database_password(p_database)
             continue
         if shell_command.command == "changepassword":
-            p.change_database_password(p_database)
+            try:
+                p.change_database_password(p_database)
+            except KeyboardInterrupt:
+                print()
+                print("Canceled.")
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
