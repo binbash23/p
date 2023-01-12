@@ -12,6 +12,7 @@ import dropboxconnector
 # import pyperclip3
 import clipboard
 import datetime
+from termcolor import colored
 
 
 class ShellCommand:
@@ -35,38 +36,39 @@ SHELL_COMMANDS = [
     ShellCommand("changepassword", "changepassword", "Change password of current database"),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database"),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard"),
-    ShellCommand("copypassword", "copypassword <UUID>", "Copy password from <UUID> to clipboard"),
-    ShellCommand("delete", "delete <UUID>", "Delete account with <UUID>"),
+    ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard"),
+    ShellCommand("delete", "delete UUID", "Delete account with UUID"),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database"),
-    ShellCommand("edit", "edit <UUID>", "Edit account with <UUID>"),
+    ShellCommand("edit", "edit UUID", "Edit account with UUID"),
     ShellCommand("exit", "exit", "Quit shell"),
-    ShellCommand("help", "help", "Show help for all shell commands"),
+    ShellCommand("help", "help [COMMAND]", "Show help for all shell commands or show description for COMMAND"),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command"),
-    ShellCommand("invalidate", "invalidate <UUID>", "Invalidate account with UUID"),
+    ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID"),
     ShellCommand("list", "list", "List all accounts"),
+    ShellCommand("lock", "lock", "Lock pshell"),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy"),
-    ShellCommand("merge2file", "merge2file <FILENAME>",
-                 "Merge local database with another database identified by <FILENAME>"),
+    ShellCommand("merge2file", "merge2file FILENAME",
+                 "Merge local database with another database identified by FILENAME"),
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
                  "Merge local database with the last known merge database"),
     ShellCommand("quit", "quit", "Quit shell"),
-    ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with <UUID>"),
-    ShellCommand("search", "search <SEARCHSTRING>", "Search <SEARCHSTRING> in account database"),
-    ShellCommand("sc", "sc <SEARCHSTRING>", "Search <SEARCHSTRING> in accounts and copy the password of the" +
+    ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID"),
+    ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database"),
+    ShellCommand("sc", "sc SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the password of the" +
                  " account found to clipboard"),
-    ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to <NAME>"),
-    ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
+    ShellCommand("setdatabasename", "setdatabasename NAME", "Set database to NAME"),
+    ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid UUID",
                  "Set the dropbox application account uuid in configuration"),
-    ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
+    ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
                  "Set the dropbox token account uuid in configuration"),
-    ShellCommand("shadowpasswords", "shadowpasswords on/off", "Shadow passwords"),
+    ShellCommand("shadowpasswords", "shadowpasswords on|off", "Shadow passwords"),
     ShellCommand("showconfig", "showconfig", "Show current configuration"),
-    ShellCommand("showinvalidated", "showinvalidated on/off", "Show invalidated accounts"),
-    ShellCommand("showunmergedwarning", "showunmergedwarning on/off", "Show warning on startup if there are " +
+    ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts"),
+    ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database"),
     ShellCommand("status", "status", "Show configuration and database status."),
-    ShellCommand("timeout", "timeout <MINUTES>", "Set the maximum shell inactivity timeout to <MINUTES>"),
-    ShellCommand("verbose", "verbose on/off", "Show verbose account infos true or false"),
+    ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES"),
+    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false"),
     ShellCommand("version", "version", "Show program version info")
 ]
 
@@ -153,17 +155,22 @@ def start_pshell(p_database: pdatabase.PDatabase):
     if show_unmerged_changes_warning_on_startup is True and \
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print("Note: You have unmerged changes in your local database.")
+    manual_locked = False
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
-        try:
-            user_input = input(prompt_string)
-        except KeyboardInterrupt:
-            return
+        if not manual_locked:
+            try:
+                user_input = input(prompt_string)
+            except KeyboardInterrupt:
+                return
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
-        if pshell_max_idle_minutes_timeout != 0 and \
-                int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout):
-            print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
+        if manual_locked or (pshell_max_idle_minutes_timeout != 0 and \
+                int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
+            if manual_locked:
+                print("Pshell manually locked.")
+            else:
+                print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
@@ -174,11 +181,18 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Error: password is wrong.")
                 else:
                     # password is ok
+                    if manual_locked:
+                        manual_locked = False
+                        user_input = ""
                     break
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
-            print("Command " + user_input + " unknown.")
-            print("Enter 'help' for command help")
+            if user_input == "":
+                # print("Empty command.")
+                pass
+            else:
+                print("Unknown command '" + user_input + "'")
+                print("Enter 'help' for command help")
             continue
         # proceed possible commands
         if shell_command.command == "add":
@@ -225,8 +239,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.edit(p_database, shell_command.arguments[1])
             continue
         if shell_command.command == "help":
-            for shell_command in SHELL_COMMANDS:
-                print(str(shell_command))
+
+            if len(shell_command.arguments) == 1:
+                print()
+                print(colored(" Pshell command help", "green"))
+                print(colored(" Type 'help COMMAND' to get usage details for COMMAND", "green"))
+                print(colored(" You can type the first distinct letter(s) of any COMMAND to be faster.", "green"))
+                print()
+                for shell_command in SHELL_COMMANDS:
+                    # print(str(shell_command))
+                    print(shell_command.synopsis)
+            else:
+                help_command = expand_string_2_shell_command(shell_command.arguments[1])
+                print(help_command.synopsis + " - " + help_command.description)
             continue
         if shell_command.command == "idletime":
             print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
@@ -240,6 +265,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "list":
             p_database.search_accounts("")
+            continue
+        if shell_command.command == "lock":
+            manual_locked = True
+            print("Pshell locked.")
             continue
         if shell_command.command == "merge2dropbox":
             p.merge_with_dropbox(p_database)
