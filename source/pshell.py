@@ -282,7 +282,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("There is no account to copy.")
                 continue
             clipboard.copy(latest_found_account.password)
-            print("Password from account: " + latest_found_account.name + " copied to clipboard.")
+            print("Password from account: '" + latest_found_account.name + "' copied to clipboard.")
             continue
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
@@ -308,14 +308,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     clipboard.copy(account_array[int(index) - 1].password)
-                    print("Password from account: " + account_array[int(index) - 1].name + " copied to clipboard.")
+                    print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 # pyperclip3.copy(password)
                 clipboard.copy(account_array[0].password)
-                print("Password from account: " + account_array[0].name + " copied to clipboard.")
+                print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
             except Exception as e:
                 print("Error copying password to clipboard: " + str(e))
             continue
