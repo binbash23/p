@@ -34,6 +34,7 @@ SHELL_COMMANDS = [
     ShellCommand("add", "add", "Add a new account"),
     ShellCommand("changepassword", "changepassword", "Change password of current database"),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database"),
+    ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard"),
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from <UUID> to clipboard"),
     ShellCommand("delete", "delete <UUID>", "Delete account with <UUID>"),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database"),
@@ -93,7 +94,7 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
     return None
 
 
-def parse_bool(string:str) -> bool:
+def parse_bool(string: str) -> bool:
     if string is None:
         return False
     if string == "True" or str == "true":
@@ -144,11 +145,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
     load_pshell_configuration(p_database)
 
     user_input = ""
+    latest_found_account = None
     prompt_string = p_database.database_filename + "> "
     if pdatabase.get_database_name(p_database.database_filename) != "":
         prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
     pdatabase.print_database_statistics(p_database.database_filename)
-    if show_unmerged_changes_warning_on_startup is True and\
+    if show_unmerged_changes_warning_on_startup is True and \
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print("Note: You have unmerged changes in your local database.")
     while user_input != "quit":
@@ -156,7 +158,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
         try:
             user_input = input(prompt_string)
         except KeyboardInterrupt:
-            # user_input = "quit"
             return
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
@@ -164,20 +165,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout):
             print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
             try:
-                user_input = getpass.getpass("Enter database password: ")
+                user_input_pass = getpass.getpass("Enter database password: ")
             except KeyboardInterrupt:
                 print()
                 return
-            # if user_input is None or user_input.encode("UTF-8") != p_database.database_password:
-            # print("user_in->" + user_input+"<")
-            # print("pass->" + p_database.database_password+"<")
-            # print("user_in->" + str(user_input is None)+"<")
-            # print("pass->" + str(p_database.database_password is None)+"<")
-            # print("user_in == ''" + str(user_input==""))
-            # print("user_in == pw" + str(user_input == p_database.database_password))
-            # if user_input is None or not p_database.is_valid_database_password(p_database.database_filename,
-            # if user_input is None or str(user_input) != str(p_database.database_password):
-            if user_input is None or user_input != p_database.get_database_password_as_string():
+            if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
                 print("Error: password is wrong.")
                 return
             # continue
@@ -195,8 +187,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "changepassword":
             p.change_database_password(p_database)
-            # print("newpw:" + str(p_database.database_password))
-            # p_database = pdatabase.PDatabase()
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
@@ -273,6 +263,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             p_database.search_accounts(shell_command.arguments[1])
+            # remember latest found account:
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            if len(account_array) == 0:
+                latest_found_account = None
+                continue
+            else:
+                latest_found_account = account_array[len(account_array) - 1]
+            continue
+        if shell_command.command == "cplast":
+            if latest_found_account is None:
+                print("There is no account to copy.")
+                continue
+            clipboard.copy(latest_found_account.password)
+            print("Password from account: " + latest_found_account.name + " copied to clipboard.")
             continue
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
