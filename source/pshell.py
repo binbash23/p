@@ -164,15 +164,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if pshell_max_idle_minutes_timeout != 0 and \
                 int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout):
             print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
-            try:
-                user_input_pass = getpass.getpass("Enter database password: ")
-            except KeyboardInterrupt:
-                print()
-                return
-            if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
-                print("Error: password is wrong.")
-                return
-            # continue
+            while True:
+                try:
+                    user_input_pass = getpass.getpass("Enter database password: ")
+                except KeyboardInterrupt:
+                    print()
+                    return
+                if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
+                    print("Error: password is wrong.")
+                else:
+                    # password is ok
+                    break
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
             print("Command " + user_input + " unknown.")
