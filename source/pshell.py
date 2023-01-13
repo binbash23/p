@@ -199,6 +199,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if manual_locked or (pshell_max_idle_minutes_timeout != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
             if manual_locked:
+                clear_console()
                 print("Pshell locked.")
             else:
                 print("Exiting pshell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
