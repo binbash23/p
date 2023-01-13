@@ -13,6 +13,7 @@ import dropboxconnector
 import clipboard
 import datetime
 from termcolor import colored
+import os
 
 
 class ShellCommand:
@@ -32,45 +33,46 @@ class ShellCommand:
 
 # SHELL_COMMANDS = ( ShellCommand(command="version", synopsis="version", description="show p program version") )
 SHELL_COMMANDS = [
-    ShellCommand("add", "add", "Add a new account"),
-    ShellCommand("changepassword", "changepassword", "Change password of current database"),
-    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database"),
-    ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard"),
-    ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard"),
-    ShellCommand("delete", "delete UUID", "Delete account with UUID"),
-    ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database"),
-    ShellCommand("edit", "edit UUID", "Edit account with UUID"),
-    ShellCommand("exit", "exit", "Quit shell"),
-    ShellCommand("help", "help [COMMAND]", "Show help for all shell commands or show description for COMMAND"),
-    ShellCommand("idletime", "idletime", "Show idletime in seconds after last command"),
-    ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID"),
-    ShellCommand("list", "list", "List all accounts"),
-    ShellCommand("lock", "lock", "Lock pshell"),
-    ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy"),
+    ShellCommand("add", "add", "Add a new account."),
+    ShellCommand("changepassword", "changepassword", "Change password of current database."),
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
+    ShellCommand("clear", "clear", "Clear console."),
+    ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard."),
+    ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard."),
+    ShellCommand("delete", "delete UUID", "Delete account with UUID."),
+    ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database."),
+    ShellCommand("edit", "edit UUID", "Edit account with UUID."),
+    ShellCommand("exit", "exit", "Quit pshell."),
+    ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show description for COMMAND."),
+    ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
+    ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID."),
+    ShellCommand("list", "list", "List all accounts."),
+    ShellCommand("lock", "lock", "Lock pshell console."),
+    ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
     ShellCommand("merge2file", "merge2file FILENAME",
-                 "Merge local database with another database identified by FILENAME"),
+                 "Merge local database with another database identified by FILENAME."),
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
-                 "Merge local database with the last known merge database"),
-    ShellCommand("quit", "quit", "Quit shell"),
-    ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID"),
-    ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database"),
+                 "Merge local database with the last known merge database."),
+    ShellCommand("quit", "quit", "Quit pshell."),
+    ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID."),
+    ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database."),
     ShellCommand("sc", "sc SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the password of the" +
-                 " account found to clipboard"),
-    ShellCommand("setdatabasename", "setdatabasename NAME", "Set database to NAME"),
+                 " account found to clipboard."),
+    ShellCommand("setdatabasename", "setdatabasename NAME", "Set database to NAME."),
     ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid UUID",
-                 "Set the dropbox application account uuid in configuration"),
+                 "Set the dropbox application account uuid in configuration."),
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
-                 "Set the dropbox token account uuid in configuration"),
-    ShellCommand("shadowpasswords", "shadowpasswords on|off", "Shadow passwords"),
-    ShellCommand("showconfig", "showconfig", "Show current configuration"),
-    ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts"),
+                 "Set the dropbox token account uuid in configuration."),
+    ShellCommand("shadowpasswords", "shadowpasswords on|off", "Shadow passwords in console output."),
+    ShellCommand("showconfig", "showconfig", "Show current configuration."),
+    ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
-                 "unmerged changes in local database compared to the latest known merge database"),
+                 "unmerged changes in local database compared to the latest known merge database.),
     ShellCommand("status", "status", "Show configuration and database status."),
-    ShellCommand("timeout", "timeout MINUTES", "Set the maximum shell inactivity timeout to MINUTES before " +
-                 "locking the pshell (0 = disable timeout)"),
-    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false"),
-    ShellCommand("version", "version", "Show program version info")
+    ShellCommand("timeout", "timeout [MINUTES]", "Set the maximum pshell inactivity timeout to MINUTES before " +
+                 "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
+    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false."),
+    ShellCommand("version", "version", "Show program version info.")
 ]
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
@@ -142,6 +144,15 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         show_unmerged_changes_warning_on_startup = parse_bool(config_value)
 
 
+def clear_console():
+    # windows
+    if os.name == 'nt':
+        os.system('cls')
+    # for mac and linux os.name is posix
+    else:
+        os.system('clear')
+
+
 def start_pshell(p_database: pdatabase.PDatabase):
     global pshell_max_idle_minutes_timeout
     global show_unmerged_changes_warning_on_startup
@@ -171,7 +182,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if manual_locked:
                 print("Pshell manually locked.")
             else:
-                print("Exiting shell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
+                print("Exiting pshell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
@@ -208,6 +219,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except KeyboardInterrupt:
                 print()
                 print("Canceled.")
+            continue
+        if shell_command.command == "clear":
+            clear_console()
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
@@ -455,8 +469,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
-                print("MINUTES are missing.")
-                print(shell_command)
+                print("Pshell max idle timeout is " + str(pshell_max_idle_minutes_timeout))
+                # print(shell_command)
                 continue
             try:
                 pshell_max_idle_minutes_timeout = int(shell_command.arguments[1])
@@ -465,7 +479,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN,
                     pshell_max_idle_minutes_timeout)
             except Exception as e:
-                print("Error setting shell timeout: " + str(e))
+                print("Error setting pshell timeout: " + str(e))
             continue
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
@@ -506,4 +520,4 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         # # Unknown command detected
         # print("Command ")
-    print("Exiting shell mode.")
+    print("Exiting pshell.")
