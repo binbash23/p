@@ -67,7 +67,7 @@ SHELL_COMMANDS = [
     ShellCommand("showconfig", "showconfig", "Show current configuration."),
     ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
-                 "unmerged changes in local database compared to the latest known merge database.),
+                 "unmerged changes in local database compared to the latest known merge database."),
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout [MINUTES]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
