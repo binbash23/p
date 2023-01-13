@@ -37,6 +37,7 @@ SHELL_COMMANDS = [
     ShellCommand("changepassword", "changepassword", "Change password of current database."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
     ShellCommand("clear", "clear", "Clear console."),
+    # ShellCommand("cleartimeout", "cleartimeout [MINUTES]", "Set or show console clear timeout in MINUTES."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard."),
     ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard."),
     ShellCommand("delete", "delete UUID", "Delete account with UUID."),
@@ -77,6 +78,8 @@ SHELL_COMMANDS = [
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
 pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
+# DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE = 1
+# pshell_max_idle_minutes_timeout_min_before_clear_console = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE
 show_unmerged_changes_warning_on_startup = True
 
 
@@ -120,6 +123,21 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN, pshell_max_idle_minutes_timeout)
+
+    # global pshell_max_idle_minutes_timeout_min_before_clear_console
+    # pshell_max_idle_minutes_timeout_min_before_clear_console = pdatabase.get_attribute_value_from_configuration_table(
+    #     p_database.database_filename,
+    #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR)
+    # if not pshell_max_idle_minutes_timeout_min_before_clear_console.isnumeric() \
+    #         or pshell_max_idle_minutes_timeout_min_before_clear_console is None \
+    #         or pshell_max_idle_minutes_timeout_min_before_clear_console == "":
+    #     pshell_max_idle_minutes_timeout_min_before_clear_console = \
+    #         DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE
+    #     pdatabase.set_attribute_value_in_configuration_table(
+    #         p_database.database_filename,
+    #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR,
+    #         pshell_max_idle_minutes_timeout_min_before_clear_console)
+
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
@@ -325,7 +343,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("There is no account to copy.")
                 continue
             clipboard.copy(latest_found_account.password)
-            print("Password from account: '" + latest_found_account.name + "' copied to clipboard.")
+            print("Password from account '" + latest_found_account.name + "' copied to clipboard.")
             continue
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
