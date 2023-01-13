@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.01.12"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.01.13"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 
@@ -319,6 +319,8 @@ def main():
                       help="Set database filename. It is also possible to create an environment variable: " +
                            "P_DATABASE=<database_filename>")
     parser.add_option("-e", "--edit", action="store", dest="edit_uuid", help="Edit account by UUID")
+    parser.add_option("-E", "--database-password--empty", action="store_true", dest="database_password_empty",
+                      help="Set empty database password")
     parser.add_option("-i", "--invalidate", action="store", dest="invalidate_uuid", help="Invalidate account by UUID")
     parser.add_option("-I", "--search-uuid", action="store", dest="search_uuid", help="Search account by UUID")
     parser.add_option("-l", "--list", action="store_true", dest="list", default=False,
@@ -329,7 +331,7 @@ def main():
                       help="Merge two databases and synchronize them. Both databases will be synchronized " +
                            "to an equal state. Both passwords must be the same!")
     parser.add_option("-p", "--database-password", action="store", dest="database_password",
-                      help="Set database password")
+                      help="Set database password. If you want to use an empty password use -E")
     parser.add_option("-q", "--query", action="store_true", dest="query", default=False,
                       help="Query p. Start interactive p shell.")
     parser.add_option("-r", "--revalidate", action="store", dest="revalidate_uuid",
@@ -419,9 +421,16 @@ def main():
         sys.exit(0)
 
     # second fetch password:
+    database_password = None
     if options.database_password is not None:
         database_password = options.database_password
-    else:
+    if options.database_password_empty:
+        database_password = ""
+
+    # if options.database_password is not None:
+    #     database_password = options.database_password
+    if database_password is None:
+    # else:
         if os.path.exists(database_filename):
             try:
                 database_password = getpass.getpass("Enter database password: ")
@@ -436,8 +445,9 @@ def main():
                 print(colored("Error: Passwords do not match.", "red"))
                 sys.exit(1)
     if database_password is None:
-        print(colored("Database password is not set! Enter password on command line or use -p option.", "red"))
+        print(colored("Database password is not set! Enter password on command line or use -p or -E option.", "red"))
         sys.exit(1)
+
     # check if the verbose switch is set:
     show_account_details = False
     if options.verbose:

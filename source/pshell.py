@@ -43,6 +43,7 @@ SHELL_COMMANDS = [
     ShellCommand("delete", "delete UUID", "Delete account with UUID."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database."),
     ShellCommand("edit", "edit UUID", "Edit account with UUID."),
+    ShellCommand("!", "! COMMAND", "Execute COMMAND in native shell."),
     ShellCommand("exit", "exit", "Quit pshell."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show description for COMMAND."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
@@ -198,7 +199,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if manual_locked or (pshell_max_idle_minutes_timeout != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
             if manual_locked:
-                print("Pshell manually locked.")
+                print("Pshell locked.")
             else:
                 print("Exiting pshell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
@@ -225,6 +226,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Enter 'help' for command help")
             continue
         # proceed possible commands
+        if shell_command.command == "!":
+            if len(shell_command.arguments) == 1:
+                print("COMMAND is missing.")
+                print(shell_command)
+                continue
+            os.system(shell_command.arguments[1])
+            continue
         if shell_command.command == "add":
             p.add(p_database)
             continue
@@ -300,7 +308,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "lock":
             manual_locked = True
-            print("Pshell locked.")
+            # print("Pshell locked.")
             continue
         if shell_command.command == "merge2dropbox":
             p.merge_with_dropbox(p_database)
