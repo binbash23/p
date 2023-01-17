@@ -1036,7 +1036,7 @@ class PDatabase:
         self.print_formatted_account(account)
 
     def print_formatted_account(self, account: Account):
-        print("ID          : " + str(account.uuid))
+        print("UUID        : " + str(account.uuid))
         print("Name        : " + str(account.name))
         print("URL         : " + str(account.url))
         print("Loginname   : " + str(account.loginname))
