@@ -14,6 +14,7 @@ import clipboard
 import datetime
 from termcolor import colored
 import os
+from inputimeout import inputimeout, TimeoutOccurred
 
 
 class ShellCommand:
@@ -191,18 +192,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
             try:
-                user_input = input(prompt_string)
+                # user_input = input(prompt_string)
+                user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60) - 1)
             except KeyboardInterrupt:
                 return
+            except TimeoutOccurred:
+                pass
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
         if manual_locked or (pshell_max_idle_minutes_timeout != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
             if manual_locked:
                 clear_console()
-                print("Pshell locked.")
+                print("PShell locked.")
             else:
-                print("Exiting pshell due to idle timeout (" + str(pshell_max_idle_minutes_timeout) + " min)")
+                print("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
@@ -283,7 +287,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:
                 print()
-                print(colored(" Pshell command help", "green"))
+                print(colored(" PShell command help", "green"))
                 print(colored(" Type 'help COMMAND' to get usage details for COMMAND", "green"))
                 print(colored(" You can type the first distinct letter(s) of any COMMAND to be faster.", "green"))
                 print()
@@ -496,7 +500,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
-                print("Pshell max idle timeout is " + str(pshell_max_idle_minutes_timeout))
+                print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout))
                 # print(shell_command)
                 continue
             try:
