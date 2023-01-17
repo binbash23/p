@@ -1425,7 +1425,7 @@ class PDatabase:
                 cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-                print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
+            print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
             database_connection.commit()
 
             #
