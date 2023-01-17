@@ -193,7 +193,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if not manual_locked:
             try:
                 # user_input = input(prompt_string)
-                user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60) - 1)
+                user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
             except KeyboardInterrupt:
                 return
             except TimeoutOccurred:
@@ -206,6 +206,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 clear_console()
                 print("PShell locked.")
             else:
+                clear_console()
                 print("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
                 try:
