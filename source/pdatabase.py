@@ -1206,7 +1206,7 @@ class PDatabase:
                         "', '" + account.type + "')"
             cursor.execute(sqlstring)
             database_connection.commit()
-            print("New account added.")
+            print("New account added: [UUID " + str(account.uuid) + "]")
         except sqlite3.IntegrityError:
             print("Error: UUID " + str(account.uuid) + " already exists in database!")
         except Exception as e:
