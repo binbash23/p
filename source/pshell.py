@@ -196,6 +196,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if not manual_locked:
             try:
                 # user_input = input(prompt_string)
+                # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
                     user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                 else:
@@ -392,7 +393,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("")
                 index = input("Multiple accounts found. Please specify the # you need: ")
                 if index == "":
-                    print("None selected.")
+                    print("Nothing selected.")
                     continue
                 try:
                     clipboard.copy(account_array[int(index) - 1].password)
@@ -427,7 +428,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("")
                 index = input("Multiple accounts found. Please specify the # you need: ")
                 if index == "":
-                    print("None selected.")
+                    print("Nothing selected.")
                     continue
                 try:
                     clipboard.copy(account_array[int(index) - 1].loginname)
