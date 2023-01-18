@@ -51,6 +51,7 @@ SHELL_COMMANDS = [
     ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID."),
     ShellCommand("list", "list", "List all accounts."),
     ShellCommand("lock", "lock", "Lock pshell console."),
+    ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
     ShellCommand("merge2file", "merge2file FILENAME",
                  "Merge local database with another database identified by FILENAME."),
@@ -195,14 +196,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if not manual_locked:
             try:
                 # user_input = input(prompt_string)
-                user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                if int(pshell_max_idle_minutes_timeout) > 0:
+                    user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                else:
+                    user_input = input(prompt_string)
             except KeyboardInterrupt:
                 return
             except TimeoutOccurred:
                 pass
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
-        if manual_locked or (pshell_max_idle_minutes_timeout != 0 and
+        if manual_locked or (int(pshell_max_idle_minutes_timeout) != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
             if manual_locked:
                 clear_console()
@@ -302,7 +306,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(help_command.synopsis + " - " + help_command.description)
             continue
         if shell_command.command == "idletime":
-            print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
+            idle_time = round(time_diff.total_seconds())
+            if idle_time < 120:
+                idle_time_str = str(idle_time) + " sec"
+            else:
+                idle_time = round(idle_time / 60)
+                idle_time_str = str(idle_time) + " min"
+            # print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
+            print("Idle time: " + idle_time_str)
             continue
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
@@ -314,7 +325,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "list":
             p_database.search_accounts("")
             continue
-        if shell_command.command == "lock":
+        if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
             # print("Pshell locked.")
             continue
