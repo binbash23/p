@@ -15,6 +15,7 @@ import datetime
 from termcolor import colored
 import os
 from inputimeout import inputimeout, TimeoutOccurred
+import time
 
 
 class ShellCommand:
@@ -183,6 +184,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     global show_unmerged_changes_warning_on_startup
     load_pshell_configuration(p_database)
 
+    clear_console()
     user_input = ""
     latest_found_account = None
     prompt_string = p_database.database_filename + "> "
@@ -211,13 +213,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
         time_diff = now_date - last_activity_date
         if manual_locked or (int(pshell_max_idle_minutes_timeout) != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
-            if manual_locked:
-                clear_console()
-                print("PShell locked.")
-            else:
-                clear_console()
-                print("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)")
             while True:
+                if manual_locked:
+                    clear_console()
+                    print(p.VERSION)
+                    print("PShell locked.")
+                else:
+                    clear_console()
+                    print(p.VERSION)
+                    print("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)")
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
                 except KeyboardInterrupt:
@@ -225,8 +229,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     return
                 if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
                     print("Error: password is wrong.")
+                    time.sleep(2)
+                    # clear_console()
                 else:
                     # password is ok
+                    clear_console()
+                    print("PShell unlocked.")
                     if manual_locked:
                         manual_locked = False
                         user_input = ""
