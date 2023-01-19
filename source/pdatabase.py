@@ -760,8 +760,10 @@ class PDatabase:
             cursor = database_connection.cursor()
             sqlresult = cursor.execute(sql_command)
             result = sqlresult.fetchall()
+            i = 0
             for row in result:
-                print(str(row))
+                print(str(row[i]))
+                i += 1
         except Exception as e:
             raise
         finally:
