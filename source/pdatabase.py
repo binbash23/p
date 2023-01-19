@@ -562,6 +562,7 @@ def print_database_statistics(database_filename):
     print("Database File                       : " + os.path.abspath(database_filename))
     print("Database Created                    : " + database_creation_date)
     print("Database Schema Version             : " + schema_version)
+    print("SQLite Database Version             : " + get_database_sqlite_version(database_filename))
     print("Database Encrypted                  : " + str(database_is_encrypted))
     print("Database Size                       : " + str(os.path.getsize(database_filename) / 1024) + " Kb")
     print("Database Last Changed               : " + last_change_date)
@@ -573,6 +574,23 @@ def print_database_statistics(database_filename):
     print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
     print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
 
+
+def get_database_sqlite_version(database_filename: str) -> str:
+    version = "unknown"
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = "select sqlite_version()"
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not get sqlite version.")
+        version = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return version
 
 def get_database_has_unmerged_changes(database_filename: str) -> str:
     last_change_date = get_last_change_date_in_database(database_filename)
