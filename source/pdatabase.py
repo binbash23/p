@@ -682,6 +682,13 @@ class PDatabase:
     #     if get_database_name(self) != "":
     #         id_string = "'" + get_database_name(self) + "' - " + id_string
 
+    def print_current_secure_delete_mode(self, database_connection, cursor):
+        sqlstring = "pragma secure_delete"
+        try:
+            print("SQLite secure_delete mode: " + str(cursor.execute(sqlstring).fetchall()[0][0]))
+        except Exception as e:
+            raise
+
     def delete_account(self, delete_uuid):
         if delete_uuid is None or delete_uuid == "":
             print("Error deleting account: UUID is empty.")
@@ -697,6 +704,7 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(database_connection, cursor)
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
             # remember deleted uuid in deleted_account table for merge information
@@ -1026,6 +1034,7 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(database_connection, cursor)
             sqlstring = "update account set name = '" + name + "', " + \
                         "url = '" + url + "', " + \
                         "loginname = '" + loginname + "', " + \
