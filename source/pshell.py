@@ -63,6 +63,8 @@ SHELL_COMMANDS = [
     ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database."),
     ShellCommand("sc", "sc SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the password of the" +
                  " account found to clipboard."),
+    ShellCommand("sca", "sca SEARCHSTRING", "Search SEARCHSTRING in accounts and copy one after another the URL, " +
+                 "loginname and password of the account found to clipboard."),
     ShellCommand("scl", "scl SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the loginname of the" +
                  " account found to clipboard."),
     ShellCommand("scu", "scu SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the URL of the" +
@@ -417,6 +419,52 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
             except Exception as e:
                 print("Error copying password to clipboard: " + str(e))
+        if shell_command.command == "sca":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            if len(account_array) == 0:
+                print("No account found.")
+                continue
+            if len(account_array) != 1:
+                i = 1
+                # print()
+                for acc in account_array:
+                    print()
+                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
+                    # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
+                    i = i + 1
+                print("")
+                index = input("Multiple accounts found. Please specify the # you need: ")
+                if index == "":
+                    print("Nothing selected.")
+                    continue
+                try:
+                    clipboard.copy(account_array[int(index) - 1].url)
+                    print("URL from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
+                    input("Press enter to copy loginname")
+                    clipboard.copy(account_array[int(index) - 1].loginname)
+                    print("Loginname from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
+                    input("Press enter to copy password")
+                    clipboard.copy(account_array[int(index) - 1].password)
+                    print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
+                except Exception as e:
+                    print("Error: " + str(e))
+                continue
+            try:
+                # pyperclip3.copy(password)
+                clipboard.copy(account_array[0].url)
+                print("URL from account: '" + account_array[0].name + "' copied to clipboard.")
+                input("Press enter to copy loginname")
+                clipboard.copy(account_array[0].loginname)
+                print("Loginname from account: '" + account_array[0].name + "' copied to clipboard.")
+                input("Press enter to copy password")
+                clipboard.copy(account_array[0].password)
+                print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
+            except Exception as e:
+                print("Error copying URL, loginname and password to clipboard: " + str(e))
         if shell_command.command == "scl":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -630,7 +678,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         # if shell_command.command == "upload2dropbox":
         #     continue
-        #     # tobe implemented xxxxxxxxxxxxxxxxxxxx
+        #     # tobe implemented
         #     print("An eventually existing database in dropbox will be overwritten!")
         #     local_path = os.path.dirname(p_database.database_filename)
         #     # dropbox_upload_file(access_token, local_path, p_database.database_filename,
