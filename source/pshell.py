@@ -450,6 +450,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     input("Press enter to copy password")
                     clipboard.copy(account_array[int(index) - 1].password)
                     print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
+                except KeyboardInterrupt as ke:
+                    print()
+                    continue
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
@@ -463,6 +466,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 input("Press enter to copy password")
                 clipboard.copy(account_array[0].password)
                 print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
+            except KeyboardInterrupt as ke:
+                print()
+                continue
             except Exception as e:
                 print("Error copying URL, loginname and password to clipboard: " + str(e))
         if shell_command.command == "scl":
