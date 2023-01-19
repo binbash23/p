@@ -97,6 +97,7 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database."),
+    ShellCommand("sql", "sql COMMAND", "Execute COMMAND in database."),
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout [MINUTES]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
@@ -437,6 +438,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
             except Exception as e:
                 print("Error copying password to clipboard: " + str(e))
+            continue
         if shell_command.command == "sca":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -489,6 +491,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             except Exception as e:
                 print("Error copying URL, loginname and password to clipboard: " + str(e))
+            continue
         if shell_command.command == "scl":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -523,6 +526,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Loginname from account: '" + account_array[0].name + "' copied to clipboard.")
             except Exception as e:
                 print("Error copying loginname to clipboard: " + str(e))
+            continue
         if shell_command.command == "scu":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -662,9 +666,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+        if shell_command.command == "sql":
+            if len(shell_command.arguments) == 1:
+                print("COMMAND is missing.")
+                print(shell_command)
+                continue
+            print("->" + shell_command.arguments[1])
+            print("Executing sql command: <" + shell_command.arguments[1] + ">")
+            try:
+                p_database.execute_sql(shell_command.arguments[1])
+            except Exception as e:
+                print("Error executing sql command: " + str(e))
+            continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
-                print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout))
+                print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
                 # print(shell_command)
                 continue
             try:

@@ -466,6 +466,7 @@ def get_database_creation_date(database_filename):
     return created_date
 
 
+
 def get_last_change_date_in_database(database_filename):
     count = 0
     try:
@@ -695,6 +696,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
             # remember deleted uuid in deleted_account table for merge information
@@ -750,6 +752,20 @@ class PDatabase:
         finally:
             database_connection.close()
         return result_array
+
+    def execute_sql(self, sql_command):
+        count = 0
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlresult = cursor.execute(sql_command)
+            result = sqlresult.fetchall()
+            for row in result:
+                print(str(row))
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
 
     def get_uuid_exists_in_deleted_accounts(self, account_uuid) -> bool:
         if account_uuid in self.get_deleted_account_uuids_decrypted():
@@ -1007,6 +1023,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "update account set name = '" + name + "', " + \
                         "url = '" + url + "', " + \
                         "loginname = '" + loginname + "', " + \
@@ -1234,15 +1251,31 @@ class PDatabase:
             return False
         return True
 
+    def set_database_pragmas_to_secure_mode(self, database_connection, cursor):
+        logging.debug("Setting PRAGMA journal_mode = WAL for database.")
+        cursor.execute("PRAGMA journal_mode = WAL")
+        database_connection.commit()
+        logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
+        cursor.execute("PRAGMA auto_vacuum = FULL")
+        database_connection.commit()
+        # Set secure_delete_mode
+        logging.debug("Setting PRAGMA secure_delete = True for database.")
+        cursor.execute("PRAGMA secure_delete = True")
+        database_connection.commit()
+
     def create_and_initialize_database(self):
         try:
             database_connection = None
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             # Set undo mode
-            logging.debug("Setting PRAGMA journal_mode = WAL for database.")
-            cursor.execute("PRAGMA journal_mode = WAL")
-            database_connection.commit()
+            # logging.debug("Setting PRAGMA journal_mode = WAL for database.")
+            # cursor.execute("PRAGMA journal_mode = WAL")
+            # database_connection.commit()
+            # logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
+            # cursor.execute("PRAGMA auto_vacuum = FULL")
+            # database_connection.commit()
             # # Set secure_delete_mode
             # logging.debug("Setting PRAGMA secure_delete = True for database.")
             # cursor.execute("PRAGMA secure_delete = True")
@@ -1266,6 +1299,7 @@ class PDatabase:
             print("Creating new p database: \"" + self.database_filename + "\" ...")
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             cursor.executescript(SQL_CREATE_DATABASE_SCHEMA)
             new_database_uuid = uuid.uuid4()
             print("Creating new UUID for database: " + str(new_database_uuid))
