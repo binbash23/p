@@ -33,8 +33,7 @@ class ShellCommand:
     def __str__(self):
         return self.command + " - Synopsis: " + self.synopsis + " - Description: " + self.description
 
-    def print_help_page(self):
-        # clear_console()
+    def print_manual(self):
         print()
         print("COMMAND")
         print(" " + self.command)
@@ -44,12 +43,11 @@ class ShellCommand:
         print()
         print("DESCRIPTION")
         formatted_description = textwrap.wrap(self.description,
-                                              width=80,
+                                              width=78,
                                               initial_indent=" ",
                                               subsequent_indent=" ")
         for row in formatted_description:
             print(row)
-        #print(self.description)
         print()
 
 
@@ -336,18 +334,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print(shell_command.synopsis)
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
-                # print(help_command.synopsis + " - " + help_command.description) xxx
-                # print()
-                # print("COMMAND")
-                # print(help_command.command)
-                # print()
-                # print("SYNOPSIS")
-                # print(help_command.synopsis)
-                # print()
-                # print("DESCRIPTION")
-                # print(help_command.description)
-                # print()
-                help_command.print_help_page()
+                help_command.print_manual()
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
