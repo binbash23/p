@@ -376,6 +376,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.merge_last_known_database()
             continue
         if shell_command.command == "quit" or shell_command.command == "exit":
+            clear_console()
             break
         if shell_command.command == "revalidate":
             if len(shell_command.arguments) == 1:
