@@ -12,3 +12,6 @@ progressbar
 dropbox
 pandas
 inputimeout
+
+
+To use copy&paste in ubuntu you need to install "python3-pyperclip"
