@@ -480,7 +480,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("<Loginname copied to clipboard>")
                     input("Press enter to copy password")
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    # clipboard.copy(account_array[int(index) - 1].password)
+                    #  clipboard.copy(account_array[int(index) - 1].password)
                     # print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
                     print("<Password copied to clipboard>")
                 except KeyboardInterrupt as ke:
