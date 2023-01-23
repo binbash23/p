@@ -214,7 +214,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     pdatabase.print_database_statistics(p_database.database_filename)
     if show_unmerged_changes_warning_on_startup is True and \
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
-        print("Note: You have unmerged changes in your local database.")
+        print(colored("Note: You have unmerged changes in your local database.", 'red'))
     manual_locked = False
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
