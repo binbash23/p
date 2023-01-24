@@ -475,7 +475,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     # print("URL from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
                     print("<URL copied to clipboard>")
                     input("Press enter to copy loginname")
-                    pyperclip3.copy(account_array[int(index) - 1].loginname1)
+                    pyperclip3.copy(account_array[int(index) - 1].loginname)
                     # clipboard.copy(account_array[int(index) - 1].loginname)
                     # print("Loginname from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
                     print("<Loginname copied to clipboard>")
