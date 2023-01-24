@@ -85,6 +85,10 @@ I use the sqlite database to store the accounts (after I encrypt them). This is 
 Just decrypt all accounts before opening the database with the sqlite browser by setting an empty password and you then have a cleartext password database to browse through.<br>
 Just make shure to encrypt the account after this by changing the password again to a non empty string.
 
+### Copy&Paste with Ubuntu
+
+To use the copy function in p (to copy passwords to the clipboard) you need to install python3-pyperclip.
+
 ### Help
 
 For help just type help in the pshell or start p.exe like 
