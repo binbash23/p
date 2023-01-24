@@ -101,7 +101,7 @@ def edit(p_database: PDatabase, edit_uuid: str):
                                                    new_loginname.strip(),
                                                    new_password.strip(),
                                                    new_type.strip())
-        print("Changed")
+        print("Account changed")
     else:
         print("Canceled")
 
