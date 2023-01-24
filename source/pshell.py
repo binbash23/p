@@ -66,6 +66,7 @@ SHELL_COMMANDS = [
     ShellCommand("!", "! COMMAND", "Execute COMMAND in native shell."),
     ShellCommand("exit", "exit", "Quit pshell."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show description for COMMAND."),
+    ShellCommand("history", "history", "Show history of user inputs."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID."),
     ShellCommand("list", "list", "List all accounts."),
@@ -216,6 +217,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print(colored("Note: You have unmerged changes in your local database.", 'red'))
     manual_locked = False
+    user_input_history = []
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
@@ -226,6 +228,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                 else:
                     user_input = input(prompt_string)
+                user_input_history.append(user_input)
             except KeyboardInterrupt:
                 return
             except TimeoutOccurred:
@@ -337,6 +340,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 help_command.print_manual()
+            continue
+        if shell_command.command == "history":
+            for current_user_input in user_input_history:
+                print(current_user_input)
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
