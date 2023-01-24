@@ -258,7 +258,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("PShell unlocked.")
                     if manual_locked:
                         manual_locked = False
-                        user_input = ""
+                    user_input = ""
                     break
         shell_command = expand_string_2_shell_command(user_input)
         if shell_command is None:
