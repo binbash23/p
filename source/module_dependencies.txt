@@ -6,7 +6,8 @@ dependencies for p
 
 termcolor
 colorama
-clipboard
+#clipboard
+pyperclip3
 cryptography
 progressbar
 dropbox
