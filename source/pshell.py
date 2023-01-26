@@ -19,6 +19,14 @@ import time
 import textwrap
 
 
+class ShellHistory:
+    execution_date = ""
+    user_input = ""
+
+    def __init__(self, execution_date=datetime.datetime.now(), user_input=""):
+        self.execution_date = execution_date
+        self.user_input = user_input
+
 class ShellCommand:
     command = ""
     arguments = [""]
@@ -217,7 +225,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print(colored("Note: You have unmerged changes in your local database.", 'red'))
     manual_locked = False
-    user_input_history = []
+    shell_history_array = []
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
@@ -228,7 +236,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                 else:
                     user_input = input(prompt_string)
-                user_input_history.append(user_input)
+                shell_history_array.append(ShellHistory(user_input=user_input))
             except KeyboardInterrupt:
                 return
             except TimeoutOccurred:
@@ -342,8 +350,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 help_command.print_manual()
             continue
         if shell_command.command == "history":
-            for current_user_input in user_input_history:
-                print(current_user_input)
+            for current_shell_history_entry in shell_history_array:
+                print(str(current_shell_history_entry.execution_date) + " - " + current_shell_history_entry.user_input)
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
