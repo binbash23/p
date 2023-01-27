@@ -62,7 +62,6 @@ class ShellCommand:
         print()
 
 
-# SHELL_COMMANDS = ( ShellCommand(command="version", synopsis="version", description="show p program version") )
 SHELL_COMMANDS = [
     ShellCommand("add", "add", "Add a new account."),
     ShellCommand("changepassword", "changepassword", "Change password of current database."),
@@ -315,9 +314,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
             try:
                 pyperclip3.copy(password)
-                # clipboard.copy(password)
-                # print("Password copied to clipboard.")
-                print("<Password copied to clipboard>")
+                print("CLIPBOARD: Password")
             except Exception as e:
                 print("Error copying password to clipboard: " + str(e))
             continue
@@ -422,9 +419,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("There is no account to copy.")
                 continue
             pyperclip3.copy(latest_found_account.password)
-            # clipboard.copy(latest_found_account.password)
-            # print("Password from account '" + latest_found_account.name + "' copied to clipboard.")
-            print("<Password copied to clipboard>")
+            print("CLIPBOARD: Password")
             continue
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
@@ -450,18 +445,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    # clipboard.copy(account_array[int(index) - 1].password)
-                    # print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<Password copied to clipboard>")
+                    print("CLIPBOARD: Password")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
-                # pyperclip3.copy(password)
                 pyperclip3.copy(account_array[0].password)
-                # clipboard.copy(account_array[0].password)
-                # print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<Password copied to clipboard>")
+                print("CLIPBOARD: Password")
             except Exception as e:
                 print("Error copying password to clipboard: " + str(e))
             continue
@@ -489,19 +479,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].url)
-                    # clipboard.copy(account_array[int(index) - 1].url)
-                    # print("URL from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<URL copied to clipboard>")
-                    input("Press enter to copy loginname")
+                    print("CLIPBOARD: URL")
+                    input("<Press enter>")
                     pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    # clipboard.copy(account_array[int(index) - 1].loginname)
-                    # print("Loginname from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<Loginname copied to clipboard>")
-                    input("Press enter to copy password")
+                    print("CLIPBOARD: Loginname")
+                    input("<Press enter>")
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    #  clipboard.copy(account_array[int(index) - 1].password)
-                    # print("Password from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<Password copied to clipboard>")
+                    print("CLIPBOARD: Password")
                 except KeyboardInterrupt as ke:
                     print()
                     continue
@@ -510,19 +494,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             try:
                 pyperclip3.copy(account_array[0].url)
-                # clipboard.copy(account_array[0].url)
-                # print("URL from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<URL copied to clipboard>")
-                input("Press enter to copy loginname")
+                print("CLIPBOARD: URL")
+                input("<Press enter>")
                 pyperclip3.copy(account_array[0].loginname)
-                # clipboard.copy(account_array[0].loginname)
-                # print("Loginname from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<Loginname copied to clipboard>")
-                input("Press enter to copy password")
+                print("CLIPBOARD: Loginname")
+                input("<Press enter>")
                 pyperclip3.copy(account_array[0].password)
-                # clipboard.copy(account_array[0].password)
-                # print("Password from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<Password copied to clipboard>")
+                print("CLIPBOARD: Password")
             except KeyboardInterrupt as ke:
                 print()
                 continue
@@ -553,17 +531,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    # clipboard.copy(account_array[int(index) - 1].loginname)
-                    # print("Loginname from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<Loginname copied to clipboard>")
+                    print("CLIPBOARD: Loginname")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].loginname)
-                # clipboard.copy(account_array[0].loginname)
-                # print("Loginname from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<Loginname copied to clipboard>")
+                print("CLIPBOARD: Loginname")
             except Exception as e:
                 print("Error copying loginname to clipboard: " + str(e))
             continue
@@ -591,17 +565,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].url)
-                    # clipboard.copy(account_array[int(index) - 1].url)
-                    # print("URL from account: '" + account_array[int(index) - 1].name + "' copied to clipboard.")
-                    print("<URL copied to clipboard>")
+                    print("CLIPBOARD: URL")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].url)
-                # clipboard.copy(account_array[0].url)
-                # print("URL from account: '" + account_array[0].name + "' copied to clipboard.")
-                print("<URL copied to clipboard>")
+                print("CLIPBOARD: URL")
             except Exception as e:
                 print("Error copying URL to clipboard: " + str(e))
         if shell_command.command == "setdatabasename":
