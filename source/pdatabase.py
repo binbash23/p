@@ -1470,8 +1470,10 @@ class PDatabase:
                     set(deleted_uuids_in_remote_db) - set(deleted_uuids_in_local_db)
             print(colored("Step #0: Synchronizing deleted accounts in local and remote database...", "green"))
             if len(deleted_uuids_in_remote_db_not_in_local) > 0:
-                print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
-                      " account(s) in local db which have been deleted in remote db...")
+                print("Found " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
+                      " account(s) in remote db which are not in local deleted_account table...")
+                # print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
+                #       " account(s) in local db which have been deleted in remote db...")
             for delete_uuid in deleted_uuids_in_remote_db_not_in_local:
                 print("Searching account with UUID " + delete_uuid + " in local database:")
                 account_found = self.search_account_by_uuid(delete_uuid)
@@ -1484,7 +1486,7 @@ class PDatabase:
                     print("Account deleted.")
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-                print("UUID of deleted account added to deleted_account table..")
+                print("UUID " + delete_uuid + " added to local deleted_account table..")
             if len(deleted_uuids_in_local_db_note_in_remote) > 0:
                 print("Deleting " + colored(str(len(deleted_uuids_in_local_db_note_in_remote)), "red") +
                       " account(s) in remote db which have been deleted in local db...")
