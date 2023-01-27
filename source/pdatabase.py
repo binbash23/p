@@ -947,19 +947,19 @@ class PDatabase:
         # print("Found " + str(results_found) + " result(s).")
         return account_array
 
-    def search_account_by_uuid(self, search_uuid):
+    def search_account_by_uuid(self, search_uuid) -> bool:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             if search_uuid is None or search_uuid == "":
-                return
+                return False
             sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, invalid_date from \
                          account where uuid = '" + str(search_uuid) + "'"
             sqlresult = cursor.execute(sqlstring)
             row = sqlresult.fetchone()
             if row is None:
                 print("UUID " + search_uuid + " not found.")
-                return
+                return False
             print()
             account = Account(uuid=row[0],
                               name=row[1],
@@ -973,6 +973,7 @@ class PDatabase:
                               )
             # self.print_formatted_account(self.decrypt_account_row(result))
             self.print_formatted_account(self.decrypt_account(account))
+            return True
         except Exception as e:
             raise
         finally:
@@ -1472,15 +1473,18 @@ class PDatabase:
                 print("Deleting " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
                       " account(s) in local db which have been deleted in remote db...")
             for delete_uuid in deleted_uuids_in_remote_db_not_in_local:
-                self.search_account_by_uuid(delete_uuid)
-                answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
-                if answer != "y" and answer != "":
-                    print("Canceled.")
-                    continue
-                cursor.execute("delete from account where uuid = '" + delete_uuid + "'")
+                print("Searching account with UUID " + delete_uuid + " in local database:")
+                account_found = self.search_account_by_uuid(delete_uuid)
+                if account_found:
+                    answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
+                    if answer != "y" and answer != "":
+                        print("Canceled.")
+                        continue
+                    cursor.execute("delete from account where uuid = '" + delete_uuid + "'")
+                    print("Account deleted.")
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-                print("Account deleted.")
+                print("UUID of deleted account added to deleted_account table..")
             if len(deleted_uuids_in_local_db_note_in_remote) > 0:
                 print("Deleting " + colored(str(len(deleted_uuids_in_local_db_note_in_remote)), "red") +
                       " account(s) in remote db which have been deleted in local db...")
