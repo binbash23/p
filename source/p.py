@@ -7,6 +7,7 @@
 import optparse
 from optparse import OptionGroup
 from pdatabase import *
+# from pdatabase import accounts_are_equal
 import getpass
 from termcolor import colored
 import colorama
@@ -94,6 +95,11 @@ def edit(p_database: PDatabase, edit_uuid: str):
         return
         # sys.exit(0)
 
+    new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password.strip(),
+                          new_type.strip())
+    if accounts_are_equal(account, new_account):
+        print("Nothing changed.")
+        return
     if answer == "y" or answer == "":
         p_database.set_account_by_uuid_and_encrypt(edit_uuid,
                                                    new_name.strip(),

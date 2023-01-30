@@ -303,14 +303,29 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-               ", Name=" + self.name + \
-               ", URL=" + self.url + \
-               ", Loginname=" + self.loginname + \
-               ", Password=" + self.password + \
-               ", Type=" + self.type + \
-               ", Createdate=" + self.create_date + \
-               ", Changedate=" + self.change_date + \
-               ", Invaliddate=" + self.invalid_date
+            ", Name=" + self.name + \
+            ", URL=" + self.url + \
+            ", Loginname=" + self.loginname + \
+            ", Password=" + self.password + \
+            ", Type=" + self.type + \
+            ", Createdate=" + self.create_date + \
+            ", Changedate=" + self.change_date + \
+            ", Invaliddate=" + self.invalid_date
+
+
+def accounts_are_equal(account1: Account, account2: Account) -> bool:
+    if account1 is None or account2 is None:
+        return False
+    if (account1.uuid == account2.uuid or (account1.uuid is None and account2.uuid is None)) and \
+            (account1.name == account2.name or (account1.name is None and account2.name is None) and \
+             (account1.url == account2.url or (account1.url is None and account2.url is None)) and \
+             (account1.loginname == account2.loginname or (
+                     account1.loginname is None and account2.loginname is None)) and \
+             (account1.password == account2.password or (account1.password is None and account2.password is None)) and \
+             (account1.type == account2.type or (account1.type is None and account2.type is None))):
+        return True
+    else:
+        return False
 
 
 def search_string_matches_account(search_string: str, account: Account) -> bool:
@@ -466,7 +481,6 @@ def get_database_creation_date(database_filename):
     return created_date
 
 
-
 def get_last_change_date_in_database(database_filename):
     count = 0
     try:
@@ -591,6 +605,7 @@ def get_database_sqlite_version(database_filename: str) -> str:
     finally:
         database_connection.close()
     return version
+
 
 def get_database_has_unmerged_changes(database_filename: str) -> str:
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -1023,7 +1038,7 @@ class PDatabase:
                 decrypted_type = self.decrypt_string_if_password_is_present(row[5])
                 # current_account = (result[0], decrypted_name, decrypted_url, decrypted_loginname, decrypted_password,
                 #                    decrypted_type)
-                account = Account(uuid=uuid,
+                account = Account(uuid=search_uuid,
                                   name=decrypted_name,
                                   url=decrypted_url,
                                   loginname=decrypted_loginname,
