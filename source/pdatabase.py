@@ -803,7 +803,8 @@ class PDatabase:
             result = sqlresult.fetchall()
             i = 0
             for row in result:
-                print(str(row[i]))
+                # print(str(row[i]))
+                print(str(row))
                 i += 1
         except Exception as e:
             raise
