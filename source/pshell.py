@@ -347,7 +347,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print(shell_command.synopsis)
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
-                help_command.print_manual()
+                if help_command is not None:
+                    help_command.print_manual()
+                else:
+                    print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":
             for current_shell_history_entry in shell_history_array:
