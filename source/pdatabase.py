@@ -313,16 +313,29 @@ class Account:
             ", Invaliddate=" + self.invalid_date
 
 
+# def accounts_are_equal(account1: Account, account2: Account) -> bool:
+#     if account1 is None or account2 is None:
+#         return False
+#     if (account1.uuid == account2.uuid or (account1.uuid is None and account2.uuid is None)) and \
+#             (account1.name == account2.name or (account1.name is None and account2.name is None) and \
+#              (account1.url == account2.url or (account1.url is None and account2.url is None)) and \
+#              (account1.loginname == account2.loginname or (
+#                      account1.loginname is None and account2.loginname is None)) and \
+#              (account1.password == account2.password or (account1.password is None and account2.password is None)) and \
+#              (account1.type == account2.type or (account1.type is None and account2.type is None))):
+#         return True
+#     else:
+#         return False
+
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
     if account1 is None or account2 is None:
         return False
-    if (account1.uuid == account2.uuid or (account1.uuid is None and account2.uuid is None)) and \
-            (account1.name == account2.name or (account1.name is None and account2.name is None) and \
-             (account1.url == account2.url or (account1.url is None and account2.url is None)) and \
-             (account1.loginname == account2.loginname or (
-                     account1.loginname is None and account2.loginname is None)) and \
-             (account1.password == account2.password or (account1.password is None and account2.password is None)) and \
-             (account1.type == account2.type or (account1.type is None and account2.type is None))):
+    if (account1.uuid == account2.uuid) and \
+            (account1.name == account2.name) and \
+             (account1.url == account2.url) and \
+             (account1.loginname == account2.loginname) and \
+             (account1.password == account2.password) and \
+             (account1.type == account2.type):
         return True
     else:
         return False
