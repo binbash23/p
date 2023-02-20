@@ -383,7 +383,8 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.version:
-        print(VERSION)
+        # Version is printed per default on startup
+        #print(VERSION)
         sys.exit(0)
 
     # check if the users wants to start the dropbox configuration process
