@@ -332,10 +332,10 @@ def accounts_are_equal(account1: Account, account2: Account) -> bool:
         return False
     if (account1.uuid == account2.uuid) and \
             (account1.name == account2.name) and \
-             (account1.url == account2.url) and \
-             (account1.loginname == account2.loginname) and \
-             (account1.password == account2.password) and \
-             (account1.type == account2.type):
+            (account1.url == account2.url) and \
+            (account1.loginname == account2.loginname) and \
+            (account1.password == account2.password) and \
+            (account1.type == account2.type):
         return True
     else:
         return False
@@ -530,12 +530,15 @@ def get_account_count_invalid(database_filename):
     return count
 
 
-def get_account_count(database_filename):
+def get_account_count(database_filename, count_invalidated_accounts: bool = True):
     count = 0
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
-        sqlstring = SQL_SELECT_COUNT_ALL_FROM_ACCOUNT
+        if count_invalidated_accounts:
+            sqlstring = SQL_SELECT_COUNT_ALL_FROM_ACCOUNT
+        else:
+            sqlstring = SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT
         sqlresult = cursor.execute(sqlstring)
         result = sqlresult.fetchone()
         if result is None:
@@ -909,7 +912,49 @@ class PDatabase:
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-                  "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+                  "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
+            print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6],
+                                  change_date=row[7],
+                                  invalid_date=row[8]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                if search_string == "" or \
+                        search_string_matches_account(search_string, decrypted_account):
+                    results_found += 1
+                    self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                    print()
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        print("Found " + str(results_found) + " result(s).")
+
+
+    def search_invalidated_accounts(self, search_string: str):
+        results_found = 0
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            # if self.show_invalidated_accounts:
+            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+            #                 invalid_date from account "
+            # else:
+            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                         invalid_date from account where invalid = 1 "
+            sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            # print("exceuting: " + sqlstring)
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+                  "* in " + str(get_account_count_invalid(self.database_filename)) + " invalidated accounts:")
             print()
             for row in result:
                 account = Account(uuid=row[0],
@@ -950,7 +995,8 @@ class PDatabase:
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(type_search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-                  "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+                  "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) +
+                  " accounts:")
             print()
             for row in result:
                 account = Account(uuid=row[0],
@@ -1007,6 +1053,91 @@ class PDatabase:
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
                         search_string_matches_account(search_string, decrypted_account):
+                    # results_found += 1
+                    # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                    account_array.append(decrypted_account)
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        # print("Found " + str(results_found) + " result(s).")
+        return account_array
+
+
+    def get_accounts_decrypted_from_invalid_accounts(self, search_string: str) -> []:
+        # results_found = 0
+        account_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            # if self.show_invalidated_accounts:
+            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+            #                 invalid_date from account "
+            # else:
+            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                         invalid_date from account where invalid = 1 "
+            sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+            # print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6],
+                                  change_date=row[7],
+                                  invalid_date=row[8]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                if search_string == "" or \
+                        search_string_matches_account(search_string, decrypted_account):
+                    # results_found += 1
+                    # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                    account_array.append(decrypted_account)
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        # print("Found " + str(results_found) + " result(s).")
+        return account_array
+
+    def get_accounts_decrypted_search_types(self, type_search_string: str) -> []:
+        # results_found = 0
+        account_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            if self.show_invalidated_accounts:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account "
+            else:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account where invalid = 0 "
+            sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+            # print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6],
+                                  change_date=row[7],
+                                  invalid_date=row[8]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                if type_search_string == "" or \
+                        type_search_string.lower() in account.type.lower():
                     # results_found += 1
                     # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                     account_array.append(decrypted_account)

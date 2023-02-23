@@ -80,6 +80,7 @@ SHELL_COMMANDS = [
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID."),
     ShellCommand("list", "list", "List all accounts."),
+    ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console."),
     ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
@@ -90,6 +91,7 @@ SHELL_COMMANDS = [
     ShellCommand("quit", "quit", "Quit pshell."),
     ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID."),
     ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database."),
+    ShellCommand("searchinvalidated", "searchinvalidated SEARCHSTRING", "Search SEARCHSTRING in invalidated accounts."),
     ShellCommand("sc", "sc SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the password of the" +
                  " account found to clipboard."),
     ShellCommand("sca", "sca SEARCHSTRING", "Search SEARCHSTRING in accounts and copy one after another the URL, " +
@@ -377,6 +379,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "list":
             p_database.search_accounts("")
             continue
+        if shell_command.command == "listinvalidated":
+            p_database.search_invalidated_accounts("")
+            continue
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
             # print("Pshell locked.")
@@ -412,6 +417,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_accounts(shell_command.arguments[1])
             # remember latest found account:
             account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            if len(account_array) == 0:
+                latest_found_account = None
+                continue
+            else:
+                latest_found_account = account_array[len(account_array) - 1]
+            continue
+        if shell_command.command == "searchinvalidated":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            p_database.search_invalidated_accounts(shell_command.arguments[1])
+            # remember latest found account:
+            account_array = p_database.get_accounts_decrypted_from_invalid_accounts(shell_command.arguments[1])
             if len(account_array) == 0:
                 latest_found_account = None
                 continue
@@ -578,20 +597,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("CLIPBOARD: URL")
             except Exception as e:
                 print("Error copying URL to clipboard: " + str(e))
-        if shell_command.command == "st":
-            if len(shell_command.arguments) == 1:
-                print("SEARCHSTRING is missing.")
-                print(shell_command)
-                continue
-            p_database.search_accounts_by_type(shell_command.arguments[1])
-            # remember latest found account:  xxx
-            # account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
-            # if len(account_array) == 0:
-            #     latest_found_account = None
-            #     continue
-            # else:
-            #     latest_found_account = account_array[len(account_array) - 1]
-            # continue
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
@@ -709,6 +714,23 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error executing sql command: " + str(e))
             continue
+        if shell_command.command == "status":
+            pdatabase.print_database_statistics(p_database.database_filename)
+            continue
+        if shell_command.command == "st":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            p_database.search_accounts_by_type(shell_command.arguments[1])
+            # remember latest found account:  xxx
+            account_array = p_database.get_accounts_decrypted_search_types(shell_command.arguments[1])
+            if len(account_array) == 0:
+                latest_found_account = None
+                continue
+            else:
+                latest_found_account = account_array[len(account_array) - 1]
+            continue
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
                 print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
@@ -743,9 +765,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     "False")
                 continue
             print("Error: on or off expected.")
-            continue
-        if shell_command.command == "status":
-            pdatabase.print_database_statistics(p_database.database_filename)
             continue
         # if shell_command.command == "upload2dropbox":
         #     continue
