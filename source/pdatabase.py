@@ -934,6 +934,47 @@ class PDatabase:
             database_connection.close()
         print("Found " + str(results_found) + " result(s).")
 
+    def search_accounts_by_type(self, type_search_string: str):
+        results_found = 0
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            if self.show_invalidated_accounts:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account "
+            else:
+                sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+                            invalid_date from account where invalid = 0 "
+            sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            # print("exceuting: " + sqlstring)
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            print("Searching for *" + colored(type_search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+                  "* in " + str(get_account_count(self.database_filename)) + " accounts:")
+            print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6],
+                                  change_date=row[7],
+                                  invalid_date=row[8]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                if type_search_string == "" or \
+                        type_search_string.lower() in account.type.lower():
+                    results_found += 1
+                    self.print_formatted_account_search_string_colored(decrypted_account, type_search_string)
+                    print()
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        print("Found " + str(results_found) + " result(s).")
+
     def get_accounts_decrypted(self, search_string: str) -> []:
         # results_found = 0
         account_array = []

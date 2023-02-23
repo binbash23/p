@@ -98,6 +98,7 @@ SHELL_COMMANDS = [
                  " account found to clipboard."),
     ShellCommand("scu", "scu SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the URL of the" +
                  " account found to clipboard."),
+    ShellCommand("st", "st SEARCHSTRING", "Search SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename NAME", "Set database to NAME."),
     ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid UUID",
                  "Set the dropbox application account uuid in configuration."),
@@ -577,6 +578,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("CLIPBOARD: URL")
             except Exception as e:
                 print("Error copying URL to clipboard: " + str(e))
+        if shell_command.command == "st":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            p_database.search_accounts_by_type(shell_command.arguments[1])
+            # remember latest found account:  xxx
+            # account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            # if len(account_array) == 0:
+            #     latest_found_account = None
+            #     continue
+            # else:
+            #     latest_found_account = account_array[len(account_array) - 1]
+            # continue
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
