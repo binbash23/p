@@ -209,7 +209,7 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY)
     if config_value is not None and (config_value == "True" or config_value == "False"):
-        p_database.shadow_passwords = parse_bool(config_value)
+        p_database.track_account_history = parse_bool(config_value)
 
 
 def clear_console():

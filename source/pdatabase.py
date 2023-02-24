@@ -969,11 +969,14 @@ class PDatabase:
                 # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                 self.print_formatted_account(decrypted_account)
                 print()
+            print("Latest version of account:")
+            self.search_account_by_uuid(uuid_string)
+            print()
         except Exception as e:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        print("Found " + str(results_found) + " result(s) in account history.")
 
     def search_accounts(self, search_string: str):
         results_found = 0
