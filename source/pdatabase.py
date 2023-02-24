@@ -327,7 +327,20 @@ SQL_SELECT_ALL_ACCOUNTS = """
     from 
         account 
 """
+SQL_SELECT_ALL_ACCOUNT_HISTORY = """
+    select 
+        uuid, 
+        account_uuid,
+        name,
+        url,
+        loginname,
+        password,
+        type
+    from 
+        account_history
+"""
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT = "select count(*) from account"
+SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_history"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
 CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST = "DATABASE_PASSWORD_TEST"
@@ -600,6 +613,23 @@ def get_account_count_invalid(database_filename):
         database_connection.close()
     return count
 
+
+def get_account_history_count(database_filename):
+    count = 0
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count account history entries.")
+        count = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return count
 
 def get_account_count(database_filename, count_invalidated_accounts: bool = True):
     count = 0
@@ -1469,11 +1499,13 @@ class PDatabase:
             # DO NOT COMMIT HERE! A rollback must be possible, if anything goes wrong before everything has been
             # changed properly
             cursor.execute(sqlstring_update_password_test_value)
-            # Iterate through all the accounts, decrypt every password with the old pw, encrypt it with the new
-            # one and write it all back.
+            # Iterate through all the accounts and the account_history, decrypt every entry with the old pw,
+            # encrypt it with the new one and write it all back.
             account_count = get_account_count(self.database_filename)
+            account_history_count = get_account_history_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
-            bar = progressbar.ProgressBar(max_value=account_count).start()
+            print("Re-encrypting " + str(account_history_count) + " account history entries...")
+            bar = progressbar.ProgressBar(max_value=(account_count + account_history_count)).start()
             bar.start()
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
@@ -1507,6 +1539,40 @@ class PDatabase:
                 cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
                                                    new_current_password, new_current_type))
                 bar.update(results_found)
+
+            sqlstring = SQL_SELECT_ALL_ACCOUNT_HISTORY
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            #results_found = 0
+            for row in result:
+                results_found += 1
+                # get current account_history data (enrypted)
+                current_uuid = row[0]
+                current_account_uuid = row[1]
+                current_name = row[2]
+                current_url = row[3]
+                current_loginname = row[4]
+                current_password = row[5]
+                current_type = row[6]
+                # current_create_date = row[7]
+                # print(row)
+                # re-encrypt that shit
+                new_current_name = self.decrypt_and_encrypt_with_new_password(current_name, new_password)
+                new_current_url = self.decrypt_and_encrypt_with_new_password(current_url, new_password)
+                new_current_loginname = self.decrypt_and_encrypt_with_new_password(current_loginname, new_password)
+                new_current_password = self.decrypt_and_encrypt_with_new_password(current_password, new_password)
+                new_current_type = self.decrypt_and_encrypt_with_new_password(current_type, new_password)
+                # and push it back into the db
+                update_sql_string = "update account_history set name=?, " + \
+                                    "url=?, " + \
+                                    "loginname=?, " + \
+                                    "password=?, " + \
+                                    "type=? " + \
+                                    "where uuid = '" + str(current_uuid) + "'"
+                cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
+                                                   new_current_password, new_current_type))
+                bar.update(results_found)
+
             bar.finish()
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
             # ERST commit, wenn ALLES erledigt ist, sonst salat in der db!!!
