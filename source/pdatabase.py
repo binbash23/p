@@ -74,6 +74,22 @@ merge_database.account
 where 
 uuid not in (select uuid from main.account)
 """
+SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE = """
+insert into main.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date)
+select 
+uuid,
+account_uuid, 
+name,
+url, 
+loginname, 
+password, 
+type, 
+create_date
+from 
+merge_database.account_history 
+where 
+uuid not in (select uuid from main.account_history)
+"""
 SQL_MERGE_COUNT_LOCAL_MISSING_UUIDS_THAT_EXIST_IN_REMOTE_DATABASE = """
 select
 count(*)
@@ -82,6 +98,14 @@ merge_database.account
 where 
 uuid not in (select uuid from main.account)
 """
+SQL_MERGE_COUNT_LOCAL_MISSING_HISTORY_UUIDS_THAT_EXIST_IN_REMOTE_DATABASE = """
+select
+count(*)
+from 
+merge_database.account_history
+where 
+uuid not in (select uuid from main.account_history)
+"""
 SQL_MERGE_COUNT_REMOTE_MISSING_UUIDS_THAT_EXIST_IN_LOCAL_DATABASE = """
 select
 count(*)
@@ -89,6 +113,14 @@ from
 main.account 
 where 
 uuid not in (select uuid from merge_database.account)
+"""
+SQL_MERGE_COUNT_REMOTE_MISSING_HISTORY_UUIDS_THAT_EXIST_IN_LOCAL_DATABASE = """
+select
+count(*)
+from 
+main.account_history
+where 
+uuid not in (select uuid from merge_database.account_history)
 """
 SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER = "drop trigger if exists main.update_change_date_Trigger"
 SQL_MERGE_INSERT_MISSING_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE = """
@@ -107,6 +139,22 @@ from
 main.account 
 where 
 uuid not in (select uuid from merge_database.account)    
+"""
+SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE = """
+insert into merge_database.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date)
+select 
+uuid, 
+account_uuid,
+name, 
+url,
+loginname, 
+password, 
+type, 
+create_date
+from 
+main.account_history
+where 
+uuid not in (select uuid from merge_database.account_history)    
 """
 SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER = """
 CREATE TRIGGER main.update_change_date_Trigger
@@ -1335,20 +1383,22 @@ class PDatabase:
         type = self.encrypt_string_if_password_is_present(type)
         try:
             database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+
             # 1. First backup old version of the account
             if get_attribute_value_from_configuration_table(self.database_filename,
                                                             CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY) \
                     == "True":
-                cursor = database_connection.cursor()
+                # cursor = database_connection.cursor()
                 account_history_uuid = uuid.uuid4()
                 sqlstring = "insert into account_history (uuid, account_uuid, name, url, loginname, password, type) " + \
                             " select '" + str(account_history_uuid) + \
                             "' as uuid, uuid as account_uuid, name, url, loginname, password, type " + \
                             " from account where uuid = '" + str(account_uuid) + "'"
                 cursor.execute(sqlstring)
-                database_connection.commit()
+                # database_connection.commit()
             # 2. Then change/set existing account to new values
-            cursor = database_connection.cursor()
+            # cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             self.print_current_secure_delete_mode(database_connection, cursor)
             sqlstring = "update account set name = '" + name + "', " + \
@@ -1812,6 +1862,14 @@ class PDatabase:
             result = sqlresult.fetchone()
             count_uuids_in_local_with_newer_update_date_than_in_remote = result[0]
 
+            sqlresult = cursor.execute(SQL_MERGE_COUNT_LOCAL_MISSING_HISTORY_UUIDS_THAT_EXIST_IN_REMOTE_DATABASE)
+            result = sqlresult.fetchone()
+            count_history_uuids_in_remote_that_do_not_exist_in_local = result[0]
+            sqlresult = cursor.execute(SQL_MERGE_COUNT_REMOTE_MISSING_HISTORY_UUIDS_THAT_EXIST_IN_LOCAL_DATABASE)
+            result = sqlresult.fetchone()
+            count_history_uuids_in_local_that_do_not_exist_in_remote = result[0]
+
+
             #
             # Step #1 Sync new accounts from remote merge database into main database
             #
@@ -1825,6 +1883,11 @@ class PDatabase:
             print("Fetching " + colored(str(count_uuids_in_remote_that_do_not_exist_in_local), "red")
                   + " new account(s) from the remote database into the origin database...")
             cursor.execute(SQL_MERGE_INSERT_MISSING_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE)
+
+            print("Fetching " + colored(str(count_history_uuids_in_remote_that_do_not_exist_in_local), "red")
+                  + " new account history entries from the remote database into the origin database...")
+            cursor.execute(SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE)
+
             # print("Re-Creating update_date trigger (origin database)...")
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
             print("Origin database is now up to date (" +
@@ -1850,6 +1913,11 @@ class PDatabase:
             print("Fetching " + colored(str(count_uuids_in_local_that_do_not_exist_in_remote), "red")
                   + " new account(s) from the origin database into the remote database...")
             cursor.execute(SQL_MERGE_INSERT_MISSING_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE)
+
+            print("Fetching " + colored(str(count_history_uuids_in_local_that_do_not_exist_in_remote), "red")
+                  + " new account history entries from the origin database into the remote database...")
+            cursor.execute(SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE)
+
             # print("Re-Creating update_date trigger (remote database)...")
             cursor.execute(SQL_MERGE_CREATE_REMOTE_ACCOUNT_CHANGE_DATE_TRIGGER)
             # Remember date of current merge action in origin and remote database
