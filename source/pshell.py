@@ -107,6 +107,7 @@ SHELL_COMMANDS = [
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
                  "Set the dropbox token account uuid in configuration."),
     ShellCommand("shadowpasswords", "shadowpasswords on|off", "Shadow passwords in console output."),
+    ShellCommand("showaccounthistory", "showaccounthistory UUID", "Show change history of account with UUID."),
     ShellCommand("showconfig", "showconfig", "Show current configuration."),
     ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
@@ -115,6 +116,7 @@ SHELL_COMMANDS = [
     ShellCommand("status", "status", "Show configuration and database status."),
     ShellCommand("timeout", "timeout [MINUTES]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
+    ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false."),
     ShellCommand("version", "version", "Show program version info.")
 ]
@@ -203,6 +205,11 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING)
     if config_value is not None and (config_value == "True" or config_value == "False"):
         show_unmerged_changes_warning_on_startup = parse_bool(config_value)
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY)
+    if config_value is not None and (config_value == "True" or config_value == "False"):
+        p_database.shadow_passwords = parse_bool(config_value)
 
 
 def clear_console():
@@ -651,12 +658,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+        if shell_command.command == "showaccounthistory":
+            if len(shell_command.arguments) == 1:
+                print("UUID is missing.")
+                print(shell_command)
+                continue
+            # xxx p.edit(p_database, shell_command.arguments[1])
+            p_database.search_account_history(shell_command.arguments[1])
+            continue
         if shell_command.command == "showconfig":
             print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
             print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
             print("Shadow passwords                    : " + str(p_database.shadow_passwords))
             print("Show accounts verbose               : " + str(p_database.show_account_details))
             print("Show unmerged changes warning       : " + str(show_unmerged_changes_warning_on_startup))
+            print("Track account history               : " + str(p_database.track_account_history))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
@@ -745,6 +761,29 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error setting pshell timeout: " + str(e))
             continue
+        if shell_command.command == "trackaccounthistory":
+            # print(shell_command.arguments)
+            if len(shell_command.arguments) == 1:
+                print("on/off is missing.")
+                print(shell_command)
+                continue
+            if shell_command.arguments[1] == "on":
+                p_database.track_account_history = True
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
+                    "True")
+                continue
+            if shell_command.arguments[1] == "off":
+                p_database.track_account_history = False
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
+                    "False")
+                continue
+            print("Error: on or off expected.")
+            continue
+
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
                 print("on/off is missing.")

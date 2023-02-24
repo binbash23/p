@@ -206,12 +206,23 @@ CREATE TABLE if not EXISTS "configuration" (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '2');   
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '3');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS "deleted_account" (
     "uuid"	TEXT NOT NULL UNIQUE,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 	);
+-- table for account history entries
+CREATE TABLE if not exists "account_history" (
+    "uuid"	TEXT NOT NULL UNIQUE,
+	"account_uuid" TEXT NOT NULL,
+    "name"	TEXT,
+    "url"	TEXT,
+    "loginname"	TEXT,
+    "password"	TEXT,
+    "type"	TEXT,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
+);
 """
 SQL_CREATE_MERGE_DATABASE_SCHEMA = """
 -- main table with accounts
@@ -238,12 +249,23 @@ CREATE TABLE if not EXISTS merge_database.configuration (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '2');   
+insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '3');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS merge_database.deleted_account (
     "uuid"	TEXT NOT NULL UNIQUE,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 	);
+-- table for account history entries
+CREATE TABLE if not exists merge_database.account_history (
+    "uuid"	TEXT NOT NULL UNIQUE,
+	"account_uuid" TEXT NOT NULL,
+    "name"	TEXT,
+    "url"	TEXT,
+    "loginname"	TEXT,
+    "password"	TEXT,
+    "type"	TEXT,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
+);	
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
 SQL_SELECT_ALL_ACCOUNTS = """
@@ -276,6 +298,7 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS = "PSHELL_SHOW_IN
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT_DETAILS"
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
+CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
 
 
 class Account:
@@ -303,14 +326,14 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-            ", Name=" + self.name + \
-            ", URL=" + self.url + \
-            ", Loginname=" + self.loginname + \
-            ", Password=" + self.password + \
-            ", Type=" + self.type + \
-            ", Createdate=" + self.create_date + \
-            ", Changedate=" + self.change_date + \
-            ", Invaliddate=" + self.invalid_date
+               ", Name=" + self.name + \
+               ", URL=" + self.url + \
+               ", Loginname=" + self.loginname + \
+               ", Password=" + self.password + \
+               ", Type=" + self.type + \
+               ", Createdate=" + self.create_date + \
+               ", Changedate=" + self.change_date + \
+               ", Invaliddate=" + self.invalid_date
 
 
 # def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -685,10 +708,12 @@ class PDatabase:
     show_invalidated_accounts: bool = False
     shadow_passwords: bool = False
     SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
+    track_account_history: bool = True
 
     def __init__(self, database_filename, database_password, show_account_details=False,
                  show_invalidated_accounts=False, shadow_passwords: bool = False,
-                 salt=DEFAULT_SALT, iteration_count: int = DEFAULT_ITERATION_COUNT):
+                 salt=DEFAULT_SALT, iteration_count: int = DEFAULT_ITERATION_COUNT,
+                 track_account_history: bool = True):
         if database_filename is None \
                 or database_filename == "" \
                 or database_password is None:
@@ -700,6 +725,7 @@ class PDatabase:
         self.show_account_details = show_account_details
         self.show_invalidated_accounts = show_invalidated_accounts
         self.shadow_passwords = shadow_passwords
+        self.track_account_history = track_account_history
         self.salt = salt
         self.iteration_count = iteration_count
         # store password as byte[]
@@ -710,9 +736,22 @@ class PDatabase:
             self.database_password = ""
         self.create_and_initialize_database()
         self.update_database_schema(self.database_filename)
+        self.set_default_values_in_configuration_table()
         if not self.is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             sys.exit(1)
+
+    def set_default_values_in_configuration_table(self):
+        if get_attribute_value_from_configuration_table(self.database_filename,
+                                                        CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY) == "":
+            if self.track_account_history:
+                set_attribute_value_in_configuration_table(self.database_filename,
+                                                           CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
+                                                           "True")
+            else:
+                set_attribute_value_in_configuration_table(self.database_filename,
+                                                           CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
+                                                           "False")
 
     def update_database_schema(self, database_filename: str):
         try:
@@ -896,6 +935,46 @@ class PDatabase:
         account.invalid_date = account.invalid_date
         return account
 
+    def search_account_history(self, uuid_string: str):
+        results_found = 0
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            # if self.show_invalidated_accounts:
+            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
+            #                 invalid_date from account "
+            # else:
+            sqlstring = "select account_uuid as uuid, name, url, loginname, password, type, create_date from account_history where " + \
+                        "account_uuid = '" + str(uuid_string) + "' order by create_date"
+            # sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
+            # print("exceuting: " + sqlstring)
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            #       "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
+            print()
+            for row in result:
+                account = Account(uuid=row[0],
+                                  name=row[1],
+                                  url=row[2],
+                                  loginname=row[3],
+                                  password=row[4],
+                                  type=row[5],
+                                  create_date=row[6]
+                                  )
+                decrypted_account = self.decrypt_account(account)
+                # if search_string == "" or \
+                #         search_string_matches_account(search_string, decrypted_account):
+                results_found += 1
+                # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                self.print_formatted_account(decrypted_account)
+                print()
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        print("Found " + str(results_found) + " result(s).")
+
     def search_accounts(self, search_string: str):
         results_found = 0
         try:
@@ -912,7 +991,8 @@ class PDatabase:
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-                  "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
+                  "* in " + str(
+                get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
             print()
             for row in result:
                 account = Account(uuid=row[0],
@@ -936,7 +1016,6 @@ class PDatabase:
         finally:
             database_connection.close()
         print("Found " + str(results_found) + " result(s).")
-
 
     def search_invalidated_accounts(self, search_string: str):
         results_found = 0
@@ -1062,7 +1141,6 @@ class PDatabase:
             database_connection.close()
         # print("Found " + str(results_found) + " result(s).")
         return account_array
-
 
     def get_accounts_decrypted_from_invalid_accounts(self, search_string: str) -> []:
         # results_found = 0
@@ -1241,6 +1319,8 @@ class PDatabase:
         finally:
             database_connection.close()
 
+    # Set account by uuid = edit account. If account_history is enabled the old version
+    # of the account will be saved in the table account_history
     def set_account_by_uuid_and_encrypt(self, account_uuid, name, url, loginname, password, type):
         if account_uuid is None or account_uuid == "":
             raise Exception("Account UUID is not set or empty.")
@@ -1252,6 +1332,19 @@ class PDatabase:
         type = self.encrypt_string_if_password_is_present(type)
         try:
             database_connection = sqlite3.connect(self.database_filename)
+            # 1. First backup old version of the account
+            if get_attribute_value_from_configuration_table(self.database_filename,
+                                                            CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY) \
+                    == "True":
+                cursor = database_connection.cursor()
+                account_history_uuid = uuid.uuid4()
+                sqlstring = "insert into account_history (uuid, account_uuid, name, url, loginname, password, type) " + \
+                            " select '" + str(account_history_uuid) + \
+                            "' as uuid, uuid as account_uuid, name, url, loginname, password, type " + \
+                            " from account where uuid = '" + str(account_uuid) + "'"
+                cursor.execute(sqlstring)
+                database_connection.commit()
+            # 2. Then change/set existing account to new values
             cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             self.print_current_secure_delete_mode(database_connection, cursor)
