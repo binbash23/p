@@ -20,7 +20,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.02.24"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.02.25"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 
