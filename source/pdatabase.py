@@ -1414,6 +1414,8 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(database_connection, cursor)
 
             # 1. First backup old version of the account
             if get_attribute_value_from_configuration_table(self.database_filename,
@@ -1429,8 +1431,8 @@ class PDatabase:
                 # database_connection.commit()
             # 2. Then change/set existing account to new values
             # cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(database_connection, cursor)
+            # self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            # self.print_current_secure_delete_mode(database_connection, cursor)
             sqlstring = "update account set name = '" + name + "', " + \
                         "url = '" + url + "', " + \
                         "loginname = '" + loginname + "', " + \
