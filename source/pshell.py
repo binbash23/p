@@ -10,7 +10,7 @@ import p
 import pdatabase
 import dropboxconnector
 import pyperclip3
-#import clipboard
+# import clipboard
 import datetime
 from termcolor import colored
 import os
@@ -29,6 +29,7 @@ class ShellHistory:
         else:
             self.execution_date = execution_date
         self.user_input = user_input
+
 
 class ShellCommand:
     command = ""
@@ -64,60 +65,75 @@ class ShellCommand:
 
 SHELL_COMMANDS = [
     ShellCommand("add", "add", "Add a new account."),
-    ShellCommand("changepassword", "changepassword", "Change password of current database."),
+    ShellCommand("changepassword", "changepassword", "Change the master password of current database. This " +
+                 "can take some minutes if there are a lot accounts in it."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
-    ShellCommand("clear", "clear", "Clear console."),
+    ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     # ShellCommand("cleartimeout", "cleartimeout [MINUTES]", "Set or show console clear timeout in MINUTES."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard."),
-    ShellCommand("copypassword", "copypassword UUID", "Copy password from UUID to clipboard."),
-    ShellCommand("delete", "delete UUID", "Delete account with UUID."),
-    ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database."),
-    ShellCommand("edit", "edit UUID", "Edit account with UUID."),
-    ShellCommand("!", "! COMMAND", "Execute COMMAND in native shell."),
+    ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to clipboard."),
+    ShellCommand("delete", "delete <UUID>", "Delete account with UUID. You can also invalidate the account " +
+                 "instead of deleting it."),
+    ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
+                 "configured dropbox account."),
+    ShellCommand("edit", "edit <UUID>", "Edit account with UUID."),
+    ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell."),
     ShellCommand("exit", "exit", "Quit pshell."),
-    ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show description for COMMAND."),
-    ShellCommand("history", "history", "Show history of user inputs."),
+    ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
+                 "description for COMMAND."),
+    ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
-    ShellCommand("invalidate", "invalidate UUID", "Invalidate account with UUID."),
+    ShellCommand("invalidate", "invalidate <UUID>", "Invalidate account with UUID."),
     ShellCommand("list", "list", "List all accounts."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
-    ShellCommand("lock", "lock", "Lock pshell console."),
+    ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
-    ShellCommand("merge2file", "merge2file FILENAME",
+    ShellCommand("merge2file", "merge2file <FILENAME>",
                  "Merge local database with another database identified by FILENAME."),
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
-                 "Merge local database with the last known merge database."),
+                 "Merge local database with the last known merge database. The last know database can be seen " +
+                 "with the status command"),
     ShellCommand("quit", "quit", "Quit pshell."),
-    ShellCommand("revalidate", "revalidate UUID", "Revalidate account with UUID."),
-    ShellCommand("search", "search SEARCHSTRING", "Search SEARCHSTRING in account database."),
-    ShellCommand("searchinvalidated", "searchinvalidated SEARCHSTRING", "Search SEARCHSTRING in invalidated accounts."),
-    ShellCommand("sc", "sc SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the password of the" +
+    ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
+    ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
+    ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
+                 "Search for SEARCHSTRING in all columns of invalidated accounts."),
+    ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
+                 "password of the account found to clipboard."),
+    ShellCommand("sca", "sca <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy one" +
+                 " after another the URL, loginname and password of the account found to clipboard."),
+    ShellCommand("scl", "scl <SEARCHSTRING>", "Search for SEARCHSTRING in account columns and copy the loginname" +
+                 " of the account found to clipboard."),
+    ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
                  " account found to clipboard."),
-    ShellCommand("sca", "sca SEARCHSTRING", "Search SEARCHSTRING in accounts and copy one after another the URL, " +
-                 "loginname and password of the account found to clipboard."),
-    ShellCommand("scl", "scl SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the loginname of the" +
-                 " account found to clipboard."),
-    ShellCommand("scu", "scu SEARCHSTRING", "Search SEARCHSTRING in accounts and copy the URL of the" +
-                 " account found to clipboard."),
-    ShellCommand("st", "st SEARCHSTRING", "Search SEARCHSTRING in the type field of all accounts"),
-    ShellCommand("setdatabasename", "setdatabasename NAME", "Set database to NAME."),
-    ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid UUID",
+    ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
+    ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
+                 "the current database."),
+    ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
                  "Set the dropbox application account uuid in configuration."),
-    ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid UUID",
+    ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
                  "Set the dropbox token account uuid in configuration."),
-    ShellCommand("shadowpasswords", "shadowpasswords on|off", "Shadow passwords in console output."),
-    ShellCommand("showaccounthistory", "showaccounthistory UUID", "Show change history of account with UUID."),
-    ShellCommand("showconfig", "showconfig", "Show current configuration."),
-    ShellCommand("showinvalidated", "showinvalidated on|off", "Show invalidated accounts."),
-    ShellCommand("showunmergedwarning", "showunmergedwarning on|off", "Show warning on startup if there are " +
-                 "unmerged changes in local database compared to the latest known merge database."),
-    ShellCommand("sql", "sql COMMAND", "Execute COMMAND in database."),
-    ShellCommand("status", "status", "Show configuration and database status."),
-    ShellCommand("timeout", "timeout [MINUTES]", "Set the maximum pshell inactivity timeout to MINUTES before " +
+    ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
+                 " or show current shadow status. This is useful if you are not alone watching the output " +
+                 "of this program on the monitor."),
+    ShellCommand("showaccounthistory", "showaccounthistory <UUID>", "Show change history of account with UUID."),
+    ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
+                 "passwords are shadowed, if verbose mode is ..."),
+    ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
+                 "the current status will be shown."),
+    ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
+                 "unmerged changes in local database compared to the latest known merge database. If empty " +
+                 "the current status will be shown."),
+    ShellCommand("sql", "sql <COMMAND>", "Execute COMMAND in database in native SQL language. The p database " +
+                 "is fully accessable with sql commands."),
+    ShellCommand("status", "status", "Show configuration and database status. A short overview of the database " +
+                 "will be shown including number of accounts, encryption status, database name..."),
+    ShellCommand("timeout", "timeout [<MINUTES>]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts."),
-    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false."),
+    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false. If verbose is on " +
+                 "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
 ]
 
@@ -261,11 +277,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if manual_locked:
                     clear_console()
                     print(p.VERSION)
-                    print("PShell locked.")
+                    print(colored("PShell locked.", "red"))
                 else:
                     clear_console()
                     print(p.VERSION)
-                    print("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)")
+                    print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
                 except KeyboardInterrupt:
@@ -278,7 +294,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 else:
                     # password is ok
                     clear_console()
-                    print("PShell unlocked.")
+                    print(colored("PShell unlocked.", "green"))
                     if manual_locked:
                         manual_locked = False
                     user_input = ""
@@ -639,8 +655,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "shadowpasswords":
             if len(shell_command.arguments) == 1:
-                print("on/off is missing.")
-                print(shell_command)
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
+                print("Status: " + current_status)
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.shadow_passwords = True
@@ -677,8 +697,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                print("on/off is missing.")
-                print(shell_command)
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS)
+                print("Status: " + current_status)
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.show_invalidated_accounts = True
@@ -699,8 +723,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "showunmergedwarning":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                print("on/off is missing.")
-                print(shell_command)
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING)
+                print("Status: " + current_status)
                 continue
             if shell_command.arguments[1] == "on":
                 show_unmerged_changes_warning_on_startup = True
@@ -764,8 +792,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "trackaccounthistory":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                print("on/off is missing.")
-                print(shell_command)
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY)
+                print("Status: " + current_status)
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.track_account_history = True
@@ -786,8 +818,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
-                print("on/off is missing.")
-                print(shell_command)
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS)
+                print("Status: " + current_status)
                 continue
             if shell_command.arguments[1] == "on":
                 p_database.show_account_details = True
