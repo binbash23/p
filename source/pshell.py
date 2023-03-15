@@ -45,6 +45,18 @@ class ShellCommand:
     def __str__(self):
         return self.command + " - Synopsis: " + self.synopsis + " - Description: " + self.description
 
+    def __eq__(self, other):
+        if self.command == other.command:
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        if self.command < other.command:
+            return True
+        else:
+            return False
+
     def print_manual(self):
         print()
         print("COMMAND")
@@ -136,6 +148,7 @@ SHELL_COMMANDS = [
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
 ]
+SHELL_COMMANDS.sort()
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
 pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
