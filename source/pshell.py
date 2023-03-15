@@ -10,7 +10,6 @@ import p
 import pdatabase
 import dropboxconnector
 import pyperclip3
-# import clipboard
 import datetime
 from termcolor import colored
 import os

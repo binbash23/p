@@ -7,12 +7,10 @@
 import optparse
 from optparse import OptionGroup
 from pdatabase import *
-# from pdatabase import accounts_are_equal
 import getpass
 from termcolor import colored
 import colorama
 from dropboxconnector import *
-# import p_shell
 from pshell import *
 
 colorama.init()
@@ -20,7 +18,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.03.01"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.03.15"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 

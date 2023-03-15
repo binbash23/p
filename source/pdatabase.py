@@ -4,7 +4,6 @@
 # Copyright
 #
 import os.path
-# import random
 import sqlite3
 import logging
 import base64
@@ -18,7 +17,6 @@ from cryptography.fernet import InvalidToken
 import binascii
 import progressbar
 from termcolor import colored
-# import termcolor
 from re import finditer
 from re import IGNORECASE
 import uuid
