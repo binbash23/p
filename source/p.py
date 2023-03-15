@@ -111,10 +111,15 @@ def edit(p_database: PDatabase, edit_uuid: str):
 
 
 def change_database_password(p_database: PDatabase) -> bool:
-    new_password = getpass.getpass("Enter new database password   : ")
-    new_password_confirm = getpass.getpass("Confirm new database password : ")
-    if new_password != new_password_confirm:
-        logging.error("Passwords do not match.")
+    try:
+        new_password = getpass.getpass("Enter new database password   : ")
+        new_password_confirm = getpass.getpass("Confirm new database password : ")
+        if new_password != new_password_confirm:
+            logging.error("Passwords do not match.")
+            return False
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
         return False
     return p_database.change_database_password(new_password)
 
@@ -137,6 +142,10 @@ def change_dropbox_database_password(p_database: PDatabase) -> bool:
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
                             "/" + DROPBOX_P_DATABASE_FILENAME)
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
+        return False
     except Exception as e:
         pass
     finally:
