@@ -1029,6 +1029,9 @@ class PDatabase:
             # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
             #       "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
             print()
+            if result is not None:
+                print(colored("Older versions of account:", 'red'))
+                print()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1045,7 +1048,7 @@ class PDatabase:
                 # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                 self.print_formatted_account(decrypted_account)
                 print()
-            print("Latest version of account:")
+            print(colored("Latest version of account:", 'green'))
             self.search_account_by_uuid(uuid_string)
             print()
         except Exception as e:
