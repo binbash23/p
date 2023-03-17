@@ -629,12 +629,12 @@ def get_account_history_count(database_filename):
         database_connection.close()
     return count
 
-def get_account_count(database_filename, count_invalidated_accounts: bool = True):
+def get_account_count(database_filename, also_count_invalidated_accounts: bool = True):
     count = 0
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
-        if count_invalidated_accounts:
+        if also_count_invalidated_accounts:
             sqlstring = SQL_SELECT_COUNT_ALL_FROM_ACCOUNT
         else:
             sqlstring = SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT
@@ -658,6 +658,7 @@ def print_database_statistics(database_filename):
     account_count = get_account_count(database_filename)
     account_count_valid = get_account_count_valid(database_filename)
     account_count_invalid = get_account_count_invalid(database_filename)
+    account_history_count = get_account_history_count(database_filename)
     database_uuid = get_database_uuid(database_filename)
     database_creation_date = get_database_creation_date(database_filename)
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -697,6 +698,7 @@ def print_database_statistics(database_filename):
     print("Database Last Changed               : " + last_change_date)
     print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
           str(account_count_invalid) + ")")
+    print("Accounts in history                 : " + str(account_history_count))
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
     print("Database has unmerged changes       : " + unmerged_changes)
