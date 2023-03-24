@@ -612,7 +612,7 @@ def get_account_count_invalid(database_filename):
     return count
 
 
-def get_account_history_count(database_filename):
+def get_account_historytable_count(database_filename):
     count = 0
     try:
         database_connection = sqlite3.connect(database_filename)
@@ -622,6 +622,23 @@ def get_account_history_count(database_filename):
         result = sqlresult.fetchone()
         if result is None:
             raise ValueError("Error: Could not count account history entries.")
+        count = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
+def get_account_history_count(database_filename: str, account_uuid: str) -> int:
+    count = 0
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = 'select count(*) from account_history where account_uuid="' + account_uuid + '"'
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count account history entries for uuid: " + account_uuid)
         count = result[0]
     except Exception as e:
         raise
@@ -658,7 +675,7 @@ def print_database_statistics(database_filename):
     account_count = get_account_count(database_filename)
     account_count_valid = get_account_count_valid(database_filename)
     account_count_invalid = get_account_count_invalid(database_filename)
-    account_history_count = get_account_history_count(database_filename)
+    account_history_count = get_account_historytable_count(database_filename)
     database_uuid = get_database_uuid(database_filename)
     database_creation_date = get_database_creation_date(database_filename)
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -1048,7 +1065,7 @@ class PDatabase:
                 #         search_string_matches_account(search_string, decrypted_account):
                 results_found += 1
                 # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
-                self.print_formatted_account(decrypted_account)
+                self.print_formatted_account(decrypted_account, False)
                 print()
             print(colored("Latest version of account:", 'green'))
             self.search_account_by_uuid(uuid_string)
@@ -1464,7 +1481,7 @@ class PDatabase:
                                                    self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         self.print_formatted_account(account)
 
-    def print_formatted_account(self, account: Account):
+    def print_formatted_account(self, account: Account, show_history_count: bool = True):
         print("UUID        : " + str(account.uuid))
         print("Name        : " + str(account.name))
         print("URL         : " + str(account.url))
@@ -1478,6 +1495,8 @@ class PDatabase:
             print("Created     : " + str(account.create_date))
             print("Changed     : " + str(account.change_date))
             print("Invalidated : " + str(account.invalid_date))
+            if show_history_count:
+                print("Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
 
     def decrypt_and_encrypt_with_new_password(self, string_encrypted: str, new_password: str) -> str:
         string_decrypted = self.decrypt_string_if_password_is_present(string_encrypted)
@@ -1507,7 +1526,7 @@ class PDatabase:
             # Iterate through all the accounts and the account_history, decrypt every entry with the old pw,
             # encrypt it with the new one and write it all back.
             account_count = get_account_count(self.database_filename)
-            account_history_count = get_account_history_count(self.database_filename)
+            account_history_count = get_account_historytable_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
             print("Re-encrypting " + str(account_history_count) + " account history entries...")
             bar = progressbar.ProgressBar(max_value=(account_count + account_history_count)).start()
