@@ -383,10 +383,24 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.edit(p_database, shell_command.arguments[1])
             continue
         if shell_command.command == "forgetdeletedaccounts":
-            p_database.delete_from_deleted_account_table()
+            try:
+                answer = input("Delete information about deleted account uuid's ([y]/n) : ")
+            except KeyboardInterrupt:
+                print()
+                print("Strg-C detected.")
+                return
+            if answer == "y" or answer == "":
+                p_database.delete_from_deleted_account_table()
             continue
         if shell_command.command == "forgetaccounthistory":
-            p_database.delete_from_account_history_table()
+            try:
+                answer = input("Delete older versions of all accounts ([y]/n) : ")
+            except KeyboardInterrupt:
+                print()
+                print("Strg-C detected.")
+                return
+            if answer == "y" or answer == "":
+                p_database.delete_from_account_history_table()
             continue
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:
