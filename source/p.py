@@ -310,6 +310,8 @@ def start_dropbox_configuration():
     print()
     refresh_access_token = get_refresh_access_token(application_key, application_secret, dropbox_access_code)
     print()
+    print("The generated refresh token is: " + refresh_access_token)
+    print()
     print("Now add two new accounts to your p database (in pshell use the command: 'add'):")
     print()
     print("Account #1:")
@@ -321,8 +323,8 @@ def start_dropbox_configuration():
     print("A new account with any name (i.e.: 'Dropbox Refresh Token') and the long refresh token as the" +
           " password (" + refresh_access_token + "). All other fields can be left empty.")
     print("")
-    print("Now you have to tell p which 2 account UUID's must be used to access the dropbox. One account (#1) " +
-          "is for the dropbox app information, the other (#2) is for the refresh token information.")
+    print("Now you have to tell p which 2 account UUID's must be used to access the dropbox.")
+    print("One account (#1) is for the dropbox app information, the other (#2) is for the refresh token information.")
     print("P stores the dropbox account infos in the configuration and you can query the config in the pshell " +
           "with the command 'status'.")
     print()
