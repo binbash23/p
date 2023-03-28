@@ -85,6 +85,12 @@ SHELL_COMMANDS = [
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to clipboard."),
     ShellCommand("delete", "delete <UUID>", "Delete account with UUID. You can also invalidate the account " +
                  "instead of deleting it."),
+    ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
+                 "table. This table is used and merged between databases to spread the information about which" +
+                 " account with which UUID has been deleted. Emptying this table removes any traces of account " +
+                 "UUID's which have existed in this database. You should empty this table on all databases. " +
+                 "Otherwise the table will be filled again after the next merge with a database which has entries " +
+                 "in the deleted_accounts table."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
                  "configured dropbox account."),
     ShellCommand("edit", "edit <UUID>", "Edit account with UUID."),
@@ -93,6 +99,7 @@ SHELL_COMMANDS = [
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
+    ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate <UUID>", "Invalidate account with UUID."),
     ShellCommand("list", "list", "List all accounts."),
@@ -374,6 +381,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             p.edit(p_database, shell_command.arguments[1])
+            continue
+        if shell_command.command == "forgetdeletedaccounts":
+            pdatabase.delete_from_deleted_account_table(p_database.database_filename)
+            continue
+        if shell_command.command == "forgetaccounthistory":
+            pdatabase.delete_from_account_history_table(p_database.database_filename)
             continue
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:

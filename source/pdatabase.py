@@ -339,7 +339,9 @@ SQL_SELECT_ALL_ACCOUNT_HISTORY = """
 """
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT = "select count(*) from account"
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_history"
+SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY = "delete from account_history"
 SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
+SQL_DELETE_ALL_FROM_DELETED_ACCOUNT = "delete from deleted_account"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
 CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST = "DATABASE_PASSWORD_TEST"
@@ -613,7 +615,7 @@ def get_account_count_invalid(database_filename):
     return count
 
 
-def get_account_historytable_count(database_filename):
+def get_account_history_table_count(database_filename):
     count = 0
     try:
         database_connection = sqlite3.connect(database_filename)
@@ -629,6 +631,28 @@ def get_account_historytable_count(database_filename):
     finally:
         database_connection.close()
     return count
+
+def delete_from_account_history_table(database_filename):
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY
+        cursor.execute(sqlstring)
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+
+def delete_from_deleted_account_table(database_filename):
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_DELETE_ALL_FROM_DELETED_ACCOUNT
+        cursor.execute(sqlstring)
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
 
 def get_deleted_account_table_count(database_filename):
     count = 0
@@ -693,7 +717,7 @@ def print_database_statistics(database_filename):
     account_count = get_account_count(database_filename)
     account_count_valid = get_account_count_valid(database_filename)
     account_count_invalid = get_account_count_invalid(database_filename)
-    account_history_count = get_account_historytable_count(database_filename)
+    account_history_count = get_account_history_table_count(database_filename)
     database_uuid = get_database_uuid(database_filename)
     database_creation_date = get_database_creation_date(database_filename)
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -1558,7 +1582,7 @@ class PDatabase:
             # Iterate through all the accounts and the account_history, decrypt every entry with the old pw,
             # encrypt it with the new one and write it all back.
             account_count = get_account_count(self.database_filename)
-            account_history_count = get_account_historytable_count(self.database_filename)
+            account_history_count = get_account_history_table_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
             print("Re-encrypting " + str(account_history_count) + " account history entries...")
             bar = progressbar.ProgressBar(max_value=(account_count + account_history_count)).start()
