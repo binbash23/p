@@ -632,28 +632,6 @@ def get_account_history_table_count(database_filename):
         database_connection.close()
     return count
 
-def delete_from_account_history_table(database_filename):
-    try:
-        database_connection = sqlite3.connect(database_filename)
-        cursor = database_connection.cursor()
-        sqlstring = SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY
-        cursor.execute(sqlstring)
-    except Exception as e:
-        raise
-    finally:
-        database_connection.close()
-
-def delete_from_deleted_account_table(database_filename):
-    try:
-        database_connection = sqlite3.connect(database_filename)
-        cursor = database_connection.cursor()
-        sqlstring = SQL_DELETE_ALL_FROM_DELETED_ACCOUNT
-        cursor.execute(sqlstring)
-    except Exception as e:
-        raise
-    finally:
-        database_connection.close()
-
 def get_deleted_account_table_count(database_filename):
     count = 0
     try:
@@ -2087,6 +2065,34 @@ class PDatabase:
         finally:
             database_connection.close()
         return return_code
+
+    def delete_from_account_history_table(self):
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(database_connection, cursor)
+            cursor.execute(sqlstring)
+            database_connection.commit()
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+
+    def delete_from_deleted_account_table(self):
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = SQL_DELETE_ALL_FROM_DELETED_ACCOUNT
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(database_connection, cursor)
+            cursor.execute(sqlstring)
+            database_connection.commit()
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
 
 
 def main():

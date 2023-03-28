@@ -383,10 +383,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.edit(p_database, shell_command.arguments[1])
             continue
         if shell_command.command == "forgetdeletedaccounts":
-            pdatabase.delete_from_deleted_account_table(p_database.database_filename)
+            p_database.delete_from_deleted_account_table()
             continue
         if shell_command.command == "forgetaccounthistory":
-            pdatabase.delete_from_account_history_table(p_database.database_filename)
+            p_database.delete_from_account_history_table()
             continue
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:
