@@ -388,9 +388,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except KeyboardInterrupt:
                 print()
                 print("Strg-C detected.")
-                return
+                continue
             if answer == "y" or answer == "":
                 p_database.delete_from_deleted_account_table()
+                print("Deleted.")
+            else:
+                print("Canceled")
             continue
         if shell_command.command == "forgetaccounthistory":
             try:
@@ -398,9 +401,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except KeyboardInterrupt:
                 print()
                 print("Strg-C detected.")
-                return
+                continue
             if answer == "y" or answer == "":
                 p_database.delete_from_account_history_table()
+                print("Deleted.")
+            else:
+                print("Canceled")
             continue
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:
