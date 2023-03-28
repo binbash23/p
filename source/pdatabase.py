@@ -339,6 +339,7 @@ SQL_SELECT_ALL_ACCOUNT_HISTORY = """
 """
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT = "select count(*) from account"
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_history"
+SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
 CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST = "DATABASE_PASSWORD_TEST"
@@ -629,6 +630,23 @@ def get_account_historytable_count(database_filename):
         database_connection.close()
     return count
 
+def get_deleted_account_table_count(database_filename):
+    count = 0
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count deleted_account entries.")
+        count = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
 def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     count = 0
     try:
@@ -716,6 +734,7 @@ def print_database_statistics(database_filename):
     print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
           str(account_count_invalid) + ")")
     print("Accounts in history                 : " + str(account_history_count))
+    print("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
     print("Database has unmerged changes       : " + unmerged_changes)
