@@ -1419,6 +1419,19 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
+        return None
+
+
+    def set_password_of_account(self, account_uuid:str, new_password:str):
+        account = self.get_account_by_uuid_and_decrypt(account_uuid)
+        if account is None:
+            return
+        self.set_account_by_uuid_and_encrypt(account.uuid,
+                                             account.name,
+                                             account.url,
+                                             account.loginname,
+                                             new_password,
+                                             account.type)
 
     # Set account by uuid = edit account. If account_history is enabled the old version
     # of the account will be saved in the table account_history

@@ -118,6 +118,7 @@ SHELL_COMMANDS = [
                  " of the account found to clipboard."),
     ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
                  " account found to clipboard."),
+    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database."),
@@ -695,7 +696,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            # xxx p.edit(p_database, shell_command.arguments[1])
             p_database.search_account_history(shell_command.arguments[1])
             continue
         if shell_command.command == "showconfig":
@@ -757,6 +757,35 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     "False")
                 continue
             print("Error: on or off expected.")
+            continue
+        if shell_command.command == "sp":
+            if len(shell_command.arguments) == 1:
+                print("UUID is missing.")
+                print(shell_command)
+                continue
+            if not p_database.get_account_exists(shell_command.arguments[1]):
+                print("Error: Account UUID " + shell_command.arguments[1] + " not found.")
+                continue
+            try:
+                if pdatabase.get_attribute_value_from_configuration_table(
+                        p_database.database_filename,
+                        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS) == 'True':
+                    new_password = getpass.getpass("New password     : ")
+                    new_password_confirm = getpass.getpass("Confirm password : ")
+                    if new_password != new_password_confirm:
+                        print("Error: Passwords do not match.")
+                        continue
+                else:
+                    new_password = input("New password  : ")
+                answer = input("Correct ([y]/n) : ")
+            except KeyboardInterrupt:
+                print()
+                print("Strg-C detected.")
+                continue
+            if answer == "y" or answer == "":
+                p_database.set_password_of_account(shell_command.arguments[1], new_password)
+            else:
+                print("Canceled")
             continue
         if shell_command.command == "sql":
             if len(shell_command.arguments) == 1:
