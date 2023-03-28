@@ -287,7 +287,15 @@ def start_dropbox_configuration():
     # or https: // www.dropbox.com / developers / apps?_tk = pilot_lp & _ad = topbar4 & _camp = myapps
 
     print("Now you have to change the permissions for the app to read/write files and folders (permissions tab).")
-    input("Press enter when you have changed the permissions.")
+    print("You have to check:")
+    print("- account_info.read")
+    print("- files.metadata.write")
+    print("- files.metadata.read")
+    print("- files.content.write")
+    print("- files.content.read")
+    print()
+    print("IMPORTANT NOTE: Everytime you change the permissions you will have to re-generate the access code!!!")
+    input("Press enter when you have changed/set the permissions.")
     print()
 
     print("You need the application key and the application secret from your just created dropbox app" +
@@ -297,19 +305,40 @@ def start_dropbox_configuration():
     print("Now a webbrowser will open and give you the dropbox access code...")
     get_generated_access_code(application_key)
     dropbox_access_code = input("Enter the dropbox access code        : ")
-    print("Now a the dropbox refresh token will be retrieved from dropbox...")
-    get_refresh_access_token(application_key, application_secret, dropbox_access_code)
-    print("Now add two new accounts to your p database:")
-    print("#1 A new account with the application_key as the loginname and the application_secret as the password.")
-    print("#2 A new account with the refresh token as the password.")
+    print()
+    print("Now a new dropbox refresh token will be retrieved from dropbox...")
+    print()
+    refresh_access_token = get_refresh_access_token(application_key, application_secret, dropbox_access_code)
+    print()
+    print("Now add two new accounts to your p database (in pshell use the command: 'add'):")
+    print()
+    print("Account #1:")
+    print("A new account with any name (i.e: 'Dropbox app') the application_key (" + application_key + ")" +
+          " as the loginname and the application_secret (" + application_secret + ") as the password. All other " +
+          "fields can be left empty.")
+    print()
+    print("Account #2:")
+    print("A new account with any name (i.e.: 'Dropbox Refresh Token') and the long refresh token as the" +
+          " password (" + refresh_access_token + "). All other fields can be left empty.")
     print("")
-    print("Then configure the #1 account uuid with the -z option")
+    print("Now you have to tell p which 2 account UUID's must be used to access the dropbox. One account (#1) " +
+          "is for the dropbox app information, the other (#2) is for the refresh token information.")
+    print("P stores the dropbox account infos in the configuration and you can query the config in the pshell " +
+          "with the command 'status'.")
+    print()
+    print("Configure the #1 account uuid with the -z option (or set it in the pshell with the command" +
+          " 'setdropboxapplicationuuid <UUID>' where you set UUID to the UUID of the just created account #1.)")
     print("Example:")
     print("> p.exe -z 'c0f98849-0677-4f12-80ff-c22cb6578d1a'")
-    print("Then configure the #2 account uuid with the -y option")
+    print()
+    print("Configure the #2 account uuid with the -y option (or set it in the pshel with the command " +
+          "'setdropboxtokenuuid <UUID>' where you set UUID to the UUID of the just created account #2.)")
     print("Example:")
     print("> p.exe -y '123ab849-7395-1672-987f-442cbafb8d1a'")
+    print()
     print("Now you should be able to synchronize your p database with the -Y option.")
+    print("It might be helpful to run p in a powershell with '.\p.exe' to be able to see error messages.")
+    print()
 
 
 #

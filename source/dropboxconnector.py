@@ -131,19 +131,20 @@ def get_generated_access_code(app_key: str):
 
 def get_refresh_access_token(app_key: str, app_secret: str, access_code_generated: str) -> str:
     basic_auth = base64.b64encode(f'{app_key}:{app_secret}'.encode())
-
     headers = {
         'Authorization': f"Basic {basic_auth}",
         'Content-Type': 'application/x-www-form-urlencoded',
     }
-
     data = f'code={access_code_generated}&grant_type=authorization_code'
-
     response = requests.post('https://api.dropboxapi.com/oauth2/token',
                              data=data,
                              auth=(app_key, app_secret))
+    refresh_token_str = response.text[response.text.index('refresh_token": "')+17:response.text.index('"scope": "')-3]
+    #print("->" + refresh_token_str)
+    print("Result from api call:")
     print(json.dumps(json.loads(response.text), indent=2))
-    return "#"
+    print()
+    return refresh_token_str
 
 
 def main():
