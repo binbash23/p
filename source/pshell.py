@@ -118,7 +118,8 @@ SHELL_COMMANDS = [
                  " of the account found to clipboard."),
     ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
                  " account found to clipboard."),
-    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID."),
+    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID. If shadow passwords is on, the password " +
+                 "will be read hidden so that none can gather it from your screen."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database."),
