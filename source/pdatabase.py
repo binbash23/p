@@ -341,6 +341,7 @@ SQL_SELECT_COUNT_ALL_FROM_ACCOUNT = "select count(*) from account"
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_history"
 SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY = "delete from account_history"
 SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
+SQL_SELECT_ALL_FROM_DELETED_ACCOUNT = "select uuid, create_date from deleted_account"
 SQL_DELETE_ALL_FROM_DELETED_ACCOUNT = "delete from deleted_account"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
@@ -1561,9 +1562,12 @@ class PDatabase:
             # encrypt it with the new one and write it all back.
             account_count = get_account_count(self.database_filename)
             account_history_count = get_account_history_table_count(self.database_filename)
+            deleted_account_table_count = get_deleted_account_table_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
             print("Re-encrypting " + str(account_history_count) + " account history entries...")
-            bar = progressbar.ProgressBar(max_value=(account_count + account_history_count)).start()
+            print("Re-encrypting " + str(account_history_count) + " deleted account entries...")
+            bar = progressbar.ProgressBar(max_value=(account_count + account_history_count +
+                                                     deleted_account_table_count)).start()
             bar.start()
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
@@ -1631,11 +1635,30 @@ class PDatabase:
                                                    new_current_password, new_current_type))
                 bar.update(results_found)
 
+                sqlstring = SQL_SELECT_ALL_FROM_DELETED_ACCOUNT
+                sqlresult = cursor.execute(sqlstring)
+                result = sqlresult.fetchall()
+                # results_found = 0
+                for row in result:
+                    results_found += 1
+                    # get current account_history data (enrypted)
+                    current_uuid = row[0]
+                    current_create_date = row[1]
+                    new_current_uuid = self.decrypt_and_encrypt_with_new_password(current_uuid, new_password)
+                    # delete old entry
+                    delete_sql_string = "delete from deleted_account where uuid = '" + current_uuid + "'"
+                    cursor.execute(delete_sql_string)
+
+                    # and create new encrypted entry
+                    insert_sql_string = "insert into deleted_account (uuid, create_date) values (?, ?)"
+                    cursor.execute(insert_sql_string, (new_current_uuid, current_create_date))
+                    bar.update(results_found)
+
             bar.finish()
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
             # ERST commit, wenn ALLES erledigt ist, sonst salat in der db!!!
             database_connection.commit()
-            print("Changed accounts: " + str(results_found))
+            print("Changed entries: " + str(results_found))
         except KeyboardInterrupt as k:
             if bar:
                 bar.finish()
