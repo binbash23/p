@@ -18,10 +18,15 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.03.28"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.03.29"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
-
+URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
+URL_DOWNLOAD_BINARY_P_LINUX = "https://github.com/binbash23/p/raw/master/dist/linux/p"
+DOWNLOAD_P_UPDATE_FILENAME_WIN = "p.exe_latest"
+DOWNLOAD_P_UPDATE_FILENAME_LINUX = "p_latest"
+P_FILENAME_WIN = "p.exe"
+P_FILENAME_LINUX = "p"
 
 def add(p_database: PDatabase):
     print("Add account")

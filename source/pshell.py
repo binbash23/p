@@ -16,6 +16,7 @@ import os
 from inputimeout import inputimeout, TimeoutOccurred
 import time
 import textwrap
+import requests
 
 
 class ShellHistory:
@@ -151,7 +152,11 @@ SHELL_COMMANDS = [
                  "will be shown including number of accounts, encryption status, database name..."),
     ShellCommand("timeout", "timeout [<MINUTES>]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
-    ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts."),
+    ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
+                 "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
+    ShellCommand("updatep", "updatep", "Update p. Depending on your operating system, the latest p binary will" +
+                 " be downloaded from git and saved in the current folder with the ending '_latest'. You have " +
+                 "to stop p after that and delete the old p binary and replace it with the new one."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false. If verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
@@ -249,9 +254,18 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         p_database.track_account_history = parse_bool(config_value)
 
 
-def clear_console():
+def os_is_windows() -> bool:
     # windows
     if os.name == 'nt':
+        return True
+    # for mac and linux os.name is posix
+    else:
+        False
+
+
+def clear_console():
+    # windows
+    if os_is_windows():
         os.system('cls')
     # for mac and linux os.name is posix
     else:
@@ -890,7 +904,22 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
-
+        if shell_command.command == "updatep":
+            if os_is_windows():
+                download_url = p.URL_DOWNLOAD_BINARY_P_WIN
+                download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
+                p_filename = p.P_FILENAME_WIN
+            else:
+                download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
+                download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
+                p_filename = p.P_FILENAME_LINUX
+            print("Downloading latest p binary to: " + download_p_filename)
+            req = requests.get(download_url)
+            open(download_p_filename, "wb").write(req.content)
+            print("Download ready.")
+            print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
+                  "'. Then restart p and you have the latest version.")
+            continue
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
                 # print("on/off is missing.")
