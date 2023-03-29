@@ -5,7 +5,6 @@
 # Password/account database for managing all your accounts
 #
 import getpass
-
 import p
 import pdatabase
 import dropboxconnector
