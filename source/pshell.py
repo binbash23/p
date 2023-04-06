@@ -354,7 +354,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             last_user_input = (shell_history_array[len(shell_history_array) - 1]).user_input
             # change the current shell_command to the last command before the redo command
+            print("Redo: " + last_user_input)
             shell_command = expand_string_2_shell_command(last_user_input)
+            if shell_command is None:
+                print("Unknown command '" + user_input + "'")
+                print("Enter 'help' for command help")
+                continue
             # and proceed parsing the command...:
         if shell_command.command == "!":
             if len(shell_command.arguments) == 1:
