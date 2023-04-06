@@ -113,6 +113,7 @@ SHELL_COMMANDS = [
                  "Merge local database with the last known merge database. The last know database can be seen " +
                  "with the status command"),
     ShellCommand("quit", "quit", "Quit pshell."),
+    ShellCommand("redo", "redo", "Redo last command. The redo command itself will not appear in the command history."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
@@ -334,6 +335,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = ""
                     break
         shell_command = expand_string_2_shell_command(user_input)
+        # check for empty string
         if shell_command is None:
             if user_input == "":
                 # print("Empty command.")
@@ -343,6 +345,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Enter 'help' for command help")
             continue
         # proceed possible commands
+        # check if the command is the "redo last command" command
+        if shell_command.command == "redo":
+            # delete the redo command from hist
+            shell_history_array.pop()
+            if len(shell_history_array) == 0:
+                print("Shell history is empty.")
+                continue
+            last_user_input = (shell_history_array[len(shell_history_array) - 1]).user_input
+            # change the current shell_command to the last command before the redo command
+            shell_command = expand_string_2_shell_command(last_user_input)
+            # and proceed parsing the command...:
         if shell_command.command == "!":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
