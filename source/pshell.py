@@ -80,7 +80,7 @@ SHELL_COMMANDS = [
                  "can take some minutes if there are a lot accounts in it."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
-    # ShellCommand("cleartimeout", "cleartimeout [MINUTES]", "Set or show console clear timeout in MINUTES."),
+    ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard."),
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to clipboard."),
     ShellCommand("delete", "delete <UUID>", "Delete account with UUID. You can also invalidate the account " +
@@ -401,6 +401,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "clear":
             clear_console()
+            continue
+        if shell_command.command == "clearhistory":
+            shell_history_array = []
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
