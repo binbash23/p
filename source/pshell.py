@@ -301,9 +301,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                 else:
                     user_input = input(prompt_string)
-                shell_history_array.append(ShellHistory(user_input=user_input))
+                if user_input.strip() != "":
+                    shell_history_array.append(ShellHistory(user_input=user_input))
             except KeyboardInterrupt:
-                return
+                #return
+                print()
+                continue
             except TimeoutOccurred:
                 pass
         now_date = datetime.datetime.now()
