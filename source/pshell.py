@@ -113,9 +113,10 @@ SHELL_COMMANDS = [
                  "Merge local database with the last known merge database. The last know database can be seen " +
                  "with the status command"),
     ShellCommand("quit", "quit", "Quit pshell."),
-    ShellCommand("redo", "redo [<HISTORY_INDEX>]", "Redo the last shell command. The redo command itself will not" +
+    ShellCommand("redo", "redo [<HISTORY_INDEX>|?]", "Redo the last shell command. The redo command itself will not" +
                  " appear in the command history. You can choose the index of the command in your history if" +
-                 " you want. If you choose no index, the latest command will be executed."),
+                 " you want. If you choose no index, the latest command will be executed. If you use redo ? you " +
+                 "will see the current command history with the indices to choose from."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
@@ -198,6 +199,15 @@ def parse_bool(string: str) -> bool:
         return True
     else:
         return False
+
+
+def print_shell_command_history(shell_history_array:[]):
+    i = 1
+    for current_shell_history_entry in shell_history_array:
+        print(" [" + str(i) + "] - " +
+              str(current_shell_history_entry.execution_date) +
+              " - " + current_shell_history_entry.user_input)
+        i += 1
 
 
 def load_pshell_configuration(p_database: pdatabase.PDatabase):
@@ -358,19 +368,31 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Shell history is empty.")
                 continue
 
+            redo_index = -1
             # when there is no index of the command history array given, use the latest one
             if len(shell_command.arguments) == 1:
-                redo_index = len(shell_history_array) - 1
+                redo_index = len(shell_history_array)
             else:
-                try:
-                    redo_index = int(shell_command.arguments[1]) - 1
-                    if redo_index < 0 or redo_index > len(shell_history_array) - 1:
-                        raise Exception("Index not found in command history.")
-                except Exception as e:
-                    print("Error: " + str(e))
-                    continue
-            #last_user_input = (shell_history_array[len(shell_history_array) - 1]).user_input
-            last_user_input = (shell_history_array[redo_index]).user_input
+                if shell_command.arguments[1].strip() == "?":
+                    print_shell_command_history(shell_history_array)
+                    try:
+                        redo_index = int(input("Enter history index: "))
+                    except KeyboardInterrupt:
+                        print()
+                        continue
+                    except Exception as e:
+                        print("Error: " + str(e))
+                        continue
+                else:
+                    try:
+                        redo_index = int(shell_command.arguments[1])
+                    except Exception as e:
+                        print("Error: " + str(e))
+                        continue
+            if redo_index < 0 or redo_index > len(shell_history_array):
+                print("Error: Index not found in command history.")
+                continue
+            last_user_input = (shell_history_array[redo_index - 1]).user_input
             # change the current shell_command to the last command before the redo command
             shell_command = expand_string_2_shell_command(last_user_input)
             print("Redo: " + last_user_input)
@@ -478,12 +500,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":
-            i = 1
-            for current_shell_history_entry in shell_history_array:
-                print(" [" + str(i) + "] - " +
-                      str(current_shell_history_entry.execution_date) +
-                      " - " + current_shell_history_entry.user_input)
-                i += 1
+            print_shell_command_history(shell_history_array)
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
