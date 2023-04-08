@@ -113,7 +113,9 @@ SHELL_COMMANDS = [
                  "Merge local database with the last known merge database. The last know database can be seen " +
                  "with the status command"),
     ShellCommand("quit", "quit", "Quit pshell."),
-    ShellCommand("redo", "redo", "Redo last command. The redo command itself will not appear in the command history."),
+    ShellCommand("redo", "redo [<HISTORY_INDEX>]", "Redo the last shell command. The redo command itself will not" +
+                 " appear in the command history. You can choose the index of the command in your history if" +
+                 " you want. If you choose no index, the latest command will be executed."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
@@ -352,7 +354,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
                 continue
-            last_user_input = (shell_history_array[len(shell_history_array) - 1]).user_input
+
+            # when there is no index of the command history array given, use the latest one
+            if len(shell_command.arguments) == 1:
+                redo_index = len(shell_history_array) - 1
+            else:
+                try:
+                    redo_index = int(shell_command.arguments[1]) - 1
+                    if redo_index < 0 or redo_index > len(shell_history_array) - 1:
+                        raise Exception("Index not found in command history.")
+                except Exception as e:
+                    print("Error: " + str(e))
+                    continue
+            #last_user_input = (shell_history_array[len(shell_history_array) - 1]).user_input
+            last_user_input = (shell_history_array[redo_index]).user_input
             # change the current shell_command to the last command before the redo command
             shell_command = expand_string_2_shell_command(last_user_input)
             print("Redo: " + last_user_input)
@@ -457,8 +472,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":
+            i = 1
             for current_shell_history_entry in shell_history_array:
-                print(str(current_shell_history_entry.execution_date) + " - " + current_shell_history_entry.user_input)
+                print(" [" + str(i) + "] - " +
+                      str(current_shell_history_entry.execution_date) +
+                      " - " + current_shell_history_entry.user_input)
+                i += 1
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
@@ -563,7 +582,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
                     i = i + 1
                 print("")
-                index = input("Multiple accounts found. Please specify the # you need: ")
+                try:
+                    index = input("Multiple accounts found. Please specify the # you need: ")
+                except KeyboardInterrupt:
+                    print()
+                    index = ""
                 if index == "":
                     print("Nothing selected.")
                     continue
