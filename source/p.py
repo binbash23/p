@@ -477,10 +477,7 @@ def main():
     if options.database_password_empty:
         database_password = ""
 
-    # if options.database_password is not None:
-    #     database_password = options.database_password
     if database_password is None:
-    # else:
         if os.path.exists(database_filename):
             try:
                 database_password = getpass.getpass("Enter database password: ")
@@ -489,8 +486,12 @@ def main():
                 return
         else:
             print(colored("Database does not exist.", "red"))
-            database_password = getpass.getpass("Enter password for new database    : ")
-            database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+            try:
+                database_password = getpass.getpass("Enter password for new database    : ")
+                database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+            except KeyboardInterrupt as k:
+                print()
+                return
             if database_password != database_password_confirm:
                 print(colored("Error: Passwords do not match.", "red"))
                 sys.exit(1)

@@ -4,6 +4,7 @@
 #
 # Password/account database for managing all your accounts
 #
+import sys
 import getpass
 import p
 import pdatabase
@@ -112,6 +113,9 @@ SHELL_COMMANDS = [
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
                  "Merge local database with the last known merge database. The last know database can be seen " +
                  "with the status command"),
+    ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
+                 "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
+                 " be created. With this command you can switch between multiple p databases."),
     ShellCommand("quit", "quit", "Quit pshell."),
     ShellCommand("redo", "redo [<HISTORY_INDEX>|?]", "Redo the last shell command. The redo command itself will not" +
                  " appear in the command history. You can choose the index of the command in your history if" +
@@ -201,7 +205,7 @@ def parse_bool(string: str) -> bool:
         return False
 
 
-def print_shell_command_history(shell_history_array:[]):
+def print_shell_command_history(shell_history_array: [ShellCommand]):
     i = 1
     for current_shell_history_entry in shell_history_array:
         print(" [" + str(i) + "] - " +
@@ -314,7 +318,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if user_input.strip() != "":
                     shell_history_array.append(ShellHistory(user_input=user_input))
             except KeyboardInterrupt:
-                #return
+                # return
                 print()
                 continue
             except TimeoutOccurred:
@@ -542,6 +546,38 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2lastknownfile":
             p_database.merge_last_known_database()
             continue
+        if shell_command.command == "opendatabase":
+            if len(shell_command.arguments) == 1:
+                print("DATABASE_FILENAME is missing.")
+                print(shell_command)
+                continue
+            new_database_filename = shell_command.arguments[1].strip()
+            if os.path.exists(new_database_filename):
+                try:
+                    new_database_password = getpass.getpass("Enter database password: ")
+                except KeyboardInterrupt as k:
+                    print()
+                    continue
+            else:
+                print(colored("Database does not exist.", "red"))
+                try:
+                    new_database_password = getpass.getpass("Enter password for new database    : ")
+                    new_database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+                except KeyboardInterrupt as k:
+                    print()
+                    continue
+                if new_database_password != new_database_password_confirm:
+                    print(colored("Error: Passwords do not match.", "red"))
+                    sys.exit(1)
+            if new_database_password is None:
+                print(colored("Database password is not set! Enter password on command line or use -p or -E option.",
+                              "red"))
+                sys.exit(1)
+
+            # Now try to open/create the database:
+            new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
+            start_pshell(new_p_database)
+            sys.exit()
         if shell_command.command == "quit" or shell_command.command == "exit":
             clear_console()
             break

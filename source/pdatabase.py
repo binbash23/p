@@ -813,7 +813,6 @@ def color_search_string(text_string, search_string, color):
 
 class PDatabase:
     DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
-    # DEFAULT_SALT = b"lastpass"  # The salt for the encryption is static. This might become a problem?!
     DEFAULT_ITERATION_COUNT = 500000
 
     database_filename = "unset_database_name.db"
