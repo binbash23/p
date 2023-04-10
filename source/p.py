@@ -6,8 +6,9 @@
 #
 import optparse
 from optparse import OptionGroup
+import stdiomask
 from pdatabase import *
-import getpass
+# import getpass
 from termcolor import colored
 import colorama
 from dropboxconnector import *
@@ -18,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.04.09"
+VERSION = "p by Jens Heine <binbash@gmx.net> version: 2023.04.11"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -37,7 +38,15 @@ def add(p_database: PDatabase):
         account.name = input("Name      : ")
         account.url = input("URL       : ")
         account.loginname = input("Loginname : ")
-        account.password = input("Password  : ")
+        if p_database.shadow_passwords:
+            while True:
+                password1 = stdiomask.getpass(prompt="Password  : ")
+                password2 = stdiomask.getpass(prompt="Confirm   : ")
+                if (password1 == password2) or (password1 is None and password2 is None):
+                    break
+                print("Error: Passwords do not match. Please try again.")
+        else:
+            account.password = input("Password  : ")
         account.type = input("Type      : ")
         answer = input("Correct ([y]/n) : ")
     except KeyboardInterrupt:
@@ -117,8 +126,8 @@ def edit(p_database: PDatabase, edit_uuid: str):
 
 def change_database_password(p_database: PDatabase) -> bool:
     try:
-        new_password = getpass.getpass("Enter new database password   : ")
-        new_password_confirm = getpass.getpass("Confirm new database password : ")
+        new_password = stdiomask.getpass(prompt="Enter new database password   : ")
+        new_password_confirm = stdiomask.getpass(prompt="Confirm new database password : ")
         if new_password != new_password_confirm:
             logging.error("Passwords do not match.")
             return False
@@ -137,7 +146,7 @@ def change_dropbox_database_password(p_database: PDatabase) -> bool:
     print("Downloading database from dropbox...")
     dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
     try:
-        remote_password = getpass.getpass("Enter current dropbox database password: ")
+        remote_password = stdiomask.getpass(prompt="Enter current dropbox database password: ")
         dropbox_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
         result = change_database_password(dropbox_p_database)
         if not result:
@@ -480,15 +489,16 @@ def main():
     if database_password is None:
         if os.path.exists(database_filename):
             try:
-                database_password = getpass.getpass("Enter database password: ")
+                #database_password = stdiomask.getpass(prompt="Enter database password: ")
+                database_password = stdiomask.getpass(prompt="Enter database password: ")
             except KeyboardInterrupt as k:
                 print()
                 return
         else:
             print(colored("Database does not exist.", "red"))
             try:
-                database_password = getpass.getpass("Enter password for new database    : ")
-                database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+                database_password = stdiomask.getpass(prompt="Enter password for new database    : ")
+                database_password_confirm = stdiomask.getpass(prompt="Confirm password for new database  : ")
             except KeyboardInterrupt as k:
                 print()
                 return
@@ -571,9 +581,9 @@ def main():
     # when there are no options but a search string, search for the string in database
     if len(sys.argv) == 2 and sys.argv[1] is not None:
         p_database.search_accounts(sys.argv[1])
-    # when there are no options start the interactive p shell mode
-    if len(sys.argv) == 1:
-        start_pshell(p_database)
+    # start the interactive p shell mode
+#    if len(sys.argv) == 1:
+    start_pshell(p_database)
 
 
 if __name__ == '__main__':

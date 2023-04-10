@@ -5,7 +5,8 @@
 # Password/account database for managing all your accounts
 #
 import sys
-import getpass
+# import getpass
+import stdiomask
 import p
 import pdatabase
 import dropboxconnector
@@ -337,7 +338,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print(p.VERSION)
                     print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
                 try:
-                    user_input_pass = getpass.getpass("Enter database password: ")
+                    user_input_pass = stdiomask.getpass(prompt="Enter database password: ")
                 except KeyboardInterrupt:
                     print()
                     return
@@ -554,15 +555,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_database_filename = shell_command.arguments[1].strip()
             if os.path.exists(new_database_filename):
                 try:
-                    new_database_password = getpass.getpass("Enter database password: ")
+                    new_database_password = stdiomask.getpass(prompt="Enter database password: ")
                 except KeyboardInterrupt as k:
                     print()
                     continue
             else:
                 print(colored("Database does not exist.", "red"))
                 try:
-                    new_database_password = getpass.getpass("Enter password for new database    : ")
-                    new_database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+                    new_database_password = stdiomask.getpass(prompt="Enter password for new database    : ")
+                    new_database_password_confirm = stdiomask.getpass(prompt="Confirm password for new database  : ")
                 except KeyboardInterrupt as k:
                     print()
                     continue
@@ -917,9 +918,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if pdatabase.get_attribute_value_from_configuration_table(
                         p_database.database_filename,
                         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS) == 'True':
-                    new_password = getpass.getpass("New password     : ")
-                    new_password_confirm = getpass.getpass("Confirm password : ")
-                    if new_password != new_password_confirm:
+                    new_password = stdiomask.getpass(prompt="New password     : ")
+                    new_password_confirm = stdiomask.getpass(prompt="Confirm password : ")
+                    if (new_password != new_password_confirm) \
+                            or (new_password is None and new_password_confirm is None):
                         print("Error: Passwords do not match.")
                         continue
                 else:
