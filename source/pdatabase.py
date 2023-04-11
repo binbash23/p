@@ -4,6 +4,7 @@
 # Copyright
 #
 import os.path
+import socket
 import sqlite3
 import logging
 import base64
@@ -868,6 +869,11 @@ class PDatabase:
                 set_attribute_value_in_configuration_table(self.database_filename,
                                                            CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
                                                            "False")
+        if get_attribute_value_from_configuration_table(self.database_filename,
+                                                        CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME) == "":
+            set_attribute_value_in_configuration_table(self.database_filename,
+                                                       CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                       socket.gethostname())
 
     def update_database_schema(self, database_filename: str):
         try:
