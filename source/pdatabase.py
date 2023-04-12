@@ -254,7 +254,7 @@ CREATE TABLE if not EXISTS "configuration" (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '4');   
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '5');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS "deleted_account" (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -277,6 +277,10 @@ CREATE TABLE if not exists "shell_history" (
 	"create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "execution_date" TEXT NOT NULL,
 	"user_input" TEXT NOT NULL
+);
+CREATE TABLE if not exists "alias" (
+    "alias" TEXT NOT NULL UNIQUE,
+	"command" TEXT
 );
 """
 SQL_CREATE_MERGE_DATABASE_SCHEMA = """
@@ -304,7 +308,7 @@ CREATE TABLE if not EXISTS merge_database.configuration (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '4');   
+insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '5');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS merge_database.deleted_account (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -327,6 +331,10 @@ CREATE TABLE if not exists merge_database.shell_history (
 	"create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "execution_date" TEXT NOT NULL,
 	"user_input" TEXT NOT NULL
+);
+CREATE TABLE if not exists merge_database.alias (
+    "alias" TEXT NOT NULL UNIQUE,
+	"command" TEXT
 );
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
@@ -358,8 +366,10 @@ SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_histor
 SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY = "delete from account_history"
 SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
 SQL_SELECT_COUNT_ALL_FROM_SHELL_HISTORY = "select count(*) from shell_history"
+SQL_SELECT_COUNT_ALL_FROM_ALIAS = "select count(*) from alias"
 SQL_SELECT_ALL_FROM_DELETED_ACCOUNT = "select uuid, create_date from deleted_account"
 SQL_SELECT_ALL_FROM_SHELL_HISTORY = "select uuid, create_date, execution_date, user_input from shell_history"
+SQL_SELECT_ALL_FROM_ALIAS = "select alias, command from alias"
 SQL_DELETE_ALL_FROM_DELETED_ACCOUNT = "delete from deleted_account"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
@@ -700,6 +710,24 @@ def get_shell_history_table_count(database_filename):
     return count
 
 
+def get_alias_table_count(database_filename):
+    count = 0
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_ALIAS
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count alias entries.")
+        count = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
+
 def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     count = 0
     try:
@@ -749,6 +777,7 @@ def print_database_statistics(database_filename):
     account_count_invalid = get_account_count_invalid(database_filename)
     account_history_count = get_account_history_table_count(database_filename)
     shell_history_count = get_shell_history_table_count(database_filename)
+    alias_count = get_alias_table_count(database_filename)
     database_uuid = get_database_uuid(database_filename)
     database_creation_date = get_database_creation_date(database_filename)
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -790,6 +819,7 @@ def print_database_statistics(database_filename):
           str(account_count_invalid) + ")")
     print("Accounts in history                 : " + str(account_history_count))
     print("Shell history entries               : " + str(shell_history_count))
+    print("Aliases                             : " + str(alias_count))
     print("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
@@ -1023,6 +1053,61 @@ class PDatabase:
         finally:
             database_connection.close()
         return shell_history_array
+
+    def get_alias_commands_decrypted(self) -> [str]:
+        alias_commands = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select alias, command from alias order by 1"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                # print("->" + str(row))
+                current_alias = row[0]
+                current_command = self.decrypt_string_if_password_is_present(row[1])
+                alias_commands.append(current_alias + " - " + current_command)
+        except Exception as e:
+            print("Error getting all alias from database.")
+            return alias_commands
+        finally:
+            database_connection.close()
+        return alias_commands
+
+    def get_alias_command_decrypted(self, alias: str) -> str:
+        alias_command = ""
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select command from alias where alias = ?"
+            sqlresult = cursor.execute(sqlstring, alias)
+            result = sqlresult.fetchone()
+            if result is None:
+                return alias_command
+            encrypted_command = result[0]
+            decrypted_command = self.decrypt_string_if_password_is_present(encrypted_command)
+            alias_command = decrypted_command
+        except Exception as e:
+            print("Error getting alias from database.")
+            return alias_command
+        finally:
+            database_connection.close()
+        return alias_command
+
+    def set_alias_command_and_encrypt(self, alias: str, command: str):
+        if alias == "" or alias is None:
+            return
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            encrypted_command = self.encrypt_string_if_password_is_present(command)
+            sqlstring = "insert or replace into alias (alias, command) values (?, ?)"
+            sqlresult = cursor.execute(sqlstring, (alias, encrypted_command))
+            database_connection.commit()
+        except Exception as e:
+            print("Error setting alias into database.")
+        finally:
+            database_connection.close()
 
     def append_shell_history_entry(self, shell_history_entry: ShellHistoryEntry):
         try:
@@ -1664,14 +1749,17 @@ class PDatabase:
             account_history_count = get_account_history_table_count(self.database_filename)
             deleted_account_table_count = get_deleted_account_table_count(self.database_filename)
             shell_history_table_count = get_shell_history_table_count(self.database_filename)
+            alias_table_count = get_alias_table_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
             print("Re-encrypting " + str(account_history_count) + " account history entries...")
             print("Re-encrypting " + str(deleted_account_table_count) + " deleted account entries...")
             print("Re-encrypting " + str(shell_history_table_count) + " shell history entries...")
+            print("Re-encrypting " + str(alias_table_count) + " alias entries...")
             bar = progressbar.ProgressBar(max_value=(account_count +
                                                      account_history_count +
                                                      deleted_account_table_count +
-                                                     shell_history_table_count))
+                                                     shell_history_table_count +
+                                                     alias_table_count))
             bar.start()
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
@@ -1779,6 +1867,21 @@ class PDatabase:
                                                                                     new_password)
                 update_sql_string = "update shell_history set execution_date = ?, user_input = ? where uuid = ?"
                 cursor.execute(update_sql_string, (new_current_execution_date, new_current_user_input, current_uuid))
+
+            # reencrypt alias table
+            sqlstring = SQL_SELECT_ALL_FROM_ALIAS
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                results_found += 1
+                # get current shell_history data (encrypted)
+                current_alias = row[0]
+                current_command = row[1]
+
+                new_current_command = self.decrypt_and_encrypt_with_new_password(current_command,
+                                                                                 new_password)
+                update_sql_string = "update alias set command = ? where alias = ?"
+                cursor.execute(update_sql_string, (new_current_command, current_alias))
 
             bar.finish()
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)

@@ -78,7 +78,23 @@ class ShellCommand:
 
 
 SHELL_COMMANDS = [
+    ShellCommand("0", "0", "Alias. This alias can be set with the alias command."),
+    ShellCommand("1", "1", "Alias. This alias can be set with the alias command."),
+    ShellCommand("2", "2", "Alias. This alias can be set with the alias command."),
+    ShellCommand("3", "3", "Alias. This alias can be set with the alias command."),
+    ShellCommand("4", "4", "Alias. This alias can be set with the alias command."),
+    ShellCommand("5", "5", "Alias. This alias can be set with the alias command."),
+    ShellCommand("6", "6", "Alias. This alias can be set with the alias command."),
+    ShellCommand("7", "7", "Alias. This alias can be set with the alias command."),
+    ShellCommand("8", "8", "Alias. This alias can be set with the alias command."),
+    ShellCommand("9", "9", "Alias. This alias can be set with the alias command."),
     ShellCommand("add", "add", "Add a new account."),
+    ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
+                 "programmable command. Possible alias names are the numbers from 0 to 9. To set the " +
+                 "command 'sc email' on the alias 1 you have to type: 'alias 1 sc Email'. After that you" +
+                 " can run the command by just typing 1. To see all aliases just type 'alias'. If you want " +
+                 "to see the command programmed on the alias 3 for example, type 'alias 3'. To unset an alias, " +
+                 "for example the 3, type 'alias 3 -'."),
     ShellCommand("changepassword", "changepassword", "Change the master password of current database. This " +
                  "can take some minutes if there are a lot accounts in it."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
@@ -128,7 +144,7 @@ SHELL_COMMANDS = [
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
-                 "password of the account found to clipboard."),
+                 "password of the account found to the clipboard."),
     ShellCommand("sca", "sca <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy one" +
                  " after another the URL, loginname and password of the account found to clipboard."),
     ShellCommand("scl", "scl <SEARCHSTRING>", "Search for SEARCHSTRING in account columns and copy the loginname" +
@@ -415,6 +431,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
         else:
             p_database.append_shell_history_entry(current_shell_history_entry)
         # and proceed parsing the command...:
+
+        # check if the command is an alias. then the alias must be replaced with the stored command
+        if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
+            alias_command = p_database.get_alias_command_decrypted(shell_command.command)
+            shell_command = expand_string_2_shell_command(alias_command)
+            current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
+            shell_history_array.append(current_shell_history_entry)
+            p_database.append_shell_history_entry(current_shell_history_entry)
+
+        # continue with command processing
+
         if shell_command.command == "!":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
@@ -424,6 +451,28 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "add":
             p.add(p_database)
+            continue
+        if shell_command.command == "alias":
+            if len(shell_command.arguments) == 1:
+                aliases = p_database.get_alias_commands_decrypted()
+                for alias in aliases:
+                    print(alias)
+            else: # 2 arguments
+                alias_argument_list = shell_command.arguments[1].split(maxsplit=1)
+                current_alias = alias_argument_list[0]
+                if current_alias  not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
+                    print("Error: Only aliases from 0..9 are allowed.")
+                    continue
+                else:
+                    if len(alias_argument_list) == 1:
+                        command = p_database.get_alias_command_decrypted(current_alias)
+                        print(command)
+                        continue
+                    else:
+                        current_command = alias_argument_list[1]
+                        if current_command == '-':
+                            current_command = ""
+                        p_database.set_alias_command_and_encrypt(current_alias, current_command)
             continue
         if shell_command.command == "changedropboxdbpassword":
             p.change_dropbox_database_password(p_database)
