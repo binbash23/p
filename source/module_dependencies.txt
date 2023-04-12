@@ -13,6 +13,7 @@ progressbar
 dropbox
 pandas
 inputimeout
-stdiomask
+getpass
+#stdiomask
 
 To use copy&paste in ubuntu you need to install "python3-pyperclip"

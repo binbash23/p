@@ -3,6 +3,7 @@
 #
 # Copyright
 #
+import datetime
 import os.path
 import socket
 import sqlite3
@@ -253,7 +254,7 @@ CREATE TABLE if not EXISTS "configuration" (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '3');   
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '4');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS "deleted_account" (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -269,6 +270,13 @@ CREATE TABLE if not exists "account_history" (
     "password"	TEXT,
     "type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
+);
+-- table for command history entries
+CREATE TABLE if not exists "shell_history" (
+    "uuid" TEXT NOT NULL UNIQUE,
+	"create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "execution_date" TEXT NOT NULL,
+	"user_input" TEXT NOT NULL
 );
 """
 SQL_CREATE_MERGE_DATABASE_SCHEMA = """
@@ -296,7 +304,7 @@ CREATE TABLE if not EXISTS merge_database.configuration (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '3');   
+insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '4');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS merge_database.deleted_account (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -313,6 +321,13 @@ CREATE TABLE if not exists merge_database.account_history (
     "type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 );	
+-- table for command history entries
+CREATE TABLE if not exists merge_database.shell_history (
+    "uuid" TEXT NOT NULL UNIQUE,
+	"create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "execution_date" TEXT NOT NULL,
+	"user_input" TEXT NOT NULL
+);
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
 SQL_SELECT_ALL_ACCOUNTS = """
@@ -342,7 +357,9 @@ SQL_SELECT_COUNT_ALL_FROM_ACCOUNT = "select count(*) from account"
 SQL_SELECT_COUNT_ALL_FROM_ACCOUNT_HISTORY = "select count(*) from account_history"
 SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY = "delete from account_history"
 SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
+SQL_SELECT_COUNT_ALL_FROM_SHELL_HISTORY = "select count(*) from shell_history"
 SQL_SELECT_ALL_FROM_DELETED_ACCOUNT = "select uuid, create_date from deleted_account"
+SQL_SELECT_ALL_FROM_SHELL_HISTORY = "select uuid, create_date, execution_date, user_input from shell_history"
 SQL_DELETE_ALL_FROM_DELETED_ACCOUNT = "delete from deleted_account"
 SQL_SELECT_COUNT_ALL_VALID_FROM_ACCOUNT = "select count(*) from account where invalid = 0"
 SQL_SELECT_COUNT_ALL_INVALID_FROM_ACCOUNT = "select count(*) from account where invalid = 1"
@@ -363,6 +380,18 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
 CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
+
+
+class ShellHistoryEntry:
+    execution_date = ""
+    user_input = ""
+
+    def __init__(self, execution_date=None, user_input=""):
+        if execution_date is None:
+            self.execution_date = datetime.datetime.now()
+        else:
+            self.execution_date = execution_date
+        self.user_input = user_input
 
 
 class Account:
@@ -634,6 +663,7 @@ def get_account_history_table_count(database_filename):
         database_connection.close()
     return count
 
+
 def get_deleted_account_table_count(database_filename):
     count = 0
     try:
@@ -651,6 +681,25 @@ def get_deleted_account_table_count(database_filename):
         database_connection.close()
     return count
 
+
+def get_shell_history_table_count(database_filename):
+    count = 0
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_SHELL_HISTORY
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count shell_history entries.")
+        count = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
+
 def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     count = 0
     try:
@@ -667,6 +716,7 @@ def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     finally:
         database_connection.close()
     return count
+
 
 def get_account_count(database_filename, also_count_invalidated_accounts: bool = True):
     count = 0
@@ -698,6 +748,7 @@ def print_database_statistics(database_filename):
     account_count_valid = get_account_count_valid(database_filename)
     account_count_invalid = get_account_count_invalid(database_filename)
     account_history_count = get_account_history_table_count(database_filename)
+    shell_history_count = get_shell_history_table_count(database_filename)
     database_uuid = get_database_uuid(database_filename)
     database_creation_date = get_database_creation_date(database_filename)
     last_change_date = get_last_change_date_in_database(database_filename)
@@ -738,6 +789,7 @@ def print_database_statistics(database_filename):
     print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
           str(account_count_invalid) + ")")
     print("Accounts in history                 : " + str(account_history_count))
+    print("Shell history entries               : " + str(shell_history_count))
     print("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
     print("Last Merge Database                 : " + str(last_merge_database))
     print("Last Merge Date                     : " + str(last_merge_date))
@@ -948,6 +1000,50 @@ class PDatabase:
         finally:
             database_connection.close()
         return result_array
+
+    def get_shell_history_entries_decrypted(self) -> [ShellHistoryEntry]:
+        shell_history_array = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select execution_date, user_input from shell_history"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                current_execution_date = row[0]
+                current_user_input = row[1]
+                current_execution_date_decrypted = self.decrypt_string_if_password_is_present(current_execution_date)
+                current_user_input_decrypted = self.decrypt_string_if_password_is_present(current_user_input)
+                new_shell_history = ShellHistoryEntry(execution_date=current_execution_date_decrypted,
+                                                      user_input=current_user_input_decrypted)
+                shell_history_array.append(new_shell_history)
+        except Exception as e:
+            print("Error getting shell history entries from database.")
+            return shell_history_array
+        finally:
+            database_connection.close()
+        return shell_history_array
+
+    def append_shell_history_entry(self, shell_history_entry: ShellHistoryEntry):
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            # print("-->" + str(shell_history_entry.execution_date))
+            # print("-->" + shell_history_entry.user_input)
+            execution_date_encrypted = \
+                self.encrypt_string_if_password_is_present(str(shell_history_entry.execution_date))
+            command_encrypted = self.encrypt_string_if_password_is_present(shell_history_entry.user_input)
+            sqlstring = "insert into shell_history (uuid, execution_date, user_input) values ('" + \
+                        str(uuid.uuid4()) + "', '" + str(execution_date_encrypted) + \
+                        "', '" + str(command_encrypted) + "') "
+            # print("---->" + sqlstring)
+            cursor.execute(sqlstring)
+            database_connection.commit()
+        except Exception as e:
+            print("Error appending shell history entry to database: " + str(e))
+            return None
+        finally:
+            database_connection.close()
 
     def get_deleted_account_uuids_decrypted_from_merge_database(self, merge_database_filename: str) -> []:
         result_array = []
@@ -1448,8 +1544,7 @@ class PDatabase:
             database_connection.close()
         return None
 
-
-    def set_password_of_account(self, account_uuid:str, new_password:str):
+    def set_password_of_account(self, account_uuid: str, new_password: str):
         account = self.get_account_by_uuid_and_decrypt(account_uuid)
         if account is None:
             return
@@ -1568,14 +1663,20 @@ class PDatabase:
             account_count = get_account_count(self.database_filename)
             account_history_count = get_account_history_table_count(self.database_filename)
             deleted_account_table_count = get_deleted_account_table_count(self.database_filename)
+            shell_history_table_count = get_shell_history_table_count(self.database_filename)
             print("Re-encrypting " + str(account_count) + " accounts...")
             print("Re-encrypting " + str(account_history_count) + " account history entries...")
-            print("Re-encrypting " + str(account_history_count) + " deleted account entries...")
-            bar = progressbar.ProgressBar(max_value=(account_count + account_history_count +
-                                                     deleted_account_table_count)).start()
+            print("Re-encrypting " + str(deleted_account_table_count) + " deleted account entries...")
+            print("Re-encrypting " + str(shell_history_table_count) + " shell history entries...")
+            bar = progressbar.ProgressBar(max_value=(account_count +
+                                                     account_history_count +
+                                                     deleted_account_table_count +
+                                                     shell_history_table_count))
             bar.start()
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
+
+            # reencrypt account table
             sqlstring = SQL_SELECT_ALL_ACCOUNTS
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
@@ -1607,10 +1708,11 @@ class PDatabase:
                                                    new_current_password, new_current_type))
                 bar.update(results_found)
 
+            # reencrypt account_history table
             sqlstring = SQL_SELECT_ALL_ACCOUNT_HISTORY
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            #results_found = 0
+            # results_found = 0
             for row in result:
                 results_found += 1
                 # get current account_history data (enrypted)
@@ -1640,24 +1742,43 @@ class PDatabase:
                                                    new_current_password, new_current_type))
                 bar.update(results_found)
 
-                sqlstring = SQL_SELECT_ALL_FROM_DELETED_ACCOUNT
-                sqlresult = cursor.execute(sqlstring)
-                result = sqlresult.fetchall()
-                # results_found = 0
-                for row in result:
-                    results_found += 1
-                    # get current account_history data (enrypted)
-                    current_uuid = row[0]
-                    current_create_date = row[1]
-                    new_current_uuid = self.decrypt_and_encrypt_with_new_password(current_uuid, new_password)
-                    # delete old entry
-                    delete_sql_string = "delete from deleted_account where uuid = '" + current_uuid + "'"
-                    cursor.execute(delete_sql_string)
+            # reencrypt deleted_account table
+            sqlstring = SQL_SELECT_ALL_FROM_DELETED_ACCOUNT
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            # results_found = 0
+            for row in result:
+                results_found += 1
+                # get current account_history data (enrypted)
+                current_uuid = row[0]
+                current_create_date = row[1]
+                new_current_uuid = self.decrypt_and_encrypt_with_new_password(current_uuid, new_password)
+                # delete old entry
+                delete_sql_string = "delete from deleted_account where uuid = '" + current_uuid + "'"
+                cursor.execute(delete_sql_string)
 
-                    # and create new encrypted entry
-                    insert_sql_string = "insert into deleted_account (uuid, create_date) values (?, ?)"
-                    cursor.execute(insert_sql_string, (new_current_uuid, current_create_date))
-                    bar.update(results_found)
+                # and create new encrypted entry
+                insert_sql_string = "insert into deleted_account (uuid, create_date) values (?, ?)"
+                cursor.execute(insert_sql_string, (new_current_uuid, current_create_date))
+                bar.update(results_found)
+
+            # reencrypt shell history table
+            sqlstring = SQL_SELECT_ALL_FROM_SHELL_HISTORY
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                results_found += 1
+                # get current shell_history data (encrypted)
+                current_uuid = row[0]
+                current_create_date = row[1]
+                current_execution_date = row[2]
+                current_user_input = row[3]
+                new_current_execution_date = self.decrypt_and_encrypt_with_new_password(current_execution_date,
+                                                                                        new_password)
+                new_current_user_input = self.decrypt_and_encrypt_with_new_password(current_user_input,
+                                                                                    new_password)
+                update_sql_string = "update shell_history set execution_date = ?, user_input = ? where uuid = ?"
+                cursor.execute(update_sql_string, (new_current_execution_date, new_current_user_input, current_uuid))
 
             bar.finish()
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
@@ -2020,7 +2141,6 @@ class PDatabase:
             sqlresult = cursor.execute(SQL_MERGE_COUNT_REMOTE_MISSING_HISTORY_UUIDS_THAT_EXIST_IN_LOCAL_DATABASE)
             result = sqlresult.fetchone()
             count_history_uuids_in_local_that_do_not_exist_in_remote = result[0]
-
 
             #
             # Step #1 Sync new accounts from remote merge database into main database

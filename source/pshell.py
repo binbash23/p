@@ -5,10 +5,11 @@
 # Password/account database for managing all your accounts
 #
 import sys
-# import getpass
-import stdiomask
+import getpass
+# import stdiomask
 import p
 import pdatabase
+from pdatabase import ShellHistoryEntry
 import dropboxconnector
 import pyperclip3
 import datetime
@@ -20,16 +21,16 @@ import textwrap
 import requests
 
 
-class ShellHistory:
-    execution_date = ""
-    user_input = ""
-
-    def __init__(self, execution_date=None, user_input=""):
-        if execution_date is None:
-            self.execution_date = datetime.datetime.now()
-        else:
-            self.execution_date = execution_date
-        self.user_input = user_input
+# class ShellHistoryEntry:
+#     execution_date = ""
+#     user_input = ""
+#
+#     def __init__(self, execution_date=None, user_input=""):
+#         if execution_date is None:
+#             self.execution_date = datetime.datetime.now()
+#         else:
+#             self.execution_date = execution_date
+#         self.user_input = user_input
 
 
 class ShellCommand:
@@ -294,6 +295,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     global show_unmerged_changes_warning_on_startup
     load_pshell_configuration(p_database)
 
+    # time.sleep(1)
     clear_console()
     user_input = ""
     latest_found_account = None
@@ -305,7 +307,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print(colored("Note: You have unmerged changes in your local database.", 'red'))
     manual_locked = False
-    shell_history_array = []
+    # shell_history_array = []
+    shell_history_array = p_database.get_shell_history_entries_decrypted()
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
@@ -317,7 +320,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 else:
                     user_input = input(prompt_string)
                 if user_input.strip() != "":
-                    shell_history_array.append(ShellHistory(user_input=user_input))
+                    current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
+                    shell_history_array.append(current_shell_history_entry)
             except KeyboardInterrupt:
                 # return
                 print()
@@ -338,7 +342,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print(p.VERSION)
                     print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
                 try:
-                    user_input_pass = stdiomask.getpass(prompt="Enter database password: ")
+                    user_input_pass = getpass.getpass("Enter database password: ")
                 except KeyboardInterrupt:
                     print()
                     return
@@ -364,7 +368,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Unknown command '" + user_input + "'")
                 print("Enter 'help' for command help")
             continue
+        #
         # proceed possible commands
+        #
+
         # check if the command is the "redo last command" command
         if shell_command.command == "redo":
             # delete the redo command from hist
@@ -405,7 +412,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Unknown command '" + last_user_input + "'")
                 print("Enter 'help' for command help")
                 continue
-            # and proceed parsing the command...:
+        else:
+            p_database.append_shell_history_entry(current_shell_history_entry)
+        # and proceed parsing the command...:
         if shell_command.command == "!":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
@@ -555,15 +564,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_database_filename = shell_command.arguments[1].strip()
             if os.path.exists(new_database_filename):
                 try:
-                    new_database_password = stdiomask.getpass(prompt="Enter database password: ")
+                    new_database_password = getpass.getpass("Enter database password: ")
                 except KeyboardInterrupt as k:
                     print()
                     continue
             else:
                 print(colored("Database does not exist.", "red"))
                 try:
-                    new_database_password = stdiomask.getpass(prompt="Enter password for new database    : ")
-                    new_database_password_confirm = stdiomask.getpass(prompt="Confirm password for new database  : ")
+                    new_database_password = getpass.getpass("Enter password for new database    : ")
+                    new_database_password_confirm = getpass.getpass("Confirm password for new database  : ")
                 except KeyboardInterrupt as k:
                     print()
                     continue
@@ -918,8 +927,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if pdatabase.get_attribute_value_from_configuration_table(
                         p_database.database_filename,
                         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS) == 'True':
-                    new_password = stdiomask.getpass(prompt="New password     : ")
-                    new_password_confirm = stdiomask.getpass(prompt="Confirm password : ")
+                    new_password = getpass.getpass("New password     : ")
+                    new_password_confirm = getpass.getpass("Confirm password : ")
                     if (new_password != new_password_confirm) \
                             or (new_password is None and new_password_confirm is None):
                         print("Error: Passwords do not match.")
