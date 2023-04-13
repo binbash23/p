@@ -1031,6 +1031,18 @@ class PDatabase:
             database_connection.close()
         return result_array
 
+    def delete_all_shell_history_entries(self):
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            sqlstring = "delete from shell_history"
+            cursor.execute(sqlstring)
+        except Exception as e:
+            print("Error deleting shell history entries from database.")
+        finally:
+            database_connection.close()
+
     def get_shell_history_entries_decrypted(self) -> [ShellHistoryEntry]:
         shell_history_array = []
         try:

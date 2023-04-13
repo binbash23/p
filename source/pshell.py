@@ -489,6 +489,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "clearhistory":
             shell_history_array = []
+            p_database.delete_all_shell_history_entries()
             continue
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
