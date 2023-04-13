@@ -125,6 +125,8 @@ SHELL_COMMANDS = [
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
+    ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
+                 "limits the amount of history entries that will be saved in the shell_history table in the database."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
     ShellCommand("merge2file", "merge2file <FILENAME>",
                  "Merge local database with another database identified by FILENAME."),
@@ -190,8 +192,8 @@ SHELL_COMMANDS.sort()
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
 pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
-# DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE = 1
-# pshell_max_idle_minutes_timeout_min_before_clear_console = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE
+DEFAULT_PSHELL_MAX_HISTORY_SIZE = 100
+pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
 show_unmerged_changes_warning_on_startup = True
 
 
@@ -244,6 +246,18 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN, pshell_max_idle_minutes_timeout)
+
+    global pshell_max_history_size
+    pshell_max_history_size = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE)
+    if not pshell_max_history_size.isnumeric() \
+            or pshell_max_history_size is None \
+            or pshell_max_history_size == "":
+        pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
+        pdatabase.set_attribute_value_in_configuration_table(
+            p_database.database_filename,
+            pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE, pshell_max_history_size)
 
     # global pshell_max_idle_minutes_timeout_min_before_clear_console
     # pshell_max_idle_minutes_timeout_min_before_clear_console = pdatabase.get_attribute_value_from_configuration_table(
@@ -308,6 +322,7 @@ def clear_console():
 
 def start_pshell(p_database: pdatabase.PDatabase):
     global pshell_max_idle_minutes_timeout
+    global pshell_max_history_size
     global show_unmerged_changes_warning_on_startup
     load_pshell_configuration(p_database)
 
@@ -429,7 +444,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Enter 'help' for command help")
                 continue
         else:
-            p_database.append_shell_history_entry(current_shell_history_entry)
+            p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
         # and proceed parsing the command...:
 
         # check if the command is an alias. then the alias must be replaced with the stored command
@@ -438,7 +453,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             shell_command = expand_string_2_shell_command(alias_command)
             current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
             shell_history_array.append(current_shell_history_entry)
-            p_database.append_shell_history_entry(current_shell_history_entry)
+            p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
 
         # continue with command processing
 
@@ -592,6 +607,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
             # print("Pshell locked.")
+            continue
+        if shell_command.command == "maxhistorysize":
+            if len(shell_command.arguments) == 1:
+                print("PShell max history size is " + str(pshell_max_history_size))
+                continue
+            try:
+                pshell_max_history_size = int(shell_command.arguments[1])
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE,
+                    pshell_max_history_size)
+            except Exception as e:
+                print("Error setting pshell max history size: " + str(e))
             continue
         if shell_command.command == "merge2dropbox":
             p.merge_with_dropbox(p_database)
@@ -907,6 +935,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "showconfig":
             print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
+            print("PShell max history size             : " + str(pshell_max_history_size))
             print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
             print("Shadow passwords                    : " + str(p_database.shadow_passwords))
             print("Show accounts verbose               : " + str(p_database.show_account_details))

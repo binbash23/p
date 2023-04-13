@@ -381,9 +381,8 @@ CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE = "LAST_MERGE_DATE"
 CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION = "SCHEMA_VERSION"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
-CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "SHELL_MAX_IDLE_TIMEOUT_MIN"
-# CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR = \
-#     "SHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "PSHELL_MAX_IDLE_TIMEOUT_MIN"
+CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE = "PSHELL_MAX_HISTORY_SIZE"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "PSHELL_SHADOW_PASSWORDS"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS = "PSHELL_SHOW_INVALIDATED_ACCOUNTS"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT_DETAILS"
@@ -1121,7 +1120,7 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def append_shell_history_entry(self, shell_history_entry: ShellHistoryEntry):
+    def add_shell_history_entry(self, shell_history_entry: ShellHistoryEntry, max_history_size: int):
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1134,6 +1133,11 @@ class PDatabase:
                         str(uuid.uuid4()) + "', '" + str(execution_date_encrypted) + \
                         "', '" + str(command_encrypted) + "') "
             # print("---->" + sqlstring)
+            cursor.execute(sqlstring)
+            # delete too much existing entries from table
+            sqlstring = "DELETE FROM shell_history WHERE uuid NOT IN (SELECT uuid FROM shell_history ORDER BY " + \
+                        "create_date DESC LIMIT " + str(max_history_size) + ") "
+            cursor = database_connection.cursor()
             cursor.execute(sqlstring)
             database_connection.commit()
         except Exception as e:
