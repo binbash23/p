@@ -1122,17 +1122,16 @@ class PDatabase:
 
     def add_shell_history_entry(self, shell_history_entry: ShellHistoryEntry, max_history_size: int):
         try:
+            if int(max_history_size) < 1:
+                return
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            # print("-->" + str(shell_history_entry.execution_date))
-            # print("-->" + shell_history_entry.user_input)
             execution_date_encrypted = \
                 self.encrypt_string_if_password_is_present(str(shell_history_entry.execution_date))
             command_encrypted = self.encrypt_string_if_password_is_present(shell_history_entry.user_input)
             sqlstring = "insert into shell_history (uuid, execution_date, user_input) values ('" + \
                         str(uuid.uuid4()) + "', '" + str(execution_date_encrypted) + \
                         "', '" + str(command_encrypted) + "') "
-            # print("---->" + sqlstring)
             cursor.execute(sqlstring)
             # delete too much existing entries from table
             sqlstring = "DELETE FROM shell_history WHERE uuid NOT IN (SELECT uuid FROM shell_history ORDER BY " + \

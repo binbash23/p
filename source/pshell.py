@@ -126,7 +126,8 @@ SHELL_COMMANDS = [
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
-                 "limits the amount of history entries that will be saved in the shell_history table in the database."),
+                 "limits the amount of history entries that will be saved in the shell_history table in the " +
+                 "database. To disable the pshell history, set this value to 0."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
     ShellCommand("merge2file", "merge2file <FILENAME>",
                  "Merge local database with another database identified by FILENAME."),
@@ -352,7 +353,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = input(prompt_string)
                 if user_input.strip() != "":
                     current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
-                    shell_history_array.append(current_shell_history_entry)
+                    #shell_history_array.append(current_shell_history_entry)
             except KeyboardInterrupt:
                 # return
                 print()
@@ -406,7 +407,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # check if the command is the "redo last command" command
         if shell_command.command == "redo":
             # delete the redo command from hist
-            shell_history_array.pop()
+            #shell_history_array.pop()
+            shell_history_array = p_database.get_shell_history_entries_decrypted()
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
                 continue
@@ -452,7 +454,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             shell_command = expand_string_2_shell_command(alias_command)
             current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
-            shell_history_array.append(current_shell_history_entry)
+            #shell_history_array.append(current_shell_history_entry)
             p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
 
         # continue with command processing
@@ -503,7 +505,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             clear_console()
             continue
         if shell_command.command == "clearhistory":
-            shell_history_array = []
+            #shell_history_array = []
             p_database.delete_all_shell_history_entries()
             continue
         if shell_command.command == "copypassword":
@@ -579,7 +581,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":
-            print_shell_command_history(shell_history_array)
+            #print_shell_command_history(shell_history_array)
+            print_shell_command_history(p_database.get_shell_history_entries_decrypted())
             continue
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
@@ -610,7 +613,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "maxhistorysize":
             if len(shell_command.arguments) == 1:
-                print("PShell max history size is " + str(pshell_max_history_size))
+                if pshell_max_history_size < 1:
+                    print("PShell max history size is " + str(pshell_max_history_size) + " (disabled)")
+                else:
+                    print("PShell max history size is " + str(pshell_max_history_size))
                 continue
             try:
                 pshell_max_history_size = int(shell_command.arguments[1])
