@@ -229,7 +229,7 @@ def parse_bool(string: str) -> bool:
 def print_shell_command_history(shell_history_array: [ShellCommand]):
     i = 1
     for current_shell_history_entry in shell_history_array:
-        print(" [" + str(i) + "] - " +
+        print(" [" + str(i).rjust(2) + "] - " +
               str(current_shell_history_entry.execution_date) +
               " - " + current_shell_history_entry.user_input)
         i += 1
@@ -259,6 +259,8 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE, pshell_max_history_size)
+    if pshell_max_history_size.isnumeric():
+        pshell_max_history_size = int(pshell_max_history_size)
 
     # global pshell_max_idle_minutes_timeout_min_before_clear_console
     # pshell_max_idle_minutes_timeout_min_before_clear_console = pdatabase.get_attribute_value_from_configuration_table(
@@ -339,7 +341,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print(colored("Note: You have unmerged changes in your local database.", 'red'))
     manual_locked = False
-    # shell_history_array = []
+    if pshell_max_history_size < 1:
+        p_database.delete_all_shell_history_entries()
     shell_history_array = p_database.get_shell_history_entries_decrypted()
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
@@ -731,7 +734,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print()
                 for acc in account_array:
                     print()
-                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
+                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
                     # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
                     i = i + 1
                 print("")
@@ -769,8 +772,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print()
                 for acc in account_array:
                     print()
-                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
-                    # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
+                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
                     i = i + 1
                 print("")
                 index = input("Multiple accounts found. Please specify the # you need: ")
@@ -821,7 +823,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print()
                 for acc in account_array:
                     print()
-                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
+                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
                     # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
                     i = i + 1
                 print("")
@@ -855,7 +857,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print()
                 for acc in account_array:
                     print()
-                    print(" [" + str(i) + "]" + " - Name: " + acc.name)
+                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
                     # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
                     i = i + 1
                 print("")

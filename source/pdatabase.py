@@ -1037,6 +1037,7 @@ class PDatabase:
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "delete from shell_history"
             cursor.execute(sqlstring)
+            database_connection.commit()
         except Exception as e:
             print("Error deleting shell history entries from database.")
         finally:
@@ -1077,7 +1078,7 @@ class PDatabase:
                 # print("->" + str(row))
                 current_alias = row[0]
                 current_command = self.decrypt_string_if_password_is_present(row[1])
-                alias_commands.append(current_alias + " - " + current_command)
+                alias_commands.append(" [" + current_alias + "] - " + current_command)
         except Exception as e:
             print("Error getting all alias from database.")
             return alias_commands
@@ -1121,9 +1122,9 @@ class PDatabase:
             database_connection.close()
 
     def add_shell_history_entry(self, shell_history_entry: ShellHistoryEntry, max_history_size: int):
+        if int(max_history_size) < 1:
+            return
         try:
-            if int(max_history_size) < 1:
-                return
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             execution_date_encrypted = \
