@@ -1113,8 +1113,12 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             encrypted_command = self.encrypt_string_if_password_is_present(command)
-            sqlstring = "insert or replace into alias (alias, command) values (?, ?)"
-            sqlresult = cursor.execute(sqlstring, (alias, encrypted_command))
+            if encrypted_command == "":
+                sqlstring = "delete from alias where alias = ?"
+                cursor.execute(sqlstring, alias)
+            else:
+                sqlstring = "insert or replace into alias (alias, command) values (?, ?)"
+                cursor.execute(sqlstring, (alias, encrypted_command))
             database_connection.commit()
         except Exception as e:
             print("Error setting alias into database.")
