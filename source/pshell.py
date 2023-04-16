@@ -87,9 +87,13 @@ SHELL_COMMANDS = [
                  " can run the command by just typing 1.\nTo see all aliases just type 'alias'. If you want " +
                  "to see the command programmed on the alias 3 for example, type 'alias 3'.\nTo unset an alias, " +
                  "for example the 3, type 'alias 3 -'."),
-    ShellCommand("changepassword", "changepassword", "Change the master password of current database. This " +
-                 "can take some minutes if there are a lot accounts in it."),
-    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
+    ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
+                 "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
+                 "be re-encrypted but also account history, aliases, command history and so on."),
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox " +
+                 "database.\nThe database will be donloaded from the dropbox account and you can enter a new " +
+                 "password. After re-encrypting the dropbox version of the database, the database will be " +
+                 "uploaded again."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
