@@ -68,10 +68,14 @@ class ShellCommand:
         print(" " + self.synopsis)
         print()
         print("DESCRIPTION")
-        formatted_description = textwrap.wrap(self.description,
-                                              width=78,
-                                              initial_indent=" ",
-                                              subsequent_indent=" ")
+        formatted_description = []
+        for line in self.description.splitlines():
+            for sub_line in textwrap.wrap(line,
+                                          width=78,
+                                          initial_indent=" ",
+                                          subsequent_indent=" "):
+                formatted_description.append(sub_line)
+            #formatted_description.append("\n")
         for row in formatted_description:
             print(row)
         print()
@@ -90,10 +94,10 @@ SHELL_COMMANDS = [
     ShellCommand("9", "9", "Alias. This alias can be set with the alias command."),
     ShellCommand("add", "add", "Add a new account."),
     ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
-                 "programmable command. Possible alias names are the numbers from 0 to 9. To set the " +
+                 "programmable command. Possible alias names are the numbers from 0 to 9.\nTo set the " +
                  "command 'sc email' on the alias 1 you have to type: 'alias 1 sc Email'. After that you" +
-                 " can run the command by just typing 1. To see all aliases just type 'alias'. If you want " +
-                 "to see the command programmed on the alias 3 for example, type 'alias 3'. To unset an alias, " +
+                 " can run the command by just typing 1.\nTo see all aliases just type 'alias'. If you want " +
+                 "to see the command programmed on the alias 3 for example, type 'alias 3'.\nTo unset an alias, " +
                  "for example the 3, type 'alias 3 -'."),
     ShellCommand("changepassword", "changepassword", "Change the master password of current database. This " +
                  "can take some minutes if there are a lot accounts in it."),
@@ -107,7 +111,7 @@ SHELL_COMMANDS = [
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
-                 "UUID's which have existed in this database. You should empty this table on all databases. " +
+                 "UUID's which have existed in this database.\nYou should empty this table on all databases. " +
                  "Otherwise the table will be filled again after the next merge with a database which has entries " +
                  "in the deleted_accounts table."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
@@ -127,7 +131,7 @@ SHELL_COMMANDS = [
     ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
-                 "database. To disable the pshell history, set this value to 0."),
+                 "database.\nTo disable the pshell history, set this value to 0."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
     ShellCommand("merge2file", "merge2file <FILENAME>",
                  "Merge local database with another database identified by FILENAME."),
@@ -136,11 +140,11 @@ SHELL_COMMANDS = [
                  "with the status command"),
     ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
-                 " be created. With this command you can switch between multiple p databases."),
+                 " be created.\nWith this command you can switch between multiple p databases."),
     ShellCommand("quit", "quit", "Quit pshell."),
     ShellCommand("redo", "redo [<HISTORY_INDEX>|?]", "Redo the last shell command. The redo command itself will not" +
                  " appear in the command history. You can choose the index of the command in your history if" +
-                 " you want. If you choose no index, the latest command will be executed. If you use redo ? you " +
+                 " you want.\nIf you choose no index, the latest command will be executed.\nIf you use redo ? you " +
                  "will see the current command history with the indices to choose from."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
@@ -154,7 +158,7 @@ SHELL_COMMANDS = [
                  " of the account found to clipboard."),
     ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
                  " account found to clipboard."),
-    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID. If shadow passwords is on, the password " +
+    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID.\nIf shadow passwords is on, the password " +
                  "will be read hidden so that none can gather it from your screen."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
@@ -164,7 +168,7 @@ SHELL_COMMANDS = [
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
                  "Set the dropbox token account uuid in configuration."),
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
-                 " or show current shadow status. This is useful if you are not alone watching the output " +
+                 " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>", "Show change history of account with UUID."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
@@ -172,20 +176,20 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
-                 "unmerged changes in local database compared to the latest known merge database. If empty " +
-                 "the current status will be shown."),
+                 "unmerged changes in local database compared to the latest known merge database.\nWith no " +
+                 "arguments, the current status will be shown."),
     ShellCommand("sql", "sql <COMMAND>", "Execute COMMAND in database in native SQL language. The p database " +
                  "is fully accessable with sql commands."),
-    ShellCommand("status", "status", "Show configuration and database status. A short overview of the database " +
+    ShellCommand("status", "status", "Show configuration and database status.\nA short overview of the database " +
                  "will be shown including number of accounts, encryption status, database name..."),
     ShellCommand("timeout", "timeout [<MINUTES>]", "Set the maximum pshell inactivity timeout to MINUTES before " +
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
                  "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
     ShellCommand("updatep", "updatep", "Update p. Depending on your operating system, the latest p binary will" +
-                 " be downloaded from git and saved in the current folder with the ending '_latest'. You have " +
+                 " be downloaded from git and saved in the current folder with the ending '_latest'.\nYou have " +
                  "to stop p after that and delete the old p binary and replace it with the new one."),
-    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false. If verbose is on " +
+    ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false.\nIf verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
 ]
@@ -356,7 +360,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = input(prompt_string)
                 if user_input.strip() != "":
                     current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
-                    #shell_history_array.append(current_shell_history_entry)
+                    # shell_history_array.append(current_shell_history_entry)
             except KeyboardInterrupt:
                 # return
                 print()
@@ -410,7 +414,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # check if the command is the "redo last command" command
         if shell_command.command == "redo":
             # delete the redo command from hist
-            #shell_history_array.pop()
+            # shell_history_array.pop()
             shell_history_array = p_database.get_shell_history_entries_decrypted()
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
@@ -457,7 +461,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             shell_command = expand_string_2_shell_command(alias_command)
             current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
-            #shell_history_array.append(current_shell_history_entry)
+            # shell_history_array.append(current_shell_history_entry)
             p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
 
         # continue with command processing
@@ -477,10 +481,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 aliases = p_database.get_alias_commands_decrypted()
                 for alias in aliases:
                     print(alias)
-            else: # 2 arguments
+            else:  # 2 arguments
                 alias_argument_list = shell_command.arguments[1].split(maxsplit=1)
                 current_alias = alias_argument_list[0]
-                if current_alias  not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
+                if current_alias not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
                     print("Error: Only aliases from 0..9 are allowed.")
                     continue
                 else:
@@ -508,7 +512,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             clear_console()
             continue
         if shell_command.command == "clearhistory":
-            #shell_history_array = []
+            # shell_history_array = []
             p_database.delete_all_shell_history_entries()
             continue
         if shell_command.command == "copypassword":
@@ -584,7 +588,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":
-            #print_shell_command_history(shell_history_array)
+            # print_shell_command_history(shell_history_array)
             print_shell_command_history(p_database.get_shell_history_entries_decrypted())
             continue
         if shell_command.command == "idletime":
