@@ -104,8 +104,8 @@ SHELL_COMMANDS = [
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox database."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
-    ShellCommand("cplast", "cplast", "Copy password from the latest found account to clipboard."),
-    ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to clipboard."),
+    ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
+    ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
     ShellCommand("delete", "delete <UUID>", "Delete account with UUID. You can also invalidate the account " +
                  "instead of deleting it."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
@@ -153,11 +153,11 @@ SHELL_COMMANDS = [
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
                  "password of the account found to the clipboard."),
     ShellCommand("sca", "sca <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy one" +
-                 " after another the URL, loginname and password of the account found to clipboard."),
+                 " after another the URL, loginname and password of the account found to the clipboard."),
     ShellCommand("scl", "scl <SEARCHSTRING>", "Search for SEARCHSTRING in account columns and copy the loginname" +
-                 " of the account found to clipboard."),
+                 " of the account found to the clipboard."),
     ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
-                 " account found to clipboard."),
+                 " account found to the clipboard."),
     ShellCommand("sp", "sp <UUID>", "Set password for account with UUID.\nIf shadow passwords is on, the password " +
                  "will be read hidden so that none can gather it from your screen."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
@@ -187,8 +187,9 @@ SHELL_COMMANDS = [
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
                  "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
     ShellCommand("updatep", "updatep", "Update p. Depending on your operating system, the latest p binary will" +
-                 " be downloaded from git and saved in the current folder with the ending '_latest'.\nYou have " +
-                 "to stop p after that and delete the old p binary and replace it with the new one."),
+                 " be downloaded from git and saved in the current folder with the ending '_latest'.\nFor " +
+                 "windows this will be: p.exe_latest\nFor linux this will be: p_latest\nYou have " +
+                 "to stop p after that and delete the old p binary and replace it with the new downloaded one."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false.\nIf verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
@@ -315,7 +316,7 @@ def os_is_windows() -> bool:
         return True
     # for mac and linux os.name is posix
     else:
-        False
+        return False
 
 
 def clear_console():
@@ -525,7 +526,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pyperclip3.copy(password)
                 print("CLIPBOARD: Password")
             except Exception as e:
-                print("Error copying password to clipboard: " + str(e))
+                print("Error copying password to the clipboard: " + str(e))
             continue
         if shell_command.command == "delete":
             if len(shell_command.arguments) == 1:
@@ -760,7 +761,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pyperclip3.copy(account_array[0].password)
                 print("CLIPBOARD: Password")
             except Exception as e:
-                print("Error copying password to clipboard: " + str(e))
+                print("Error copying password to the clipboard: " + str(e))
             continue
         if shell_command.command == "sca":
             if len(shell_command.arguments) == 1:
@@ -811,7 +812,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 continue
             except Exception as e:
-                print("Error copying URL, loginname and password to clipboard: " + str(e))
+                print("Error copying URL, loginname and password to the clipboard: " + str(e))
             continue
         if shell_command.command == "scl":
             if len(shell_command.arguments) == 1:
@@ -845,7 +846,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pyperclip3.copy(account_array[0].loginname)
                 print("CLIPBOARD: Loginname")
             except Exception as e:
-                print("Error copying loginname to clipboard: " + str(e))
+                print("Error copying loginname to the clipboard: " + str(e))
             continue
         if shell_command.command == "scu":
             if len(shell_command.arguments) == 1:
@@ -879,7 +880,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pyperclip3.copy(account_array[0].url)
                 print("CLIPBOARD: URL")
             except Exception as e:
-                print("Error copying URL to clipboard: " + str(e))
+                print("Error copying URL to the clipboard: " + str(e))
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
@@ -1115,6 +1116,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
                 p_filename = p.P_FILENAME_LINUX
             print("Downloading latest p binary to: " + download_p_filename)
+            print("Please wait, this can take a while...")
             req = requests.get(download_url)
             open(download_p_filename, "wb").write(req.content)
             print("Download ready.")
