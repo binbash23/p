@@ -438,20 +438,6 @@ class Account:
                ", Invaliddate=" + self.invalid_date
 
 
-# def accounts_are_equal(account1: Account, account2: Account) -> bool:
-#     if account1 is None or account2 is None:
-#         return False
-#     if (account1.uuid == account2.uuid or (account1.uuid is None and account2.uuid is None)) and \
-#             (account1.name == account2.name or (account1.name is None and account2.name is None) and \
-#              (account1.url == account2.url or (account1.url is None and account2.url is None)) and \
-#              (account1.loginname == account2.loginname or (
-#                      account1.loginname is None and account2.loginname is None)) and \
-#              (account1.password == account2.password or (account1.password is None and account2.password is None)) and \
-#              (account1.type == account2.type or (account1.type is None and account2.type is None))):
-#         return True
-#     else:
-#         return False
-
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
     if account1 is None or account2 is None:
         return False
@@ -1195,28 +1181,6 @@ class PDatabase:
         else:
             return False
 
-    # def get_uuid_exists_in_deleted_accounts(self, account_uuid) -> bool:
-    #     try:
-    #         database_connection = sqlite3.connect(self.database_filename)
-    #         cursor = database_connection.cursor()
-    #         sqlstring = "select uuid from deleted_account"
-    #         # print("exceuting: " + sqlstring)
-    #         sqlresult = cursor.execute(sqlstring)
-    #         result = sqlresult.fetchall()
-    #         for row in result:
-    #             current_uuid = row[0]
-    #             decrypted_uuid = self.decrypt_string_if_password_is_present(current_uuid)
-    #             print("account_uuid   -> " + account_uuid)
-    #             print("decrypted_uuid -> " + decrypted_uuid)
-    #             if decrypted_uuid == account_uuid:
-    #                 return True
-    #     except Exception as e:
-    #         print("Error: " + str(e))
-    #         return False
-    #     finally:
-    #         database_connection.close()
-    #     return False
-
     def invalidate_account(self, invalidate_uuid: str):
         if invalidate_uuid is None or invalidate_uuid == "":
             return
@@ -1468,7 +1432,6 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         return account_array
 
     def get_accounts_decrypted_from_invalid_accounts(self, search_string: str) -> []:
@@ -1503,14 +1466,11 @@ class PDatabase:
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
                         search_string_matches_account(search_string, decrypted_account):
-                    # results_found += 1
-                    # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                     account_array.append(decrypted_account)
         except Exception as e:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         return account_array
 
     def get_accounts_decrypted_search_types(self, type_search_string: str) -> []:
@@ -1545,14 +1505,11 @@ class PDatabase:
                 decrypted_account = self.decrypt_account(account)
                 if type_search_string == "" or \
                         type_search_string.lower() in account.type.lower():
-                    # results_found += 1
-                    # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                     account_array.append(decrypted_account)
         except Exception as e:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         return account_array
 
     def search_account_by_uuid(self, search_uuid) -> bool:
@@ -1579,7 +1536,6 @@ class PDatabase:
                               change_date=row[7],
                               invalid_date=row[8]
                               )
-            # self.print_formatted_account(self.decrypt_account_row(result))
             self.print_formatted_account(self.decrypt_account(account))
             return True
         except Exception as e:
@@ -1629,8 +1585,6 @@ class PDatabase:
                 decrypted_loginname = self.decrypt_string_if_password_is_present(row[3])
                 decrypted_password = self.decrypt_string_if_password_is_present(row[4])
                 decrypted_type = self.decrypt_string_if_password_is_present(row[5])
-                # current_account = (result[0], decrypted_name, decrypted_url, decrypted_loginname, decrypted_password,
-                #                    decrypted_type)
                 account = Account(uuid=search_uuid,
                                   name=decrypted_name,
                                   url=decrypted_url,
@@ -1641,7 +1595,6 @@ class PDatabase:
                                   change_date=str(row[7]),
                                   invalid_date=str(row[8])
                                   )
-                # print("->" + str(current_account))
                 return account
         except Exception as e:
             raise
@@ -1775,11 +1728,12 @@ class PDatabase:
             print("Re-encrypting " + str(deleted_account_table_count) + " deleted account entries...")
             print("Re-encrypting " + str(shell_history_table_count) + " shell history entries...")
             print("Re-encrypting " + str(alias_table_count) + " alias entries...")
-            bar = progressbar.ProgressBar(max_value=(account_count +
-                                                     account_history_count +
-                                                     deleted_account_table_count +
-                                                     shell_history_table_count +
-                                                     alias_table_count))
+            max_value = (account_count +
+                         account_history_count +
+                         deleted_account_table_count +
+                         shell_history_table_count +
+                         alias_table_count)
+            bar = progressbar.ProgressBar(maxval=max_value)
             bar.start()
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
@@ -1915,7 +1869,6 @@ class PDatabase:
                 database_connection.rollback()
             print("Process canceled by user.")
             return
-            # sys.exit(0)
         except Exception as e:
             if database_connection:
                 database_connection.rollback()
@@ -1970,11 +1923,6 @@ class PDatabase:
         else:
             return encrypted_text
 
-    # def decrypt_string(self, encrypted_text):
-    #     if encrypted_text == "":
-    #         return ""
-    #     decrypted_string = self.fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
-    #     return decrypted_string
 
     def add_account_and_encrypt(self, account: Account):
         account.name = self.encrypt_string_if_password_is_present(account.name)

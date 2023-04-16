@@ -21,18 +21,6 @@ import textwrap
 import requests
 
 
-# class ShellHistoryEntry:
-#     execution_date = ""
-#     user_input = ""
-#
-#     def __init__(self, execution_date=None, user_input=""):
-#         if execution_date is None:
-#             self.execution_date = datetime.datetime.now()
-#         else:
-#             self.execution_date = execution_date
-#         self.user_input = user_input
-
-
 class ShellCommand:
     command = ""
     arguments = [""]
