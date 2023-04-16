@@ -397,7 +397,7 @@ class ShellHistoryEntry:
 
     def __init__(self, execution_date=None, user_input=""):
         if execution_date is None:
-            self.execution_date = datetime.datetime.now()
+            self.execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         else:
             self.execution_date = execution_date
         self.user_input = user_input
