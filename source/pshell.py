@@ -256,7 +256,7 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.set_attribute_value_in_configuration_table(
             p_database.database_filename,
             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE, pshell_max_history_size)
-    if pshell_max_history_size.isnumeric():
+    else:
         pshell_max_history_size = int(pshell_max_history_size)
 
     # global pshell_max_idle_minutes_timeout_min_before_clear_console
