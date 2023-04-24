@@ -2238,6 +2238,7 @@ class PDatabase:
             print("Origin database is now up to date (" +
                   colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local +
                               count_uuids_in_remote_that_do_not_exist_in_local +
+                              count_history_uuids_in_remote_that_do_not_exist_in_local +
                               len(deleted_uuids_in_remote_db_not_in_local)), "red") + " changes have been done)")
             # remember that there where changes in local db for return code:
             return_code = 0
@@ -2273,6 +2274,7 @@ class PDatabase:
             print("Remote database is now up to date (" +
                   colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote +
                               count_uuids_in_local_that_do_not_exist_in_remote +
+                              count_history_uuids_in_local_that_do_not_exist_in_remote +
                               len(deleted_uuids_in_local_db_note_in_remote)), "red") + " changes have been done)")
             # Finally commit it
             database_connection.commit()
