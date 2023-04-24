@@ -923,6 +923,8 @@ class PDatabase:
         self.set_default_values_in_configuration_table()
         if not self.is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
+            print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
+            print(colored("To create a new database, remove the old one and start p again.", 'red'))
             sys.exit(1)
 
     def set_default_values_in_configuration_table(self):
