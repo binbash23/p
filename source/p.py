@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.04.20"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.04.25"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -90,10 +90,31 @@ def edit(p_database: PDatabase, edit_uuid: str):
         if new_loginname == "":
             new_loginname = old_loginame
 
-        print("Password (old)  : " + old_password)
-        new_password = input("Password (new)  : ")
-        if new_password == "":
-            new_password = old_password
+        # print("Password (old)  : " + old_password)
+        # new_password = input("Password (new)  : ")
+        # if new_password == "":
+        #     new_password = old_password
+
+        if p_database.shadow_passwords:
+            print("Password (old)  : ****")
+            change_shadowed_password = input("Do you want to change the password ([y]/n) : ")
+            if change_shadowed_password == "y" or change_shadowed_password == "":
+                while True:
+                    password1 = getpass.getpass("New password    : ")
+                    password2 = getpass.getpass("Confirm         : ")
+                    if (password1 == password2) or (password1 is None and password2 is None):
+                        break
+                    print("Error: Passwords do not match. Please try again.")
+                new_password = password1
+            else:
+                new_password = old_password
+        else:
+            print("Password (old)  : " + old_password)
+            change_unshadowed_password = input("Do you want to change the password ([y]/n) : ")
+            if change_unshadowed_password == "y" or change_unshadowed_password == "":
+                new_password = input("Password (new)  : ")
+            else:
+                new_password = old_password
 
         print("Type (old)      : " + old_type)
         new_type = input("Type (new)      : ")
@@ -107,8 +128,10 @@ def edit(p_database: PDatabase, edit_uuid: str):
         return
         # sys.exit(0)
 
-    new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password.strip(),
+    new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password,
                           new_type.strip())
+    # new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password.strip(),
+    #                       new_type.strip())
     if accounts_are_equal(account, new_account):
         print("Nothing changed.")
         return
@@ -117,8 +140,14 @@ def edit(p_database: PDatabase, edit_uuid: str):
                                                    new_name.strip(),
                                                    new_url.strip(),
                                                    new_loginname.strip(),
-                                                   new_password.strip(),
+                                                   new_password,
                                                    new_type.strip())
+        # p_database.set_account_by_uuid_and_encrypt(edit_uuid,
+        #                                            new_name.strip(),
+        #                                            new_url.strip(),
+        #                                            new_loginname.strip(),
+        #                                            new_password.strip(),
+        #                                            new_type.strip())
         print("Account changed")
     else:
         print("Canceled")
@@ -552,7 +581,7 @@ def main():
         p_database.delete_account(options.delete_uuid)
         sys.exit(0)
     if options.edit_uuid is not None:
-        edit(p_database, options.edit_uuid)
+        edit(p_database, str(options.edit_uuid).strip())
         sys.exit(0)
     if options.search_uuid is not None:
         p_database.search_account_by_uuid(options.search_uuid)

@@ -540,7 +540,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            p.edit(p_database, shell_command.arguments[1])
+            p.edit(p_database, shell_command.arguments[1].strip())
             continue
         if shell_command.command == "forgetdeletedaccounts":
             try:
