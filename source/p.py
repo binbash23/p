@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.04.25"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.05.04"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -43,6 +43,7 @@ def add(p_database: PDatabase):
                 password1 = getpass.getpass("Password  : ")
                 password2 = getpass.getpass("Confirm   : ")
                 if (password1 == password2) or (password1 is None and password2 is None):
+                    account.password = password1
                     break
                 print("Error: Passwords do not match. Please try again.")
         else:
@@ -103,9 +104,9 @@ def edit(p_database: PDatabase, edit_uuid: str):
                     password1 = getpass.getpass("New password    : ")
                     password2 = getpass.getpass("Confirm         : ")
                     if (password1 == password2) or (password1 is None and password2 is None):
+                        new_password = password1
                         break
                     print("Error: Passwords do not match. Please try again.")
-                new_password = password1
             else:
                 new_password = old_password
         else:
