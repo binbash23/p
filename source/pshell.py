@@ -518,10 +518,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
+            # password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
+            account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             try:
-                pyperclip3.copy(password)
-                print("CLIPBOARD: Password")
+                # pyperclip3.copy(password)
+                print("Account   : " + account.name)
+                print("CLIPBOARD : Password")
+                pyperclip3.copy(account.password)
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
             continue
@@ -604,7 +607,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            p_database.invalidate_account(shell_command.arguments[1])
+            p_database.invalidate_account(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "list":
             p_database.search_accounts("")
@@ -640,7 +643,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("FILENAME is missing.")
                 print(shell_command)
                 continue
-            p_database.merge_database(shell_command.arguments[1])
+            p_database.merge_database(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "merge2lastknownfile":
             p_database.merge_last_known_database()
@@ -685,16 +688,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            p_database.revalidate_account(shell_command.arguments[1])
+            p_database.revalidate_account(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "search":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            p_database.search_accounts(shell_command.arguments[1])
+            p_database.search_accounts(shell_command.arguments[1].strip())
             # remember latest found account:
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
                 latest_found_account = None
                 continue
@@ -720,14 +723,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("There is no account to copy.")
                 continue
             pyperclip3.copy(latest_found_account.password)
-            print("CLIPBOARD: Password")
+            print("Account   : " + latest_found_account.name)
+            print("CLIPBOARD : Password")
             continue
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
                 print("No account found.")
                 continue
@@ -750,13 +754,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    print("CLIPBOARD: Password")
+                    print("Account   : " + account_array[int(index) - 1].name)
+                    print("CLIPBOARD : Password")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].password)
-                print("CLIPBOARD: Password")
+                print("Account   : " + account_array[0].name)
+                print("CLIPBOARD : Password")
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
             continue
@@ -765,7 +771,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
                 print("No account found.")
                 continue
@@ -783,13 +789,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].url)
-                    print("CLIPBOARD: URL")
+                    print("Account   : " + account_array[int(index) - 1].name)
+                    print("CLIPBOARD : URL")
                     input("<Press enter>")
                     pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    print("CLIPBOARD: Loginname")
+                    print("CLIPBOARD : Loginname")
                     input("<Press enter>")
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    print("CLIPBOARD: Password")
+                    print("CLIPBOARD : Password")
                 except KeyboardInterrupt as ke:
                     print()
                     continue
@@ -798,13 +805,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             try:
                 pyperclip3.copy(account_array[0].url)
-                print("CLIPBOARD: URL")
+                print("Account   : " + account_array[0].name)
+                print("CLIPBOARD : URL")
                 input("<Press enter>")
                 pyperclip3.copy(account_array[0].loginname)
-                print("CLIPBOARD: Loginname")
+                print("CLIPBOARD : Loginname")
                 input("<Press enter>")
                 pyperclip3.copy(account_array[0].password)
-                print("CLIPBOARD: Password")
+                print("CLIPBOARD : Password")
             except KeyboardInterrupt as ke:
                 print()
                 continue
@@ -816,7 +824,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
                 print("No account found.")
                 continue
@@ -835,13 +843,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    print("CLIPBOARD: Loginname")
+                    print("Account   : " + account_array[int(index) - 1].name)
+                    print("CLIPBOARD : Loginname")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].loginname)
-                print("CLIPBOARD: Loginname")
+                print("Account   : " + account_array[0].name)
+                print("CLIPBOARD : Loginname")
             except Exception as e:
                 print("Error copying loginname to the clipboard: " + str(e))
             continue
@@ -850,7 +860,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1])
+            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
                 print("No account found.")
                 continue
@@ -869,13 +879,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].url)
-                    print("CLIPBOARD: URL")
+                    print("Account   : " + account_array[int(index) - 1].name)
+                    print("CLIPBOARD : URL")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].url)
-                print("CLIPBOARD: URL")
+                print("Account   : " + account_array[0].name)
+                print("CLIPBOARD : URL")
             except Exception as e:
                 print("Error copying URL to the clipboard: " + str(e))
         if shell_command.command == "setdatabasename":
@@ -899,7 +911,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
-                shell_command.arguments[1])
+                shell_command.arguments[1].strip())
             continue
         if shell_command.command == "setdropboxtokenuuid":
             if len(shell_command.arguments) == 1:
@@ -909,7 +921,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
-                shell_command.arguments[1])
+                shell_command.arguments[1].strip())
             continue
         if shell_command.command == "shadowpasswords":
             if len(shell_command.arguments) == 1:
@@ -941,7 +953,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            p_database.search_account_history(shell_command.arguments[1])
+            p_database.search_account_history(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "showconfig":
             print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
@@ -1009,7 +1021,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command)
                 continue
-            if not p_database.get_account_exists(shell_command.arguments[1]):
+            if not p_database.get_account_exists(shell_command.arguments[1].strip()):
                 print("Error: Account UUID " + shell_command.arguments[1] + " not found.")
                 continue
             try:
