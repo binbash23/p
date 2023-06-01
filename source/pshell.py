@@ -576,7 +576,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 print(colored(" PShell command help", "green"))
                 print(colored(" Type 'help COMMAND' to get usage details for COMMAND", "green"))
-                print(colored(" You can type the first distinct letter(s) of any COMMAND to be faster.", "green"))
+                print(colored(" It is enough to type the first distinct letter(s) of any COMMAND.", "green"))
                 print()
                 for shell_command in SHELL_COMMANDS:
                     # print(str(shell_command))
@@ -585,7 +585,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
                     help_command.print_manual()
-                else:
+                else: 
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "history":

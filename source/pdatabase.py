@@ -428,14 +428,14 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-               ", Name=" + self.name + \
-               ", URL=" + self.url + \
-               ", Loginname=" + self.loginname + \
-               ", Password=" + self.password + \
-               ", Type=" + self.type + \
-               ", Createdate=" + self.create_date + \
-               ", Changedate=" + self.change_date + \
-               ", Invaliddate=" + self.invalid_date
+            ", Name=" + self.name + \
+            ", URL=" + self.url + \
+            ", Loginname=" + self.loginname + \
+            ", Password=" + self.password + \
+            ", Type=" + self.type + \
+            ", Createdate=" + self.create_date + \
+            ", Changedate=" + self.change_date + \
+            ", Invaliddate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -1689,7 +1689,7 @@ class PDatabase:
         if self.show_account_details:
             print("Created     : " + str(account.create_date))
             print("Changed     : " + str(account.change_date))
-            print("Invalidated : " + str(account.invalid_date))
+            print("Invalidated : " + colored(str(account.invalid_date), "red"))
             if show_history_count:
                 print("Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
 
@@ -1924,7 +1924,6 @@ class PDatabase:
             return decrypted_string
         else:
             return encrypted_text
-
 
     def add_account_and_encrypt(self, account: Account):
         account.name = self.encrypt_string_if_password_is_present(account.name)

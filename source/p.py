@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.05.12"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.06.01"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -98,8 +98,8 @@ def edit(p_database: PDatabase, edit_uuid: str):
 
         if p_database.shadow_passwords:
             print("Password (old)  : ****")
-            change_shadowed_password = input("Do you want to change the password ([y]/n) : ")
-            if change_shadowed_password == "y" or change_shadowed_password == "":
+            change_shadowed_password = input("Do you want to change the password (y/[n]) : ")
+            if change_shadowed_password == "y":
                 while True:
                     password1 = getpass.getpass("New password    : ")
                     password2 = getpass.getpass("Confirm         : ")
@@ -111,8 +111,8 @@ def edit(p_database: PDatabase, edit_uuid: str):
                 new_password = old_password
         else:
             print("Password (old)  : " + old_password)
-            change_unshadowed_password = input("Do you want to change the password ([y]/n) : ")
-            if change_unshadowed_password == "y" or change_unshadowed_password == "":
+            change_unshadowed_password = input("Do you want to change the password (y/[n]) : ")
+            if change_unshadowed_password == "y":
                 new_password = input("Password (new)  : ")
             else:
                 new_password = old_password
