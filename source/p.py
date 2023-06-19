@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.06.01"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.06.19"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -284,6 +284,8 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
 def merge_with_dropbox(p_database: PDatabase):
     print("Merge with dropbox...")
     dropbox_connection = create_dropbox_connection(p_database)
+    # print(dropbox_connection)
+    # exit(0)
     if dropbox_connection is None:
         print("Error: Could not create dropbox connection")
         return

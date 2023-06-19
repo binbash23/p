@@ -30,7 +30,10 @@ def create_dropbox_connection_with_refresh_token(_app_key, _app_secret, _refresh
     try:
         dropbox_connection = dropbox.Dropbox(app_key=_app_key, app_secret=_app_secret,
                                              oauth2_refresh_token=_refresh_token)
-    except AuthError as e:
+        # execute a dummy command to raise an exception if connection is not possible
+        dropbox_connection.files_list_folder('')
+#     except AuthError as e:
+    except Exception as e:
         print('Error connecting to Dropbox with refresh token: ' + str(e))
         return None
         # raise
