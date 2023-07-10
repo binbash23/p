@@ -1677,21 +1677,21 @@ class PDatabase:
         self.print_formatted_account(account)
 
     def print_formatted_account(self, account: Account, show_history_count: bool = True):
-        print("UUID        : " + str(account.uuid))
-        print("Name        : " + str(account.name))
-        print("URL         : " + str(account.url))
-        print("Loginname   : " + str(account.loginname))
+        print("UUID            : " + str(account.uuid))
+        print("Name            : " + str(account.name))
+        print("URL             : " + str(account.url))
+        print("Loginname       : " + str(account.loginname))
         if self.shadow_passwords:
-            print("Password    : ********")
+            print("Password        : ********")
         else:
-            print("Password    : " + str(account.password))
-        print("Type        : " + str(account.type))
+            print("Password        : " + str(account.password))
+        print("Type            : " + str(account.type))
         if self.show_account_details:
-            print("Created     : " + str(account.create_date))
-            print("Changed     : " + str(account.change_date))
-            print("Invalidated : " + colored(str(account.invalid_date), "red"))
+            print("Created         : " + str(account.create_date))
+            print("Changed         : " + str(account.change_date))
+            print("Invalidated     : " + colored(str(account.invalid_date), "red"))
             if show_history_count:
-                print("Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
+                print("Old Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
 
     def decrypt_and_encrypt_with_new_password(self, string_encrypted: str, new_password: str) -> str:
         string_decrypted = self.decrypt_string_if_password_is_present(string_encrypted)
