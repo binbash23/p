@@ -113,6 +113,7 @@ SHELL_COMMANDS = [
     ShellCommand("exit", "exit", "Quit pshell."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
+    ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
     ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
     ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
@@ -140,6 +141,7 @@ SHELL_COMMANDS = [
                  "will see the current command history with the indices to choose from."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
+    ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
@@ -588,6 +590,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 else: 
                     print("Unknown command: " + shell_command.arguments[1])
             continue
+        if shell_command.command == "helpverbose":
+            for sc in SHELL_COMMANDS:
+                print(sc)
+            continue
         if shell_command.command == "history":
             # print_shell_command_history(shell_history_array)
             print_shell_command_history(p_database.get_shell_history_entries_decrypted())
@@ -704,6 +710,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 latest_found_account = account_array[len(account_array) - 1]
             continue
+
+        if shell_command.command == "searchhelp":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            search_string = shell_command.arguments[1].strip().lower()
+            for sc in SHELL_COMMANDS:
+                if search_string in sc.command.lower():  # or \
+                        # search_string in sc.synopsis.lower() or \
+                        # search_string in sc.description.lower():
+                    print(sc.command)
+            continue
+
         if shell_command.command == "searchinvalidated":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
