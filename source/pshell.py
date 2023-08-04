@@ -463,6 +463,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
             # shell_history_array.append(current_shell_history_entry)
             p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
+        if shell_command is None:
+            print("Error: Alias is not set. Use \"help alias\" for more information.")
+            continue
 
         # continue with command processing
 
