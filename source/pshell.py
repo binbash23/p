@@ -118,7 +118,7 @@ SHELL_COMMANDS = [
     ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate <UUID>", "Invalidate account with UUID."),
-    ShellCommand("list", "list", "List all accounts."),
+    ShellCommand("list", "list", "List all accounts ordered by the last change date."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
