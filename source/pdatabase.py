@@ -802,8 +802,8 @@ def print_database_statistics(database_filename):
     print("Database Last Changed               : " + last_change_date)
     print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
           str(account_count_invalid) + ")")
-    print("Accounts in history                 : " + str(account_history_count))
-    print("Shell history entries               : " + str(shell_history_count))
+    print("Account history entries             : " + str(account_history_count))
+    print("Shell command history entries       : " + str(shell_history_count))
     print("Aliases                             : " + str(alias_count))
     print("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
     print("Last Merge Database                 : " + str(last_merge_database))
