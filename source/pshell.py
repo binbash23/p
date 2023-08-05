@@ -192,7 +192,7 @@ SHELL_COMMANDS.sort()
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
 pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
-DEFAULT_PSHELL_MAX_HISTORY_SIZE = 100
+DEFAULT_PSHELL_MAX_HISTORY_SIZE = 10
 pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
 show_unmerged_changes_warning_on_startup = True
 
@@ -1018,10 +1018,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 # print("on/off is missing.")
                 # print(shell_command)
-                current_status = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING)
-                print("Status: " + current_status)
+                # current_status = pdatabase.get_attribute_value_from_configuration_table(
+                #     p_database.database_filename,
+                #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING)
+                # if current_status == "":
+                #     current_status = "True"
+                # print("Status: " + current_status)
+                print("Status: " + str(show_unmerged_changes_warning_on_startup))
                 continue
             if shell_command.arguments[1] == "on":
                 show_unmerged_changes_warning_on_startup = True
