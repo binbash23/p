@@ -945,6 +945,13 @@ def color_search_string(text_string, search_string, color):
     return colored_string
 
 
+def print_found_n_results(n_results:int):
+    if n_results == 1:
+        print("Found 1 result.")
+    else:
+        print("Found " + str(n_results) + " results.")
+
+
 class PDatabase:
     DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
     DEFAULT_ITERATION_COUNT = 500000
@@ -1334,7 +1341,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s) in account history.")
+        # print("Found " + str(results_found) + " result(s) in account history.")
+        print_found_n_results(results_found)
 
     def search_accounts(self, search_string: str):
         results_found = 0
@@ -1380,7 +1388,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def search_invalidated_accounts(self, search_string: str):
         results_found = 0
@@ -1421,7 +1430,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def search_accounts_by_type(self, type_search_string: str):
         results_found = 0
@@ -1463,7 +1473,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def get_accounts_decrypted(self, search_string: str) -> []:
         # results_found = 0
@@ -2204,7 +2215,8 @@ class PDatabase:
         finally:
             database_connection.close()
         print()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def merge_last_known_database(self):
         last_known_database = \
