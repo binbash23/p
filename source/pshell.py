@@ -50,7 +50,7 @@ class ShellCommand:
     def print_manual(self):
         print()
         print("COMMAND")
-        print(" " + self.command)
+        print(" " + colored(self.command, "green"))
         print()
         print("SYNOPSIS")
         print(" " + self.synopsis)
@@ -141,7 +141,8 @@ SHELL_COMMANDS = [
                  "will see the current command history with the indices to choose from."),
     ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
-    ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
+    ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
+    ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
@@ -585,7 +586,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 for shell_command in SHELL_COMMANDS:
                     # print(str(shell_command))
-                    print(shell_command.synopsis)
+                    print(colored(shell_command.synopsis, "green"))
+                    print()
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
@@ -594,8 +596,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "helpverbose":
+            print()
             for sc in SHELL_COMMANDS:
                 print(sc)
+                print()
             continue
         if shell_command.command == "history":
             # print_shell_command_history(shell_history_array)
@@ -720,11 +724,28 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command)
                 continue
             search_string = shell_command.arguments[1].strip().lower()
+            print()
             for sc in SHELL_COMMANDS:
                 if search_string in sc.command.lower():  # or \
                         # search_string in sc.synopsis.lower() or \
                         # search_string in sc.description.lower():
                     print(sc.command)
+                    print()
+            continue
+
+        if shell_command.command == "searchhelpverbose":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command)
+                continue
+            search_string = shell_command.arguments[1].strip().lower()
+            print()
+            for sc in SHELL_COMMANDS:
+                if search_string in sc.command.lower() or \
+                        search_string in sc.synopsis.lower() or \
+                        search_string in sc.description.lower():
+                    sc.print_manual()
+                    print()
             continue
 
         if shell_command.command == "searchinvalidated":
