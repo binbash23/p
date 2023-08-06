@@ -726,10 +726,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             search_string = shell_command.arguments[1].strip().lower()
             print()
             for sc in SHELL_COMMANDS:
-                if search_string in sc.command.lower():  # or \
-                        # search_string in sc.synopsis.lower() or \
-                        # search_string in sc.description.lower():
-                    print(sc.command)
+                if search_string in sc.command.lower():
+                    print(colored(sc.command, "green"))
                     print()
             continue
 
