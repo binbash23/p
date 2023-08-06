@@ -63,7 +63,7 @@ class ShellCommand:
                                           initial_indent=" ",
                                           subsequent_indent=" "):
                 formatted_description.append(sub_line)
-            #formatted_description.append("\n")
+            # formatted_description.append("\n")
         for row in formatted_description:
             print(row)
         print()
@@ -333,12 +333,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
     clear_console()
     user_input = ""
     latest_found_account = None
-#    prompt_string = p_database.database_filename + "> "
-#     prompt_string = p_database.database_filename + "$ "
-#     if pdatabase.get_database_name(p_database.database_filename) != "":
-#         prompt_string = "pshell@" + pdatabase.get_database_name(p_database.database_filename) + ":" + prompt_string
-#     else:
-#         prompt_string = "pshell" + ":" + prompt_string
+    #    prompt_string = p_database.database_filename + "> "
+    #     prompt_string = p_database.database_filename + "$ "
+    #     if pdatabase.get_database_name(p_database.database_filename) != "":
+    #         prompt_string = "pshell@" + pdatabase.get_database_name(p_database.database_filename) + ":" + prompt_string
+    #     else:
+    #         prompt_string = "pshell" + ":" + prompt_string
     prompt_string = "[" + p_database.database_filename + "] " "pshell> "
 
     pdatabase.print_database_statistics(p_database.database_filename)
@@ -592,7 +592,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
                     help_command.print_manual()
-                else: 
+                else:
                     print("Unknown command: " + shell_command.arguments[1])
             continue
         if shell_command.command == "helpverbose":
@@ -998,13 +998,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_account_history(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "showconfig":
-            print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
-            print("PShell max history size             : " + str(pshell_max_history_size))
-            print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
-            print("Shadow passwords                    : " + str(p_database.shadow_passwords))
-            print("Show accounts verbose               : " + str(p_database.show_account_details))
-            print("Show unmerged changes warning       : " + str(show_unmerged_changes_warning_on_startup))
-            print("Track account history               : " + str(p_database.track_account_history))
+            # print("PShell timeout                      : " + str(pshell_max_idle_minutes_timeout))
+            # print("PShell max history size             : " + str(pshell_max_history_size))
+            # print("Show invalidated accounts           : " + str(p_database.show_invalidated_accounts))
+            # print("Shadow passwords                    : " + str(p_database.shadow_passwords))
+            # print("Show accounts verbose               : " + str(p_database.show_account_details))
+            # print("Show unmerged changes warning       : " + str(show_unmerged_changes_warning_on_startup))
+            # print("Track account history               : " + str(p_database.track_account_history))
+            print("PShell timeout                      : " + colored(str(pshell_max_idle_minutes_timeout), "green"))
+            print("PShell max history size             : " + colored(str(pshell_max_history_size), "green"))
+            print("Show invalidated accounts           : " + colored(str(p_database.show_invalidated_accounts), "green"))
+            print("Shadow passwords                    : " + colored(str(p_database.shadow_passwords), "green"))
+            print("Show accounts verbose               : " + colored(str(p_database.show_account_details), "green"))
+            print("Show unmerged changes warning       : " + colored(str(show_unmerged_changes_warning_on_startup), "green"))
+            print("Track account history               : " + colored(str(p_database.track_account_history), "green"))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
