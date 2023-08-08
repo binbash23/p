@@ -1379,12 +1379,12 @@ class PDatabase:
                         search_string_matches_account(search_string, decrypted_account):
                     results_found += 1
                     try:
-                        if results_found < 3:
+                        if results_found < 4:
                             self.print_formatted_account_search_string_colored(decrypted_account, search_string,
-                                                                               True)
+                                                                               print_slowly=True)
                         else:
                             self.print_formatted_account_search_string_colored(decrypted_account, search_string,
-                                                                               False)
+                                                                               print_slowly=False)
                     except KeyboardInterrupt as ke:
                         print()
                         return
@@ -1429,7 +1429,17 @@ class PDatabase:
                 if search_string == "" or \
                         search_string_matches_account(search_string, decrypted_account):
                     results_found += 1
-                    self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                    try:
+                        if results_found < 4:
+                            self.print_formatted_account_search_string_colored(decrypted_account, search_string,
+                                                                               print_slowly=True)
+                        else:
+                            self.print_formatted_account_search_string_colored(decrypted_account, search_string,
+                                                                               print_slowly=False)
+                        print()
+                    except KeyboardInterrupt as ke:
+                        print()
+                        return
                     print()
         except Exception as e:
             raise
@@ -1472,7 +1482,16 @@ class PDatabase:
                 if type_search_string == "" or \
                         type_search_string.lower() in account.type.lower():
                     results_found += 1
-                    self.print_formatted_account_search_string_colored(decrypted_account, type_search_string)
+                    try:
+                        if results_found < 4:
+                            self.print_formatted_account_search_string_colored(decrypted_account, type_search_string,
+                                                                               print_slowly=True)
+                        else:
+                            self.print_formatted_account_search_string_colored(decrypted_account, type_search_string,
+                                                                               print_slowly=False)
+                    except KeyboardInterrupt as ke:
+                        print()
+                        return
                     print()
         except Exception as e:
             raise
