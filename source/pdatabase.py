@@ -1643,7 +1643,11 @@ class PDatabase:
                               change_date=row[7],
                               invalid_date=row[8]
                               )
-            self.print_formatted_account(self.decrypt_account(account))
+            try:
+                self.print_formatted_account(self.decrypt_account(account))
+            except KeyboardInterrupt as ke:
+                print()
+                return
             return True
         except Exception as e:
             raise
