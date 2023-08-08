@@ -25,7 +25,7 @@ from re import IGNORECASE
 import uuid
 import colorama
 # from print_slow import print_slow
-import print_slow 
+import print_slow
 
 colorama.init()
 
@@ -849,10 +849,10 @@ def print_database_statistics(database_filename):
         print("SQLite Database Version             : ", end="")
         print_slow.print_slow(get_database_sqlite_version(database_filename))
         print("Database Encrypted                  : ", end="")
-        print_slow.print_slow(str(database_is_encrypted))
+        print_slow(str(database_is_encrypted))
         print("Database Size                       : ", end="")
-        print_slow.print_slow(str(os.path.getsize(database_filename) / 1024))
-        print_slow.print_slow(" Kb")
+        print_slow(str(os.path.getsize(database_filename) / 1024))
+        print_slow(" Kb")
         print("Database Last Changed               : ", end="")
         print_slow.print_slow(last_change_date)
         print("Accounts (valid/invalid)            : ", end="")
@@ -944,6 +944,13 @@ def color_search_string(text_string, search_string, color):
                      text_string[list_matching_indices[len(list_matching_indices) - 1] + len(search_string):
                                  len(text_string)]
     return colored_string
+
+
+def print_found_n_results(n_results:int):
+    if n_results == 1:
+        print("Found 1 result.")
+    else:
+        print("Found " + str(n_results) + " results.")
 
 
 class PDatabase:
@@ -1335,7 +1342,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s) in account history.")
+        # print("Found " + str(results_found) + " result(s) in account history.")
+        print_found_n_results(results_found)
 
     def search_accounts(self, search_string: str):
         results_found = 0
@@ -1386,7 +1394,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def search_invalidated_accounts(self, search_string: str):
         results_found = 0
@@ -1427,7 +1436,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def search_accounts_by_type(self, type_search_string: str):
         results_found = 0
@@ -1469,7 +1479,8 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def get_accounts_decrypted(self, search_string: str) -> []:
         # results_found = 0
@@ -2215,7 +2226,8 @@ class PDatabase:
         finally:
             database_connection.close()
         print()
-        print("Found " + str(results_found) + " result(s).")
+        # print("Found " + str(results_found) + " result(s).")
+        print_found_n_results(results_found)
 
     def merge_last_known_database(self):
         last_known_database = \
