@@ -1332,7 +1332,14 @@ class PDatabase:
                 #         search_string_matches_account(search_string, decrypted_account):
                 results_found += 1
                 # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
-                self.print_formatted_account(decrypted_account, False)
+                try:
+                    if results_found < 4:
+                        self.print_formatted_account(decrypted_account, show_history_count=False, print_slowly=True)
+                    else:
+                        self.print_formatted_account(decrypted_account, show_history_count=False, print_slowly=False)
+                except KeyboardInterrupt as ke:
+                    print()
+                    return
                 print()
             print(colored("Latest version of account:", 'green'))
             self.search_account_by_uuid(uuid_string)
