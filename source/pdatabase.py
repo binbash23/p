@@ -24,7 +24,8 @@ from re import finditer
 from re import IGNORECASE
 import uuid
 import colorama
-from print_slow import print_slow
+# from print_slow import print_slow
+import print_slow 
 
 colorama.init()
 
@@ -836,44 +837,44 @@ def print_database_statistics(database_filename):
     # print_slow("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
     try:
         print("Database Name                       : ", end="")
-        print_slow(database_name)
+        print_slow.print_slow(database_name)
         print("Database UUID                       : ", end="")
-        print_slow(database_uuid)
+        print_slow.print_slow(database_uuid)
         print("Database File                       : ", end="")
-        print_slow(os.path.abspath(database_filename))
+        print_slow.print_slow(os.path.abspath(database_filename))
         print("Database Created                    : ", end="")
-        print_slow(database_creation_date)
+        print_slow.print_slow(database_creation_date)
         print("Database Schema Version             : ", end="")
-        print_slow(schema_version)
+        print_slow.print_slow(schema_version)
         print("SQLite Database Version             : ", end="")
-        print_slow(get_database_sqlite_version(database_filename))
+        print_slow.print_slow(get_database_sqlite_version(database_filename))
         print("Database Encrypted                  : ", end="")
-        print_slow(str(database_is_encrypted))
+        print_slow.print_slow(str(database_is_encrypted))
         print("Database Size                       : ", end="")
-        print_slow(str(os.path.getsize(database_filename) / 1024))
-        print_slow(" Kb")
+        print_slow.print_slow(str(os.path.getsize(database_filename) / 1024))
+        print_slow.print_slow(" Kb")
         print("Database Last Changed               : ", end="")
-        print_slow(last_change_date)
+        print_slow.print_slow(last_change_date)
         print("Accounts (valid/invalid)            : ", end="")
-        print_slow(str(account_count) + " (" + str(account_count_valid) + "/" + str(account_count_invalid) + ")")
+        print_slow.print_slow(str(account_count) + " (" + str(account_count_valid) + "/" + str(account_count_invalid) + ")")
         print("Account history entries             : ", end="")
-        print_slow(str(account_history_count))
+        print_slow.print_slow(str(account_history_count))
         print("Shell command history entries       : ", end="")
-        print_slow(str(shell_history_count))
+        print_slow.print_slow(str(shell_history_count))
         print("Aliases                             : ", end="")
-        print_slow(str(alias_count))
+        print_slow.print_slow(str(alias_count))
         print("Account UUID's in deleted table     : ", end="")
-        print_slow(str(get_deleted_account_table_count(database_filename)))
+        print_slow.print_slow(str(get_deleted_account_table_count(database_filename)))
         print("Last Merge Database                 : ", end="")
-        print_slow(str(last_merge_database))
+        print_slow.print_slow(str(last_merge_database))
         print("Last Merge Date                     : ", end="")
-        print_slow(str(last_merge_date))
+        print_slow.print_slow(str(last_merge_date))
         print("Database has unmerged changes       : ", end="")
-        print_slow(unmerged_changes)
+        print_slow.print_slow(unmerged_changes)
         print("Dropbox refresh token account uuid  : ", end="")
-        print_slow(str(dropbox_account_uuid))
+        print_slow.print_slow(str(dropbox_account_uuid))
         print("Dropbox application account uuid    : ", end="")
-        print_slow(str(dropbox_application_account_uuid))
+        print_slow.print_slow(str(dropbox_application_account_uuid))
     except KeyboardInterrupt as ke:
         print()
         None
@@ -1354,7 +1355,7 @@ class PDatabase:
             print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
                   "* in " + str(
                 get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
-            print()
+            # print("Found " + str(len(result)) + " result(s):")
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1371,7 +1372,12 @@ class PDatabase:
                         search_string_matches_account(search_string, decrypted_account):
                     results_found += 1
                     try:
-                        self.print_formatted_account_search_string_colored(decrypted_account, search_string)
+                        if results_found < 3:
+                            self.print_formatted_account_search_string_colored(decrypted_account, search_string,
+                                                                               True)
+                        else:
+                            self.print_formatted_account_search_string_colored(decrypted_account, search_string,
+                                                                               False)
                     except KeyboardInterrupt as ke:
                         print()
                         return
@@ -1731,7 +1737,8 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def print_formatted_account_search_string_colored(self, account: Account, search_string: str = ""):
+    def print_formatted_account_search_string_colored(self, account: Account, search_string: str = "",
+                                                      print_slowly: bool = True):
         account.uuid = color_search_string(account.uuid, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.name = color_search_string(account.name, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.url = color_search_string(account.url, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
@@ -1744,34 +1751,38 @@ class PDatabase:
                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.invalid_date = color_search_string(account.invalid_date, search_string,
                                                    self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        self.print_formatted_account(account)
+        self.print_formatted_account(account, print_slowly=print_slowly)
 
-    def print_formatted_account(self, account: Account, show_history_count: bool = True):
+    def print_formatted_account(self, account: Account, show_history_count: bool = True, print_slowly: bool = True):
+        if print_slowly == False:
+            print_delay = 0
+        else:
+            print_delay = print_slow.DEFAULT_DELAY
         print("UUID            : ", end="")
-        print_slow(str(account.uuid))
+        print_slow.print_slow(str(account.uuid), delay=print_delay)
         print("Name            : ", end="")
-        print_slow(str(account.name))
+        print_slow.print_slow(str(account.name), delay=print_delay)
         print("URL             : ", end="")
-        print_slow(str(account.url))
+        print_slow.print_slow(str(account.url), delay=print_delay)
         print("Loginname       : ", end="")
-        print_slow(str(account.loginname))
+        print_slow.print_slow(str(account.loginname), delay=print_delay)
         if self.shadow_passwords:
             print("Password        : ********")
         else:
             print("Password        : ", end="")
-            print_slow(str(account.password))
+            print_slow.print_slow(str(account.password), delay=print_delay)
         print("Type            : ", end="")
-        print_slow(str(account.type))
+        print_slow.print_slow(str(account.type), delay=print_delay)
         if self.show_account_details:
             print("Created         : ", end="")
-            print_slow(str(account.create_date))
+            print_slow.print_slow(str(account.create_date), delay=print_delay)
             print("Changed         : ", end="")
-            print_slow(str(account.change_date))
+            print_slow.print_slow(str(account.change_date), delay=print_delay)
             print("Invalidated     : ", end="")
-            print_slow(colored(str(account.invalid_date), "red"))
+            print_slow.print_slow(colored(str(account.invalid_date), "red"), delay=print_delay)
             if show_history_count:
                 print("Old Versions    : ", end="")
-                print_slow(str(get_account_history_count(self.database_filename, account.uuid)))
+                print_slow.print_slow(str(get_account_history_count(self.database_filename, account.uuid)), delay=print_delay)
 
     # def print_formatted_account(self, account: Account, show_history_count: bool = True):
     #     print("UUID            : " + str(account.uuid))

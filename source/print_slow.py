@@ -10,7 +10,7 @@ import sys
 DEFAULT_DELAY = 0.008
 #DEFAULT_DELAY = 0.05
 
-def print_slow(text: str, delay=DEFAULT_DELAY):
+def print_slow(text: str, delay: int = DEFAULT_DELAY):
     for char in text:
         # print(char, end='')
         sys.stdout.write(char)
