@@ -19,6 +19,7 @@ from inputimeout import inputimeout, TimeoutOccurred
 import time
 import textwrap
 import requests
+import print_slow
 
 
 class ShellCommand:
@@ -484,7 +485,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 aliases = p_database.get_alias_commands_decrypted()
                 for alias in aliases:
-                    print(alias)
+                    try:
+                        print_slow.print_slow(alias)
+                    except KeyboardInterrupt as ke:
+                        print()
+                        continue
             else:  # 2 arguments
                 alias_argument_list = shell_command.arguments[1].split(maxsplit=1)
                 current_alias = alias_argument_list[0]
