@@ -70,6 +70,8 @@ class ShellCommand:
 
 
 SHELL_COMMANDS = [
+    ShellCommand("/", "/ <SEARCHSTRING>", "/ is an alias to the search command. For " +
+                 "more info see the help for the search command."),
     ShellCommand("0", "0", "Alias. This alias can be set with the alias command."),
     ShellCommand("1", "1", "Alias. This alias can be set with the alias command."),
     ShellCommand("2", "2", "Alias. This alias can be set with the alias command."),
@@ -703,7 +705,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             p_database.revalidate_account(shell_command.arguments[1].strip())
             continue
-        if shell_command.command == "search":
+        if shell_command.command == "search" or shell_command.command == "/":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
