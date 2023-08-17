@@ -173,6 +173,8 @@ SHELL_COMMANDS = [
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
+    ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
+                 "Show status when pshell starts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database.\nWith no " +
                  "arguments, the current status will be shown."),
@@ -199,6 +201,7 @@ pshell_max_idle_minutes_timeout = DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN
 DEFAULT_PSHELL_MAX_HISTORY_SIZE = 10
 pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
 show_unmerged_changes_warning_on_startup = True
+show_status_on_startup = True
 
 
 def expand_string_2_shell_command(string: str) -> ShellCommand:
@@ -279,6 +282,13 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
     #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR,
     #         pshell_max_idle_minutes_timeout_min_before_clear_console)
 
+    global show_status_on_startup
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_STATUS_ON_STARTUP)
+    if config_value is not None and (config_value == "True" or config_value == "False"):
+        show_status_on_startup = parse_bool(config_value)
+
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
@@ -330,6 +340,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     global pshell_max_idle_minutes_timeout
     global pshell_max_history_size
     global show_unmerged_changes_warning_on_startup
+    global show_status_on_startup
     load_pshell_configuration(p_database)
 
     # time.sleep(1)
@@ -344,7 +355,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
     #         prompt_string = "pshell" + ":" + prompt_string
     prompt_string = "[" + p_database.database_filename + "] " "pshell> "
 
-    pdatabase.print_database_statistics(p_database.database_filename)
+    if show_status_on_startup is True:
+        pdatabase.print_database_statistics(p_database.database_filename)
+
     if show_unmerged_changes_warning_on_startup is True and \
             pdatabase.get_database_has_unmerged_changes(p_database.database_filename) is True:
         print(colored("Note: You have unmerged changes in your local database.", 'red'))
@@ -1059,14 +1072,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_account_history(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "showconfig":
-            # print("PShell timeout                      : " + colored(str(pshell_max_idle_minutes_timeout), "green"))
-            # print("PShell max history size             : " + colored(str(pshell_max_history_size), "green"))
-            # print("Show invalidated accounts           : " + colored(str(p_database.show_invalidated_accounts), "green"))
-            # print("Shadow passwords                    : " + colored(str(p_database.shadow_passwords), "green"))
-            # print("Show accounts verbose               : " + colored(str(p_database.show_account_details), "green"))
-            # print("Show unmerged changes warning       : " + colored(str(show_unmerged_changes_warning_on_startup), "green"))
-            # print("Track account history               : " + colored(str(p_database.track_account_history), "green"))
-
             print("PShell timeout                      : ", end="")
             print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
             print("PShell max history size             : ", end="")
@@ -1079,6 +1084,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
             print("Show unmerged changes warning       : ", end="")
             print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
+            print("Show status on startup              : ", end="")
+            print_slow.print_slow(colored(str(show_status_on_startup), "green"))
             print("Track account history               : ", end="")
             print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
             continue
@@ -1108,17 +1115,32 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
+        if shell_command.command == "showstatusonstartup":
+            # print(shell_command.arguments)
+            if len(shell_command.arguments) == 1:
+                print("Status: " + str(show_status_on_startup))
+                continue
+            if shell_command.arguments[1] == "on":
+                show_status_on_startup = True
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_STATUS_ON_STARTUP,
+                    "True")
+                continue
+            if shell_command.arguments[1] == "off":
+                show_status_on_startup = False
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_STATUS_ON_STARTUP,
+                    "False")
+                continue
+            print("Error: on or off expected.")
+            continue
+
         if shell_command.command == "showunmergedwarning":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                # print("on/off is missing.")
-                # print(shell_command)
-                # current_status = pdatabase.get_attribute_value_from_configuration_table(
-                #     p_database.database_filename,
-                #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING)
-                # if current_status == "":
-                #     current_status = "True"
-                # print("Status: " + current_status)
                 print("Status: " + str(show_unmerged_changes_warning_on_startup))
                 continue
             if shell_command.arguments[1] == "on":
