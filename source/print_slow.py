@@ -15,5 +15,8 @@ def print_slow(text: str, delay: int = DEFAULT_DELAY):
         # print(char, end='')
         sys.stdout.write(char)
         sys.stdout.flush()
-        time.sleep(delay)
+        try:
+            time.sleep(delay)
+        except KeyboardInterrupt as ke:
+            return
     print()

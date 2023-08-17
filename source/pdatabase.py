@@ -795,47 +795,6 @@ def print_database_statistics(database_filename):
     else:
         unmerged_changes = colored("No", "green")
 
-    # print("Database Name                       : " + database_name)
-    # print("Database UUID                       : " + database_uuid)
-    # print("Database File                       : " + os.path.abspath(database_filename))
-    # print("Database Created                    : " + database_creation_date)
-    # print("Database Schema Version             : " + schema_version)
-    # print("SQLite Database Version             : " + get_database_sqlite_version(database_filename))
-    # print("Database Encrypted                  : " + str(database_is_encrypted))
-    # print("Database Size                       : " + str(os.path.getsize(database_filename) / 1024) + " Kb")
-    # print("Database Last Changed               : " + last_change_date)
-    # print("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
-    #       str(account_count_invalid) + ")")
-    # print("Account history entries             : " + str(account_history_count))
-    # print("Shell command history entries       : " + str(shell_history_count))
-    # print("Aliases                             : " + str(alias_count))
-    # print("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
-    # print("Last Merge Database                 : " + str(last_merge_database))
-    # print("Last Merge Date                     : " + str(last_merge_date))
-    # print("Database has unmerged changes       : " + unmerged_changes)
-    # print("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
-    # print("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
-
-    # print_slow("Database Name                       : " + database_name)
-    # print_slow("Database UUID                       : " + database_uuid)
-    # print_slow("Database File                       : " + os.path.abspath(database_filename))
-    # print_slow("Database Created                    : " + database_creation_date)
-    # print_slow("Database Schema Version             : " + schema_version)
-    # print_slow("SQLite Database Version             : " + get_database_sqlite_version(database_filename))
-    # print_slow("Database Encrypted                  : " + str(database_is_encrypted))
-    # print_slow("Database Size                       : " + str(os.path.getsize(database_filename) / 1024) + " Kb")
-    # print_slow("Database Last Changed               : " + last_change_date)
-    # print_slow("Accounts (valid/invalid)            : " + str(account_count) + " (" + str(account_count_valid) + "/" +
-    #            str(account_count_invalid) + ")")
-    # print_slow("Account history entries             : " + str(account_history_count))
-    # print_slow("Shell command history entries       : " + str(shell_history_count))
-    # print_slow("Aliases                             : " + str(alias_count))
-    # print_slow("Account UUID's in deleted table     : " + str(get_deleted_account_table_count(database_filename)))
-    # print_slow("Last Merge Database                 : " + str(last_merge_database))
-    # print_slow("Last Merge Date                     : " + str(last_merge_date))
-    # print_slow("Database has unmerged changes       : " + unmerged_changes)
-    # print_slow("Dropbox refresh token account uuid  : " + str(dropbox_account_uuid))
-    # print_slow("Dropbox application account uuid    : " + str(dropbox_application_account_uuid))
     try:
         print("Database Name                       : ", end="")
         print_slow.print_slow(database_name)
@@ -877,7 +836,6 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(dropbox_application_account_uuid))
     except KeyboardInterrupt as ke:
         print()
-        None
 
 
 def get_database_sqlite_version(database_filename: str) -> str:
@@ -906,10 +864,6 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
         last_change_date_later_than_last_merge_date = last_change_date > last_merge_date
     else:
         last_change_date_later_than_last_merge_date = False
-    # if last_change_date_later_than_last_merge_date is True:
-    #     last_change_date_later_than_last_merge_date = colored("Yes", "red")
-    # else:
-    #     last_change_date_later_than_last_merge_date = colored("No", "green")
     return last_change_date_later_than_last_merge_date
 
 
@@ -1030,10 +984,6 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    # def __str__(self):
-    #     id_string = "[" + get_database_uuid(self.database_filename) + "] - '" + self.database_filename + "'"
-    #     if get_database_name(self) != "":
-    #         id_string = "'" + get_database_name(self) + "' - " + id_string
 
     def print_current_secure_delete_mode(self, database_connection, cursor):
         sqlstring = "pragma secure_delete"
@@ -1303,18 +1253,10 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            # if self.show_invalidated_accounts:
-            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-            #                 invalid_date from account "
-            # else:
             sqlstring = "select account_uuid as uuid, name, url, loginname, password, type, create_date from account_history where " + \
                         "account_uuid = '" + str(uuid_string) + "' order by create_date"
-            # sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
-            # print("exceuting: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-            #       "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
             print()
             if result is not None:
                 print(colored("Older versions of account:", 'red'))
@@ -1329,10 +1271,7 @@ class PDatabase:
                                   create_date=row[6]
                                   )
                 decrypted_account = self.decrypt_account(account)
-                # if search_string == "" or \
-                #         search_string_matches_account(search_string, decrypted_account):
                 results_found += 1
-                # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                 try:
                     if results_found < 4:
                         self.print_formatted_account(decrypted_account, show_history_count=False, print_slowly=True)
@@ -1409,10 +1348,6 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            # if self.show_invalidated_accounts:
-            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-            #                 invalid_date from account "
-            # else:
             sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
                          invalid_date from account where invalid = 1 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
@@ -1523,9 +1458,6 @@ class PDatabase:
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
-            # print()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1603,9 +1535,6 @@ class PDatabase:
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
-            # print()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1825,39 +1754,6 @@ class PDatabase:
                 print("Old Versions    : ", end="")
                 print_slow.print_slow(str(get_account_history_count(self.database_filename, account.uuid)), delay=print_delay)
 
-    # def print_formatted_account(self, account: Account, show_history_count: bool = True):
-    #     print("UUID            : " + str(account.uuid))
-    #     print("Name            : " + str(account.name))
-    #     print("URL             : " + str(account.url))
-    #     print("Loginname       : " + str(account.loginname))
-    #     if self.shadow_passwords:
-    #         print("Password        : ********")
-    #     else:
-    #         print("Password        : " + str(account.password))
-    #     print("Type            : " + str(account.type))
-    #     if self.show_account_details:
-    #         print("Created         : " + str(account.create_date))
-    #         print("Changed         : " + str(account.change_date))
-    #         print("Invalidated     : " + colored(str(account.invalid_date), "red"))
-    #         if show_history_count:
-    #             print("Old Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
-
-    # def print_formatted_account(self, account: Account, show_history_count: bool = True):
-    #     print_slow("UUID            : " + str(account.uuid))
-    #     print_slow("Name            : " + str(account.name))
-    #     print_slow("URL             : " + str(account.url))
-    #     print_slow("Loginname       : " + str(account.loginname))
-    #     if self.shadow_passwords:
-    #         print_slow("Password        : ********")
-    #     else:
-    #         print_slow("Password        : " + str(account.password))
-    #     print_slow("Type            : " + str(account.type))
-    #     if self.show_account_details:
-    #         print_slow("Created         : " + str(account.create_date))
-    #         print_slow("Changed         : " + str(account.change_date))
-    #         print_slow("Invalidated     : " + colored(str(account.invalid_date), "red"))
-    #         if show_history_count:
-    #             print_slow("Old Versions    : " + str(get_account_history_count(self.database_filename, account.uuid)))
 
     def decrypt_and_encrypt_with_new_password(self, string_encrypted: str, new_password: str) -> str:
         string_decrypted = self.decrypt_string_if_password_is_present(string_encrypted)
