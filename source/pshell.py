@@ -803,15 +803,23 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 try:
                     pyperclip3.copy(account_array[int(index) - 1].password)
-                    print("Account   : " + account_array[int(index) - 1].name)
-                    print("Clipboard : Password")
+                    # print("Account   : " + account_array[int(index) - 1].name)
+                    print("Account   : ", end='')
+                    print_slow.print_slow(account_array[int(index) - 1].name)
+                    # print("Clipboard : Password")
+                    print("Clipboard : ", end='')
+                    print_slow.print_slow("Password")
                 except Exception as e:
                     print("Error: " + str(e))
                 continue
             try:
                 pyperclip3.copy(account_array[0].password)
-                print("Account   : " + account_array[0].name)
-                print("Clipboard : Password")
+                # print("Account   : " + account_array[0].name)
+                print("Account   : ", end='')
+                print_slow.print_slow(account_array[0].name)
+                # print("Clipboard : Password")
+                print("Clipboard : ", end='')
+                print_slow.print_slow("Password")
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
             continue
