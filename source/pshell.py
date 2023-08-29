@@ -90,6 +90,7 @@ SHELL_COMMANDS = [
                  " can run the command by just typing 1.\nTo see all aliases just type 'alias'. If you want " +
                  "to see the command programmed on the alias 3 for example, type 'alias 3'.\nTo unset an alias, " +
                  "for example the 3, type 'alias 3 -'."),
+    ShellCommand("cc", "cc", "Clear clipboard. Remove anything from clipboard."),
     ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
                  "be re-encrypted but also account history, aliases, command history and so on."),
@@ -564,6 +565,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                         if current_command == '-':
                             current_command = ""
                         p_database.set_alias_command_and_encrypt(current_alias, current_command)
+            continue
+        if shell_command.command == "cc":
+            pyperclip3.clear()
             continue
         if shell_command.command == "changedropboxdbpassword":
             p.change_dropbox_database_password(p_database)
