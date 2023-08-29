@@ -158,6 +158,9 @@ SHELL_COMMANDS = [
                  " of the account found to the clipboard."),
     ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
                  " account found to the clipboard."),
+    ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
+                 "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
+                 " which looks kinda cool :) But if you think it's anoying, disable it."),
     ShellCommand("sp", "sp <UUID>", "Set password for account with UUID.\nIf shadow passwords is on, the password " +
                  "will be read hidden so that none can gather it from your screen."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
@@ -204,6 +207,7 @@ DEFAULT_PSHELL_MAX_HISTORY_SIZE = 10
 pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
 show_unmerged_changes_warning_on_startup = True
 show_status_on_startup = True
+pshell_print_slow_enabled = True
 
 
 # Try to find the uuid for a given searchstring. If there are multiple accounts that match,
@@ -286,6 +290,15 @@ def print_shell_command_history(shell_history_array: [ShellCommand]):
 
 
 def load_pshell_configuration(p_database: pdatabase.PDatabase):
+    global pshell_print_slow_enabled
+    config_value = pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
+    if config_value is not None and (config_value == "True" or config_value == "False"):
+        # pshell_print_slow_enabled = parse_bool(config_value)
+        # print_slow.set_delay_enabled(pshell_print_slow_enabled)
+        print_slow.set_delay_enabled(parse_bool(config_value))
+
     global pshell_max_idle_minutes_timeout
     pshell_max_idle_minutes_timeout = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
@@ -312,20 +325,6 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
     else:
         pshell_max_history_size = int(pshell_max_history_size)
 
-    # global pshell_max_idle_minutes_timeout_min_before_clear_console
-    # pshell_max_idle_minutes_timeout_min_before_clear_console = pdatabase.get_attribute_value_from_configuration_table(
-    #     p_database.database_filename,
-    #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR)
-    # if not pshell_max_idle_minutes_timeout_min_before_clear_console.isnumeric() \
-    #         or pshell_max_idle_minutes_timeout_min_before_clear_console is None \
-    #         or pshell_max_idle_minutes_timeout_min_before_clear_console == "":
-    #     pshell_max_idle_minutes_timeout_min_before_clear_console = \
-    #         DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CLEAR_CONSOLE
-    #     pdatabase.set_attribute_value_in_configuration_table(
-    #         p_database.database_filename,
-    #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN_BEFORE_CONSOLE_CLEAR,
-    #         pshell_max_idle_minutes_timeout_min_before_clear_console)
-
     global show_status_on_startup
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
@@ -338,7 +337,6 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS)
     if config_value is not None and (config_value == "True" or config_value == "False"):
         p_database.shadow_passwords = parse_bool(config_value)
-        # print("->" + p_database.shadow_passwords)
     config_value = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS)
@@ -409,6 +407,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     if pshell_max_history_size < 1:
         p_database.delete_all_shell_history_entries()
     shell_history_array = p_database.get_shell_history_entries_decrypted()
+
     while user_input != "quit":
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
@@ -951,6 +950,31 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print_slow.print_slow("URL")
             except Exception as e:
                 print("Error copying URL to the clipboard: " + str(e))
+        if shell_command.command == "slowprintenabled":
+            if len(shell_command.arguments) == 1:
+                # print("on/off is missing.")
+                # print(shell_command)
+                current_status = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
+                print("Status: " + current_status)
+                continue
+            if shell_command.arguments[1] == "on":
+                print_slow.set_delay_enabled(True)
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED,
+                    "True")
+                continue
+            if shell_command.arguments[1] == "off":
+                print_slow.set_delay_enabled(False)
+                pdatabase.set_attribute_value_in_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED,
+                    "False")
+                continue
+            print("Error: on or off expected.")
+            continue
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
@@ -1033,6 +1057,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(show_status_on_startup), "green"))
             print("Track account history               : ", end="")
             print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
+            print("Slow print enabled                  : ", end="")
+            print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
+            # print_slow.print_slow(colored(str(xxx), "green"))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
