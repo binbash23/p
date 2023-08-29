@@ -204,6 +204,48 @@ show_unmerged_changes_warning_on_startup = True
 show_status_on_startup = True
 
 
+# Try to find the uuid for a given searchstring. If there are multiple accounts that match,
+# then ask the user which one to take.
+def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatabase) -> str:
+    matching_uuid = None
+    searchstring = searchstring.strip()
+    if searchstring == "" or searchstring is None:
+        print("Searchstring is missing.")
+        return None
+    account_array = p_database.get_accounts_decrypted(searchstring)
+    if len(account_array) == 0:
+        print("No account found.")
+        return None
+    if len(account_array) != 1:
+        i = 1
+        # print()
+        for acc in account_array:
+            print()
+            print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
+            i = i + 1
+        print("")
+        try:
+            index = input("Multiple accounts found. Please specify the # you need: ")
+        except KeyboardInterrupt:
+            print()
+            index = ""
+        if index == "":
+            print("Nothing selected.")
+            return None
+        try:
+            matching_uuid = account_array[int(index) - 1].uuid
+        except Exception as e:
+            print("Error: " + str(e))
+            return None
+        return matching_uuid
+    try:
+        matching_uuid = account_array[0].uuid
+    except Exception as e:
+        print("Error copying password to the clipboard: " + str(e))
+        return None
+    return matching_uuid
+
+
 def expand_string_2_shell_command(string: str) -> ShellCommand:
     if string is None or string.strip() == "":
         return None
@@ -565,11 +607,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.delete_dropbox_database(p_database)
             continue
         if shell_command.command == "edit":
-            if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
-                print(shell_command)
-                continue
-            p.edit(p_database, shell_command.arguments[1].strip())
+            uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if uuid_to_edit is not None:
+                p.edit(p_database, uuid_to_edit)
             continue
         if shell_command.command == "forgetdeletedaccounts":
             try:
