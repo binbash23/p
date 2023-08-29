@@ -111,7 +111,8 @@ SHELL_COMMANDS = [
                  "in the deleted_accounts table."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
                  "configured dropbox account."),
-    ShellCommand("edit", "edit <UUID>", "Edit account with UUID."),
+    ShellCommand("edit", "edit <SEARCHSTRING>>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
+                 "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell."),
     ShellCommand("exit", "exit", "Quit pshell."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
@@ -881,75 +882,27 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
-            if len(account_array) == 0:
-                print("No account found.")
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if account_uuid is None:
                 continue
-            if len(account_array) != 1:
-                i = 1
-                # print()
-                for acc in account_array:
-                    print()
-                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
-                    i = i + 1
-                print("")
-                index = input("Multiple accounts found. Please specify the # you need: ")
-                if index == "":
-                    print("Nothing selected.")
-                    continue
-                try:
-                    pyperclip3.copy(account_array[int(index) - 1].url)
-                    # print("Account   : " + account_array[int(index) - 1].name)
-                    # print("Clipboard : URL")
-                    # input("<Press enter>")
-
-                    print("Account   : ", end='')
-                    print_slow.print_slow(account_array[int(index) - 1].name)
-                    print("Clipboard : ", end='')
-                    print_slow.print_slow("URL")
-                    input("<Press enter>")
-
-                    pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    # print("Clipboard : Loginname")
-                    # input("<Press enter>")
-
-                    print("Clipboard : ", end='')
-                    print_slow.print_slow("Loginname")
-                    input("<Press enter>")
-
-                    pyperclip3.copy(account_array[int(index) - 1].password)
-                    # print("Clipboard : Password")
-
-                    print("Clipboard : ", end='')
-                    print_slow.print_slow("Password")
-                except KeyboardInterrupt as ke:
-                    print()
-                    continue
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
+            account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
             try:
-                pyperclip3.copy(account_array[0].url)
-                # print("Account   : " + account_array[0].name)
-                # print("Clipboard : URL")
-                # input("<Press enter>")
+                # pyperclip3.copy(account_array[0].url)
+                pyperclip3.copy(account.url)
 
                 print("Account   : ", end='')
-                print_slow.print_slow(account_array[0].name)
+                print_slow.print_slow(account.name)
                 print("Clipboard : ", end='')
                 print_slow.print_slow("URL")
                 input("<Press enter>")
 
-                pyperclip3.copy(account_array[0].loginname)
-                # print("Clipboard : Loginname")
-                # input("<Press enter>")
+                pyperclip3.copy(account.loginname)
 
                 print("Clipboard : ", end='')
                 print_slow.print_slow("Loginname")
                 input("<Press enter>")
 
-                pyperclip3.copy(account_array[0].password)
-                # print("Clipboard : Password")
+                pyperclip3.copy(account.password)
 
                 print("Clipboard : ", end='')
                 print_slow.print_slow("Password")
@@ -964,39 +917,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
-            if len(account_array) == 0:
-                print("No account found.")
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if account_uuid is None:
                 continue
-            if len(account_array) != 1:
-                i = 1
-                for acc in account_array:
-                    print()
-                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
-                    i = i + 1
-                print("")
-                index = input("Multiple accounts found. Please specify the # you need: ")
-                if index == "":
-                    print("Nothing selected.")
-                    continue
-                try:
-                    pyperclip3.copy(account_array[int(index) - 1].loginname)
-                    # print("Account   : " + account_array[int(index) - 1].name)
-                    # print("Clipboard : Loginname")
-
-                    print("Account   : ", end='')
-                    print_slow.print_slow(account_array[int(index) - 1].name)
-                    print("Clipboard : ", end='')
-                    print_slow.print_slow("Loginname")
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
+            account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
             try:
-                pyperclip3.copy(account_array[0].loginname)
-                # print("Account   : " + account_array[0].name)
-                # print("Clipboard : Loginname")
+                pyperclip3.copy(account.loginname)
                 print("Account   : ", end='')
-                print_slow.print_slow(account_array[0].name)
+                print_slow.print_slow(account.name)
                 print("Clipboard : ", end='')
                 print_slow.print_slow("Loginname")
             except Exception as e:
@@ -1007,41 +935,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
-            if len(account_array) == 0:
-                print("No account found.")
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if account_uuid is None:
                 continue
-            if len(account_array) != 1:
-                i = 1
-                # print()
-                for acc in account_array:
-                    print()
-                    print(" [" + str(i).rjust(2) + "]" + " - Name: " + acc.name)
-                    # p_database.print_formatted_account_search_string_colored(acc, shell_command.arguments[1])
-                    i = i + 1
-                print("")
-                index = input("Multiple accounts found. Please specify the # you need: ")
-                if index == "":
-                    print("Nothing selected.")
-                    continue
-                try:
-                    pyperclip3.copy(account_array[int(index) - 1].url)
-                    # print("Account   : " + account_array[int(index) - 1].name)
-                    # print("Clipboard : URL")
-                    # print("Account   : " + account_array[0].name)
-                    print("Account   : ", end='')
-                    print_slow.print_slow(account_array[int(index) - 1].name)
-                    print("Clipboard : ", end='')
-                    print_slow.print_slow("URL")
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
+            account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
             try:
-                pyperclip3.copy(account_array[0].url)
-                # print("Account   : " + account_array[0].name)
-                # print("Clipboard : URL")
+                pyperclip3.copy(account.url)
                 print("Account   : ", end='')
-                print_slow.print_slow(account_array[0].name)
+                print_slow.print_slow(account.name)
                 print("Clipboard : ", end='')
                 print_slow.print_slow("URL")
             except Exception as e:
