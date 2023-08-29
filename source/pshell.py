@@ -160,7 +160,7 @@ SHELL_COMMANDS = [
                  " account found to the clipboard."),
     ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
                  "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
-                 " which looks kinda cool :) But if you think it's anoying, disable it."),
+                 " which looks kinda cool :) But if you think it's anoying, disable it (created for ben)."),
     ShellCommand("sp", "sp <UUID>", "Set password for account with UUID.\nIf shadow passwords is on, the password " +
                  "will be read hidden so that none can gather it from your screen."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
