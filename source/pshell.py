@@ -954,10 +954,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 # print("on/off is missing.")
                 # print(shell_command)
-                current_status = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
-                print("Status: " + current_status)
+                # current_status = pdatabase.get_attribute_value_from_configuration_table(
+                #     p_database.database_filename,
+                #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
+                # print("Status: " + current_status)
+                print("Status: " + str(print_slow.DELAY_ENABLED))
                 continue
             if shell_command.arguments[1] == "on":
                 print_slow.set_delay_enabled(True)
