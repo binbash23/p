@@ -661,6 +661,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 print()
                 print(colored(" PShell command help", "green"))
+                print()
                 print(colored(" Type 'help COMMAND' to get usage details for COMMAND", "green"))
                 print(colored(" It is enough to type the first distinct letter(s) of any COMMAND.", "green"))
                 print()
