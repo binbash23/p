@@ -479,7 +479,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
                 continue
-
             redo_index = -1
             # when there is no index of the command history array given, use the latest one
             if len(shell_command.arguments) == 1:
@@ -488,7 +487,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if shell_command.arguments[1].strip() == "?":
                     print_shell_command_history(shell_history_array)
                     try:
-                        redo_index = int(input("Enter history index: "))
+                        redo_index_input = input("Enter history index: ")
+                        if not redo_index_input.isnumeric():
+                            continue
+                        else:
+                            redo_index = int(redo_index_input)
                     except KeyboardInterrupt:
                         print()
                         continue
@@ -504,7 +507,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if redo_index < 0 or redo_index > len(shell_history_array):
                 print("Error: Index not found in command history.")
                 continue
+
             last_user_input = (shell_history_array[redo_index - 1]).user_input
+
             # change the current shell_command to the last command before the redo command
             shell_command = expand_string_2_shell_command(last_user_input)
             print("Redo command: " + last_user_input)
