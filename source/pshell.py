@@ -178,7 +178,9 @@ SHELL_COMMANDS = [
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
-    ShellCommand("showaccounthistory", "showaccounthistory <UUID>", "Show change history of account with UUID."),
+    ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" + #
+                 " account with UUID. If you do not know the uuid, use a SEARCHSTRING and you can choose from " +
+                 "possible existing accounts which include your SEARCHSTRING."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
@@ -542,7 +544,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "!":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             os.system(shell_command.arguments[1])
             continue
@@ -598,7 +600,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             # password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
             account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
@@ -613,7 +615,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "delete":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip()
             uuid_to_delete = find_uuid_for_searchstring_interactive(search_string, p_database)
@@ -696,7 +698,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING or UUID is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip()
             uuid_to_invalidate = find_uuid_for_searchstring_interactive(search_string, p_database)
@@ -738,7 +740,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2file":
             if len(shell_command.arguments) == 1:
                 print("FILENAME is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p_database.merge_database(shell_command.arguments[1].strip())
             continue
@@ -748,7 +750,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
                 print("DATABASE_FILENAME is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             new_database_filename = shell_command.arguments[1].strip()
             if os.path.exists(new_database_filename):
@@ -783,14 +785,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "revalidate":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p_database.revalidate_account(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "search" or shell_command.command == "/":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p_database.search_accounts(shell_command.arguments[1].strip())
             # remember latest found account:
@@ -805,7 +807,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "searchhelp":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip().lower()
             print()
@@ -818,7 +820,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "searchhelpverbose":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip().lower()
             print()
@@ -833,7 +835,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "searchinvalidated":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p_database.search_invalidated_accounts(shell_command.arguments[1])
             # remember latest found account:
@@ -855,7 +857,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
             if len(account_array) == 0:
@@ -903,7 +905,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "sca":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if account_uuid is None:
@@ -938,7 +940,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "scl":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if account_uuid is None:
@@ -956,7 +958,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "scu":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if account_uuid is None:
@@ -999,7 +1001,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
@@ -1012,7 +1014,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
@@ -1022,7 +1024,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "setdropboxtokenuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
@@ -1056,10 +1058,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "showaccounthistory":
             if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
-                print(shell_command)
+                print("UUID or SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
                 continue
-            p_database.search_account_history(shell_command.arguments[1].strip())
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_show_accounthistory_from = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_show_accounthistory_from is None:
+                continue
+            p_database.search_account_history(uuid_to_show_accounthistory_from)
             continue
         if shell_command.command == "showconfig":
             print("PShell timeout                      : ", end="")
@@ -1154,7 +1160,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "sp":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip()
             uuid_to_change_password = find_uuid_for_searchstring_interactive(search_string, p_database)
@@ -1188,7 +1194,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "sql":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             print("->" + shell_command.arguments[1])
             print("Executing sql command: <" + shell_command.arguments[1] + ">")
@@ -1203,7 +1209,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "st":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
-                print(shell_command)
+                print(shell_command.synopsis)
                 continue
             p_database.search_accounts_by_type(shell_command.arguments[1])
             # remember latest found account:  xxx
