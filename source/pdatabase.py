@@ -926,7 +926,7 @@ class PDatabase:
     def __init__(self, database_filename, database_password, show_account_details=False,
                  show_invalidated_accounts=False, shadow_passwords: bool = False,
                  salt=DEFAULT_SALT, iteration_count: int = DEFAULT_ITERATION_COUNT,
-                 track_account_history: bool = True):
+                 track_account_history: bool = True, initial_database_name: str = None):
         if database_filename is None \
                 or database_filename == "" \
                 or database_password is None:
@@ -947,7 +947,7 @@ class PDatabase:
             self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
         else:
             self.database_password = ""
-        self.create_and_initialize_database()
+        self.create_and_initialize_database(initial_database_name)
         self.update_database_schema(self.database_filename)
         self.set_default_values_in_configuration_table()
         if not self.is_valid_database_password(self.database_filename, self.database_password):
@@ -967,11 +967,11 @@ class PDatabase:
                 set_attribute_value_in_configuration_table(self.database_filename,
                                                            CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
                                                            "False")
-        if get_attribute_value_from_configuration_table(self.database_filename,
-                                                        CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME) == "":
-            set_attribute_value_in_configuration_table(self.database_filename,
-                                                       CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
-                                                       socket.gethostname())
+        # if get_attribute_value_from_configuration_table(self.database_filename,
+        #                                                 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME) == "":
+        #     set_attribute_value_in_configuration_table(self.database_filename,
+        #                                                CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+        #                                                socket.gethostname())
 
     def update_database_schema(self, database_filename: str):
         try:
@@ -2048,7 +2048,7 @@ class PDatabase:
         cursor.execute("PRAGMA secure_delete = True")
         database_connection.commit()
 
-    def create_and_initialize_database(self):
+    def create_and_initialize_database(self, initial_database_name: str = None):
         try:
             database_connection = None
             database_connection = sqlite3.connect(self.database_filename)
@@ -2106,7 +2106,15 @@ class PDatabase:
                         "('DATABASE_CREATED', datetime(CURRENT_TIMESTAMP, 'localtime'))"
             cursor.execute(sqlstring)
             # print("executed: " + sqlstring)
+
             database_connection.commit()
+
+            # set an initial logical database name if wanted
+            if initial_database_name is not None:
+                set_attribute_value_in_configuration_table(self.database_filename,
+                                                           CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                           initial_database_name)
+
             # print("DATABASE_PASSWORD test value created and inserted into configuration table.")
         except Exception as e:
             raise

@@ -19,7 +19,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.08.29"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.09.05"
 database_filename = 'p.db'
 TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -28,6 +28,7 @@ DOWNLOAD_P_UPDATE_FILENAME_WIN = "p.exe_latest"
 DOWNLOAD_P_UPDATE_FILENAME_LINUX = "p_latest"
 P_FILENAME_WIN = "p.exe"
 P_FILENAME_LINUX = "p"
+
 
 def add(p_database: PDatabase):
     print("Add account")
@@ -393,7 +394,9 @@ def start_dropbox_configuration():
 # main
 #
 def main():
+    print()
     print(p.VERSION)
+    print()
     parser = optparse.OptionParser()
     parser.add_option("-a", "--add", action="store_true", dest="add", default=False,
                       help="Add new account interactive")
@@ -468,7 +471,7 @@ def main():
 
     if options.version:
         # Version is printed per default on startup
-        #print(VERSION)
+        # print(VERSION)
         sys.exit(0)
 
     # check if the users wants to start the dropbox configuration process
@@ -488,7 +491,8 @@ def main():
         pass
     if options.database is not None and options.database != "":
         database_filename = options.database
-    print("Using Database: " + database_filename)
+    absolute_filename = os.path.abspath(database_filename)
+    print("Database filename         : " + absolute_filename)
 
     # check here, if statistics should be shown. this must be done without trying to decrypt/create the db connection
     if options.statistics:
@@ -518,19 +522,30 @@ def main():
     if options.database_password_empty:
         database_password = ""
 
+    database_logical_name = None
     if database_password is None:
         if os.path.exists(database_filename):
             try:
-                #database_password = getpass.getpass("Enter database password: ")
-                database_password = getpass.getpass("Enter database password: ")
+                current_database_name = pdatabase.get_database_name(database_filename)
+                if current_database_name is None or current_database_name == "":
+                    print("Logical database name     : [empty]")
+                else:
+                    print("Logical database name     : " + current_database_name)
+                database_password = getpass.getpass("Enter database password   : ")
             except KeyboardInterrupt as k:
                 print()
                 return
         else:
-            print(colored("Database does not exist.", "red"))
+            print()
+            print("> Information: Database file does not exist and will be created now.")
+            print("> Create a new password to encrypt the database file. Do not forget this password!")
+            print("> If you do not want to encrypt the database, leave the password empty.")
+            print()
             try:
-                database_password = getpass.getpass("Enter password for new database    : ")
-                database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+                database_password = getpass.getpass("Enter database password   : ")
+                database_password_confirm = getpass.getpass("Confirm database password : ")
+                print("If you want you can set an optional logical database name now.")
+                database_logical_name = input("Enter a database name     : ")
             except KeyboardInterrupt as k:
                 print()
                 return
@@ -551,7 +566,7 @@ def main():
         show_invalidated_accounts = True
     # Now try to open/create the database:
     p_database = PDatabase(database_filename, database_password, show_account_details,
-                           show_invalidated_accounts)
+                           show_invalidated_accounts, initial_database_name=database_logical_name)
 
     # from here we have a valid database ready to access
 
@@ -614,7 +629,7 @@ def main():
     if len(sys.argv) == 2 and sys.argv[1] is not None:
         p_database.search_accounts(sys.argv[1])
     # start the interactive p shell mode
-#    if len(sys.argv) == 1:
+    #    if len(sys.argv) == 1:
     start_pshell(p_database)
 
 
