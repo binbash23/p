@@ -102,8 +102,9 @@ SHELL_COMMANDS = [
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
-    ShellCommand("delete", "delete <UUID>", "Delete account with UUID. You can also invalidate the account " +
-                 "instead of deleting it."),
+    ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>", "Delete account with UUID. You can also invalidate " +
+                 "the account instead of deleting it. If you do not no the UUID, use a SEARCHSTRING and you " +
+                 "will be offered possible accounts to delete."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
@@ -609,8 +610,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "delete":
             if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
+                print("UUID or SEARCHSTRING is missing.")
                 print(shell_command)
+                continue
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_delete = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_delete is None:
                 continue
             p_database.delete_account(shell_command.arguments[1])
             continue
@@ -1073,7 +1078,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
             print("Slow print enabled                  : ", end="")
             print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
-            # print_slow.print_slow(colored(str(xxx), "green"))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
