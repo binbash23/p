@@ -664,10 +664,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(colored(" Type 'help COMMAND' to get usage details for COMMAND", "green"))
                 print(colored(" It is enough to type the first distinct letter(s) of any COMMAND.", "green"))
                 print()
+                print(colored(" You can search through all command help texts with 'searchhelp <SEARCHSTRING>'",
+                              "green"))
+                print(colored(" to get a list of commands which contain SEARCHSTRING in their help text.", "green"))
+                print()
+                print(colored(" You can also use 'searchhelpverbose <SEARCHSTRING>' to print the full help text(s)",
+                              "green"))
+                print(colored(" of commands which contain SEARCHSTRING in their help text.", "green"))
+                print()
+                print(colored(" Complete list of p commands:", "green"))
+                print()
                 for shell_command in SHELL_COMMANDS:
                     # print(str(shell_command))
                     print(colored(shell_command.synopsis, "green"))
-                    print()
+                    #print()
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
