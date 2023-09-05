@@ -122,7 +122,9 @@ SHELL_COMMANDS = [
     ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
     ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
-    ShellCommand("invalidate", "invalidate <UUID>", "Invalidate account with UUID."),
+    ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
+                 "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
+                 " to invalidate."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
@@ -686,10 +688,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
+                print("SEARCHSTRING or UUID is missing.")
                 print(shell_command)
                 continue
-            p_database.invalidate_account(shell_command.arguments[1].strip())
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_invalidate = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if p_database.invalidate_account(uuid_to_invalidate):
+                print("Account with UUID: " + uuid_to_invalidate + " has been invalidated.")
+            else:
+                print("UUID is empty.")
+            # p_database.invalidate_account(shell_command.arguments[1].strip())
             continue
         if shell_command.command == "list":
             p_database.search_accounts("")

@@ -1208,9 +1208,9 @@ class PDatabase:
         else:
             return False
 
-    def invalidate_account(self, invalidate_uuid: str):
+    def invalidate_account(self, invalidate_uuid: str) -> bool:
         if invalidate_uuid is None or invalidate_uuid == "":
-            return
+            return False
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1222,6 +1222,7 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
+        return True
 
     def revalidate_account(self, revalidate_uuid: str):
         if revalidate_uuid is None or revalidate_uuid == "":
