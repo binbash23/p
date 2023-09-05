@@ -164,8 +164,10 @@ SHELL_COMMANDS = [
     ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
                  "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
                  " which looks kinda cool :) But if you think it's anoying, disable it (created for ben)."),
-    ShellCommand("sp", "sp <UUID>", "Set password for account with UUID.\nIf shadow passwords is on, the password " +
-                 "will be read hidden so that none can gather it from your screen."),
+    ShellCommand("sp", "sp <UUID>|<SEARCHSTRING>", "Set password for account with UUID or SEARCHSTRING. If" +
+                 " shadow passwords is on, the password will be read hidden so that none can gather it from " +
+                 "your screen. If you do not no the UUID, use a SEARCHSTRING and you will be offered possible " +
+                 "accounts the change the password for."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database."),
@@ -1151,11 +1153,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "sp":
             if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
+                print("UUID or SEARCHSTRING is missing.")
                 print(shell_command)
                 continue
-            if not p_database.get_account_exists(shell_command.arguments[1].strip()):
-                print("Error: Account UUID " + shell_command.arguments[1] + " not found.")
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_change_password = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_change_password is None:
+                continue
+            if not p_database.get_account_exists(uuid_to_change_password):
+                print("Error: Account UUID " + uuid_to_change_password + " not found.")
                 continue
             try:
                 if pdatabase.get_attribute_value_from_configuration_table(
@@ -1175,7 +1181,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Strg-C detected.")
                 continue
             if answer == "y" or answer == "":
-                p_database.set_password_of_account(shell_command.arguments[1], new_password)
+                p_database.set_password_of_account(uuid_to_change_password, new_password)
             else:
                 print("Canceled")
             continue
