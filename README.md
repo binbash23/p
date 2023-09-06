@@ -73,6 +73,9 @@ Type        : Webaccount
 Found 1 result(s).
 DB: p.db>
 ```
+
+You should also take a look at the [wiki](https://github.com/binbash23/p/wiki)
+
 ### Cloud integration
 
 Who wants to have a master database copy in the cloud can also do this by using my dropbox feature. First you have to enable your dropbox for an API connection. Then you can alway upload/sync your database with the copy in your personal dropbox account.<br>The procedure to enable dropbox is f&%$%&ing stupid complicated. So I wrote a help text for this [here](https://github.com/binbash23/p/blob/master/docs/howto_dropbox_configuration.txt).<br>By the way: [your master password for the p database NEVER leaves your computer nor will it be typed in a web form or something like that](https://github.com/binbash23/p/blob/master/docs/20221230_p_architecture.png). The "cloud integration" that I implemented is simply moving the full encrypted p database into your dropbox account. Dropbox will never see your p master password. 
