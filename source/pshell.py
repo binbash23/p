@@ -1294,21 +1294,30 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Error: on or off expected.")
             continue
         if shell_command.command == "updatep":
-            if os_is_windows():
-                download_url = p.URL_DOWNLOAD_BINARY_P_WIN
-                download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
-                p_filename = p.P_FILENAME_WIN
-            else:
-                download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
-                download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
-                p_filename = p.P_FILENAME_LINUX
-            print("Downloading latest p binary to: " + download_p_filename)
-            print("Please wait, this can take a while...")
-            req = requests.get(download_url)
-            open(download_p_filename, "wb").write(req.content)
-            print("Download ready.")
-            print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
-                  "'. Then restart p and you have the latest version.")
+            try:
+                if os_is_windows():
+                    download_url = p.URL_DOWNLOAD_BINARY_P_WIN
+                    download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
+                    p_filename = p.P_FILENAME_WIN
+                else:
+                    download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
+                    download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
+                    p_filename = p.P_FILENAME_LINUX
+                print("Downloading latest p binary to: " + download_p_filename)
+                print("Please wait, this can take a while...")
+                req = requests.get(download_url)
+                open(download_p_filename, "wb").write(req.content)
+                print("Download ready.")
+                # print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
+                #       "'. Then restart p and you have the latest version.")
+                input('Press return to start the new version')
+                if not os.path.exists('updater.exe'):
+                    print("Error: updater executable not found.")
+                    continue
+                os.startfile('updater.exe')
+                sys.exit(0)
+            except Exception as ex:
+                print("Error updating: " + ex.with_traceback())
             continue
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
