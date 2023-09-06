@@ -29,9 +29,9 @@ Jens
 You can use the python code or the binaries that I have compiled to the following folders.
 
 For Linux, use the 'p' executeable here:
-```
-p/dist/linux/p
-```
+
+[p/dist/linux/p](https://github.com/binbash23/p/raw/master/dist/linux/p)
+
 and for Windows, use the 'p.exe' executeable here: 
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
