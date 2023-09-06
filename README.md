@@ -32,9 +32,9 @@ For Linux, use the 'p' executeable here:
 ```
 p/dist/linux/p
 ```
-and for Windows, use the 'p.exe' executeable here:
+and for Windows, use the 'p.exe' executeable here: 
 ```
-p/dist/windows/p.exe
+[p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
 ```
 I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
