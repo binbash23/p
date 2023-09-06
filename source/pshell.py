@@ -125,7 +125,9 @@ SHELL_COMMANDS = [
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
                  "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
-                 " to invalidate."),
+                 " to invalidate.\nIf you invalidate an account the account will be invisible in normal operation." +
+                 " If you search something, invalidated accounts are not visible unless you change the settings (" +
+                 "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
@@ -147,7 +149,8 @@ SHELL_COMMANDS = [
                  " appear in the command history. You can choose the index of the command in your history if" +
                  " you want.\nIf you choose no index, the latest command will be executed.\nIf you use redo ? you " +
                  "will see the current command history with the indices to choose from."),
-    ShellCommand("revalidate", "revalidate <UUID>", "Revalidate account with UUID."),
+    ShellCommand("revalidate", "revalidate <UUID>|<SEARCHSTRING>", "Revalidate account with UUID or use " +
+                 "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
@@ -257,6 +260,15 @@ def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatab
         print("Error copying password to the clipboard: " + str(e))
         return None
     return matching_uuid
+
+
+def get_prompt_string(p_database: pdatabase.PDatabase) -> str:
+    logical_database_name = pdatabase.get_database_name(p_database.database_filename)
+    if logical_database_name != "":
+        prompt_string = "[" + logical_database_name + "] pshell> "
+    else:
+        prompt_string = "[" + p_database.database_filename + "] pshell> "
+    return prompt_string
 
 
 def expand_string_2_shell_command(string: str) -> ShellCommand:
@@ -394,15 +406,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
     # time.sleep(1)
     clear_console()
+    prompt_string = "> "
     user_input = ""
     latest_found_account = None
-    #    prompt_string = p_database.database_filename + "> "
-    #     prompt_string = p_database.database_filename + "$ "
-    #     if pdatabase.get_database_name(p_database.database_filename) != "":
-    #         prompt_string = "pshell@" + pdatabase.get_database_name(p_database.database_filename) + ":" + prompt_string
-    #     else:
-    #         prompt_string = "pshell" + ":" + prompt_string
-    prompt_string = "[" + p_database.database_filename + "] " "pshell> "
 
     if show_status_on_startup is True:
         pdatabase.print_database_statistics(p_database.database_filename)
@@ -416,6 +422,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
     shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
+        # prompt_string = "[" + p_database.database_filename + "] " "pshell> "
+        prompt_string = get_prompt_string(p_database)
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
             try:
@@ -621,7 +629,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             uuid_to_delete = find_uuid_for_searchstring_interactive(search_string, p_database)
             if uuid_to_delete is None:
                 continue
-            p_database.delete_account(shell_command.arguments[1])
+            p_database.delete_account(uuid_to_delete)
             continue
         if shell_command.command == "deletedropboxdatabase":
             p.delete_dropbox_database(p_database)
@@ -795,10 +803,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
             break
         if shell_command.command == "revalidate":
             if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
+                print("UUID or SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
                 continue
-            p_database.revalidate_account(shell_command.arguments[1].strip())
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_revalidate = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_revalidate is None:
+                continue
+            p_database.revalidate_account(uuid_to_revalidate)
             continue
         if shell_command.command == "search" or shell_command.command == "/":
             if len(shell_command.arguments) == 1:
@@ -821,11 +833,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip().lower()
+            if search_string == "":
+                continue
+            print(colored("Searching in all help texts for: '" + search_string + "'", "green"))
             print()
+            results_found = 0
             for sc in SHELL_COMMANDS:
                 if search_string in sc.command.lower():
+                    results_found += 1
                     print(colored(sc.command, "green"))
-                    print()
+                    # print()
+            if results_found > 0:
+                print()
+            else:
+                print("No results found.")
+                print()
             continue
 
         if shell_command.command == "searchhelpverbose":
@@ -1018,9 +1040,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                 shell_command.arguments[1])
-            prompt_string = p_database.database_filename + "> "
-            if pdatabase.get_database_name(p_database.database_filename) != "":
-                prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
+            # prompt_string = p_database.database_filename + "> "
+            # if pdatabase.get_database_name(p_database.database_filename) != "":
+            #    prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
             continue
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
