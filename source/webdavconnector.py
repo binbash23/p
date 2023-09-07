@@ -3,13 +3,10 @@
 #
 # webdav connector
 #
-import webdav.client as wc
+from webdav4.client import Client
 
+client = Client("https://webdav.com", auth=("username", "password"))
+client.exists("Documents/Readme.md")
 
-options = {
- 'webdav_hostname': "https://webdav.server.ru",
- 'webdav_login':    "login",
- 'webdav_password': "password"
-}
-
-client = wc.Client(options)
+client.ls("Photos", detail=False)
+client.upload_file("Gorilla.jpg", "Photos/Gorilla.jpg")
