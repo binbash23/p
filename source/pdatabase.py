@@ -11,6 +11,7 @@ import logging
 import base64
 import os
 import sys
+import time
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -954,6 +955,7 @@ class PDatabase:
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
+            time.sleep(3)
             sys.exit(1)
 
     def set_default_values_in_configuration_table(self):
