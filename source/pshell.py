@@ -1299,10 +1299,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     download_url = p.URL_DOWNLOAD_BINARY_P_WIN
                     download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
                     p_filename = p.P_FILENAME_WIN
+                    p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN
+                    p_updater = p.P_UPDATER_FILENAME_WIN
                 else:
                     download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
                     download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
                     p_filename = p.P_FILENAME_LINUX
+                    p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
+                    p_updater = p.P_UPDATER_FILENAME_LINUX
                 print("Downloading latest p binary to: " + download_p_filename)
                 print("Please wait, this can take a while...")
                 req = requests.get(download_url)
@@ -1311,10 +1315,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
                 #       "'. Then restart p and you have the latest version.")
                 input('Press return to start the new version')
-                if not os.path.exists('updater.exe'):
-                    print("Error: updater executable not found.")
-                    continue
-                os.startfile('updater.exe')
+                if not os.path.exists(p_updater):
+                    print("updater executable not found.")
+                    print("Downloading it...")
+                    req = requests.get(p_updater_download_url)
+                    open(p_updater, "wb").write(req.content)
+                    print("Download ready.")
+                    # continue
+                os.startfile(p_updater)
                 sys.exit(0)
             except Exception as ex:
                 print("Error updating: " + ex.with_traceback())
