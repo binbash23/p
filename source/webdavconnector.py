@@ -5,6 +5,11 @@
 #
 from webdav4.client import Client
 
+def webdav_file_exists()-> bool:
+
+
+
+
 client = Client("https://webdav.com", auth=("username", "password"))
 client.exists("Documents/Readme.md")
 
