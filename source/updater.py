@@ -13,12 +13,6 @@ import time
 VERSION = "[updater] by Jens Heine <binbash@gmx.net> version: 2023.09.07"
 
 
-# new_filename_win = 'p.exe_latest'
-# old_filename_win = 'p.exe'
-# new_filename_linux = 'p_latest'
-# old_filename_linux = 'p'
-
-
 def main():
     print()
     print(VERSION)
