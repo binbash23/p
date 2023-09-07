@@ -1314,7 +1314,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Download ready.")
                 # print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
                 #       "'. Then restart p and you have the latest version.")
-                input('Press return to start the new version')
+                # input('Press return to start the new version')
                 if not os.path.exists(p_updater):
                     print("updater executable not found.")
                     print("Downloading it...")
@@ -1322,10 +1322,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     open(p_updater, "wb").write(req.content)
                     print("Download ready.")
                     # continue
-                os.startfile(p_updater)
+
+                print("Starting updater: " + p_updater + "...")
+                time.sleep(2)
+                # os.startfile(p_updater + " -D " + p_database.database_filename + " -o " + p_filename +
+                #              " -n " + download_p_filename)
+                os.startfile(p_updater, " -D " + p_database.database_filename + " -o " + p_filename +
+                             " -n " + download_p_filename)
                 sys.exit(0)
             except Exception as ex:
-                print("Error updating: " + ex.with_traceback())
+                print("Error updating: " + str(ex.with_traceback()))
             continue
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
