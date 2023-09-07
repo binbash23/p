@@ -334,7 +334,7 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
     pshell_max_history_size = pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE)
-    if not pshell_max_history_size.isnumeric() \
+    if pshell_max_history_size is not None and not pshell_max_history_size.isnumeric() \
             or pshell_max_history_size is None \
             or pshell_max_history_size == "":
         pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
