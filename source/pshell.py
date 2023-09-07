@@ -186,6 +186,8 @@ SHELL_COMMANDS = [
                  "possible existing accounts which include your SEARCHSTRING."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
+    ShellCommand("showlinks", "showlinks", "Show links to github homepage, binary " +
+                 "downloads etc."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
@@ -1119,6 +1121,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
             print("Slow print enabled                  : ", end="")
             print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
+            continue
+        if shell_command.command == "showlinks":
+            print("p github home            : ", end="")
+            print_slow.print_slow(colored(str(p.URL_GITHUB_P_HOME), "green"))
+            print("p github wiki            : ", end="")
+            print_slow.print_slow(colored(str(p.URL_GITHUB_P_WIKI), "green"))
+            print("p binary windows         : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_WIN), "green"))
+            print("p binary linux           : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_LINUX), "green"))
+            print("p updater binary windows : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN), "green"))
+            print("p updater binary linux   : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX), "green"))
             continue
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
