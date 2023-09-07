@@ -1327,8 +1327,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 time.sleep(2)
                 # os.startfile(p_updater + " -D " + p_database.database_filename + " -o " + p_filename +
                 #              " -n " + download_p_filename)
-                os.startfile(p_updater, " -D " + p_database.database_filename + " -o " + p_filename +
-                             " -n " + download_p_filename)
+                # os.startfile(p_updater, " -D " + p_database.database_filename + " -o " + p_filename +
+                #             " -n " + download_p_filename)
+                os.startfile(p_updater)
                 sys.exit(0)
             except Exception as ex:
                 print("Error updating: " + str(ex.with_traceback()))

@@ -48,12 +48,12 @@ def main():
     absolute_filename = os.path.abspath(database_filename)
     print("Database filename : " + absolute_filename)
 
-    old_filename = ""
+    old_filename = "p.exe"
     if options.old_filename is not None and options.old_filename != "":
         old_filename = options.old_filename
     print("Old filename      : " + old_filename)
 
-    new_filename = ""
+    new_filename = "p.exe_latest"
     if options.new_filename is not None and options.new_filename != "":
         new_filename = options.new_filename
     print("New filename      : " + new_filename)
