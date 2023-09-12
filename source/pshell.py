@@ -225,7 +225,7 @@ pshell_print_slow_enabled = True
 # Try to find the uuid for a given searchstring. If there are multiple accounts that match,
 # then ask the user which one to take.
 def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatabase) -> str:
-    matching_uuid = None
+    # matching_uuid = None
     searchstring = searchstring.strip()
     if searchstring == "" or searchstring is None:
         print("Searchstring is missing.")
@@ -809,10 +809,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command.synopsis)
                 continue
             search_string = shell_command.arguments[1].strip()
+            old_show_invalidated_value = p_database.show_invalidated_accounts
+            p_database.show_invalidated_accounts = True
             uuid_to_revalidate = find_uuid_for_searchstring_interactive(search_string, p_database)
+            p_database.show_invalidated_accounts = old_show_invalidated_value
             if uuid_to_revalidate is None:
                 continue
-            p_database.revalidate_account(uuid_to_revalidate)
+            if p_database.revalidate_account(uuid_to_revalidate):
+                print("Account " + uuid_to_revalidate + " revalidated.")
+            else:
+                print("Could not revalidate account " + uuid_to_revalidate + ".")
             continue
         if shell_command.command == "search" or shell_command.command == "/":
             if len(shell_command.arguments) == 1:

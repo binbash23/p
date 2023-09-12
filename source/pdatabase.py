@@ -1222,23 +1222,26 @@ class PDatabase:
             database_connection.commit()
         except Exception as e:
             raise
+            return False
         finally:
             database_connection.close()
         return True
 
-    def revalidate_account(self, revalidate_uuid: str):
+    def revalidate_account(self, revalidate_uuid: str) -> bool:
         if revalidate_uuid is None or revalidate_uuid == "":
-            return
+            return False
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "update account set invalid_date = NULL where uuid = " + str(revalidate_uuid) + "'"
+            sqlstring = "update account set invalid_date = NULL where uuid = '" + str(revalidate_uuid) + "'"
             cursor.execute(sqlstring)
             database_connection.commit()
         except Exception as e:
             raise
+            return False
         finally:
             database_connection.close()
+        return True
 
     def decrypt_account(self, account: Account) -> Account:
         account.uuid = account.uuid
