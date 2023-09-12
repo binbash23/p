@@ -173,7 +173,7 @@ SHELL_COMMANDS = [
                  "accounts the change the password for."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
-                 "the current database."),
+                 "the current database. To unset the database name, set it to '-'"),
     ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
                  "Set the dropbox application account uuid in configuration."),
     ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
@@ -1044,13 +1044,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("NAME is missing.")
                 print(shell_command.synopsis)
                 continue
+            new_database_name = shell_command.arguments[1].strip()
+            if new_database_name == "-":
+                new_database_name = ""
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
-                shell_command.arguments[1])
-            # prompt_string = p_database.database_filename + "> "
-            # if pdatabase.get_database_name(p_database.database_filename) != "":
-            #    prompt_string = pdatabase.get_database_name(p_database.database_filename) + " - " + prompt_string
+                new_database_name)
             continue
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
