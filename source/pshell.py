@@ -129,6 +129,7 @@ SHELL_COMMANDS = [
                  " If you search something, invalidated accounts are not visible unless you change the settings (" +
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
+    ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
@@ -732,6 +733,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "list":
             p_database.search_accounts("")
+            continue
+        if shell_command.command == "listdropboxfiles":
+            dropbox_connection = p.create_dropbox_connection(p_database)
+            dropbox_files = dropboxconnector.dropbox_list_files(dropbox_connection, "")
+            if len(dropbox_files) > 0:
+                print("Files found in the dropbox folder:")
+                for f in dropbox_files:
+                    print(f)
+            else:
+                print("No files found in dropbox folder.")
             continue
         if shell_command.command == "listinvalidated":
             p_database.search_invalidated_accounts("")
