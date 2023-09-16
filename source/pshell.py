@@ -457,6 +457,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     clear_console()
                     print(p.VERSION)
                     print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
+                print(prompt_string)
                 try:
                     user_input_pass = getpass.getpass("Enter database password: ")
                 except KeyboardInterrupt:
