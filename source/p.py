@@ -19,9 +19,9 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.09.12"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.09.15"
 database_filename = 'p.db'
-TEMP_MERGE_DATABASE_FILENAME = "temp_dropbox_p.db"
+TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki/%5Bp%5D-Wiki-Home"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -181,7 +181,8 @@ def change_dropbox_database_password(p_database: PDatabase) -> bool:
     if not dropbox_database_exists(p_database):
         return False
     print("Downloading database from dropbox...")
-    dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
+    dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+                          TEMP_MERGE_DATABASE_FILENAME)
     try:
         remote_password = getpass.getpass("Enter current dropbox database password: ")
         dropbox_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
@@ -192,7 +193,7 @@ def change_dropbox_database_password(p_database: PDatabase) -> bool:
         print("Uploading changed database back to dropbox...")
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-                            "/" + DROPBOX_P_DATABASE_FILENAME)
+                            "/" + p_database.get_database_filename_without_path())
     except KeyboardInterrupt:
         print()
         print("Canceled")
@@ -208,7 +209,7 @@ def dropbox_database_exists(p_database: PDatabase) -> bool:
     dropbox_connection = create_dropbox_connection(p_database)
     print("Checking for remote database...")
     try:
-        exists = dropbox_file_exists(dropbox_connection, "", DROPBOX_P_DATABASE_FILENAME)
+        exists = dropbox_file_exists(dropbox_connection, "", p_database.get_database_filename_without_path())
     except Exception as e:
         print("Error checking for remote database file: " + str(e))
         return False
@@ -232,7 +233,7 @@ def delete_dropbox_database(p_database: PDatabase) -> bool:
         print("Canceled")
         return False
     if answer == "y" or answer == "":
-        dropbox_delete_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME)
+        dropbox_delete_file(dropbox_connection, "/" + p_database.get_database_filename_without_path())
     else:
         print("Canceled")
 
@@ -291,8 +292,6 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
 def merge_with_dropbox(p_database: PDatabase):
     print("Merge with dropbox...")
     dropbox_connection = create_dropbox_connection(p_database)
-    # print(dropbox_connection)
-    # exit(0)
     if dropbox_connection is None:
         print("Error: Could not create dropbox connection")
         return
@@ -309,18 +308,18 @@ def merge_with_dropbox(p_database: PDatabase):
               TEMP_MERGE_DATABASE_FILENAME + "' to dropbox...")
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-                            "/" + DROPBOX_P_DATABASE_FILENAME)
+                            "/" + p_database.get_database_filename_without_path())
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
         return
     print("Downloading database from dropbox...")
-    dropbox_download_file(dropbox_connection, "/" + DROPBOX_P_DATABASE_FILENAME, TEMP_MERGE_DATABASE_FILENAME)
+    dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(), TEMP_MERGE_DATABASE_FILENAME)
     print("Merging local database with the version from dropbox...")
     return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
     if return_code > 1:
         print("Uploading merged database back to dropbox...")
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-                            "/" + DROPBOX_P_DATABASE_FILENAME)
+                            "/" + p_database.get_database_filename_without_path())
     else:
         print("No changes in remote database. Skipping upload.")
     os.remove(TEMP_MERGE_DATABASE_FILENAME)

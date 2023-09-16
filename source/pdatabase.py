@@ -2184,6 +2184,12 @@ class PDatabase:
             return ""
         return bytes(self.database_password).decode("UTF-8")
 
+    def get_database_filename_without_path(self) -> str:
+        if self.database_filename is not None and self.database_filename != "":
+            return os.path.basename(self.database_filename)
+        else:
+            return None
+
     # returns -1 in error case, 0 when no error and no changes where made,
     # 1 when changes where made locally and 2 when changes where made in remote db
     # and 3 when changes where made locally and remote
