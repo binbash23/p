@@ -245,6 +245,7 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
         print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
+        print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
         return None
     else:
         print("Using Dropbox Account Token uuid from config : " +
@@ -265,6 +266,7 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
     if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
         print(colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
+        print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
         return None
     else:
         print("Using Dropbox Application Account uuid from config : " +
