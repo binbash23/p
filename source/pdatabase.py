@@ -1045,6 +1045,37 @@ class PDatabase:
             database_connection.close()
         return result_array
 
+    def get_orphaned_account_history_entries_count(self) -> int:
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            sqlstring = "select count(*) FROM account_history h WHERE h.account_uuid not in (select uuid from account)"
+            sqlresult = cursor.execute(sqlstring)
+            #database_connection.commit()
+            result = sqlresult.fetchone()
+            if result is None:
+                raise ValueError("Error: Could not count orphaned history entries.")
+            count = result[0]
+            return count
+        except Exception as e:
+            print("Error counting orphaned history entries from database.")
+        finally:
+            database_connection.close()
+    def delete_orphaned_account_history_entries(self):
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            sqlstring = "delete FROM account_history WHERE account_uuid not in (select uuid from account)"
+            cursor.execute(sqlstring)
+            database_connection.commit()
+        except Exception as e:
+            print("Error deleting orphaned history entries from database: " + str(e))
+            # e.with_traceback()
+        finally:
+            database_connection.close()
+
     def delete_all_shell_history_entries(self):
         try:
             database_connection = sqlite3.connect(self.database_filename)

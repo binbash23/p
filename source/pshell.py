@@ -102,9 +102,13 @@ SHELL_COMMANDS = [
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
+    ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
+                 "Count orphaned account history entries."),
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>", "Delete account with UUID. You can also invalidate " +
                  "the account instead of deleting it. If you do not no the UUID, use a SEARCHSTRING and you " +
                  "will be offered possible accounts to delete."),
+    ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
+                 "Delete orphaned account history entries."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
@@ -624,6 +628,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
             continue
+
+        if shell_command.command == "countorphanedaccounthistoryentries":
+            try:
+                orphaned_account_history_entries = p_database.get_orphaned_account_history_entries_count()
+                print("Orphaned account history entries: " + str(orphaned_account_history_entries))
+            except Exception as e:
+                print("Error counting orphaned history entries: " + str(e))
+            continue
+
         if shell_command.command == "delete":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
@@ -642,6 +655,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
             uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if uuid_to_edit is not None:
                 p.edit(p_database, uuid_to_edit)
+            continue
+
+        if shell_command.command == "deleteorphanedaccounthistoryentries":
+            try:
+                p_database.delete_orphaned_account_history_entries()
+            except Exception as e:
+                # print("Error deleting orphaned history entries.")
+                e.with_traceback()
             continue
         if shell_command.command == "forgetdeletedaccounts":
             try:
