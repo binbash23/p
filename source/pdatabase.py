@@ -2339,11 +2339,11 @@ class PDatabase:
             print("Updating " + colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote), "red")
                   + " remote account(s) that have newer change dates in the origin database...")
             cursor.execute(SQL_MERGE_DELETE_ACCOUNTS_IN_REMOTE_THAT_EXIST_IN_ORIGIN_WITH_NEWER_CHANGE_DATE)
-            print("Fetching " + colored(str(count_uuids_in_local_that_do_not_exist_in_remote), "red")
+            print("Pushing " + colored(str(count_uuids_in_local_that_do_not_exist_in_remote), "red")
                   + " new account(s) from the origin database into the remote database...")
             cursor.execute(SQL_MERGE_INSERT_MISSING_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE)
 
-            print("Fetching " + colored(str(count_history_uuids_in_local_that_do_not_exist_in_remote), "red")
+            print("Pushing " + colored(str(count_history_uuids_in_local_that_do_not_exist_in_remote), "red")
                   + " new account history entries from the origin database into the remote database...")
             cursor.execute(SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE)
 
