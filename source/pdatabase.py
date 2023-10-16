@@ -1253,7 +1253,6 @@ class PDatabase:
             database_connection.commit()
         except Exception as e:
             raise
-            return False
         finally:
             database_connection.close()
         return True
@@ -1269,7 +1268,6 @@ class PDatabase:
             database_connection.commit()
         except Exception as e:
             raise
-            return False
         finally:
             database_connection.close()
         return True

@@ -12,7 +12,8 @@ import base64
 import requests
 import json
 
-#DROPBOX_P_DATABASE_FILENAME = "p.db"
+
+# DROPBOX_P_DATABASE_FILENAME = "p.db"
 
 
 # def create_dropbox_connection_with_access_token(access_token):
@@ -31,35 +32,37 @@ def create_dropbox_connection_with_refresh_token(_app_key, _app_secret, _refresh
                                              oauth2_refresh_token=_refresh_token)
         # execute a dummy command to raise an exception if connection is not possible
         dropbox_connection.files_list_folder('')
-#     except AuthError as e:
+    #     except AuthError as e:
     except Exception as e:
         print('Error connecting to Dropbox with refresh token: ' + str(e))
         return None
         # raise
     return dropbox_connection
 
-def dropbox_list_files(dropbox_connection, path):
-      #  a Pandas dataframe of files in a given Dropbox folder path in the Apps directory.
-      # dropbox_connection = dropbox_connect(access_token)
-     try:
-         files = dropbox_connection.files_list_folder(path).entries
-         files_list = []
-         for file in files:
-             if isinstance(file, dropbox.files.FileMetadata):
-                 metadata = {
-                     'name': file.name,
-                     'path_display': file.path_display,
-                     'client_modified': file.client_modified,
-                     'server_modified': file.server_modified
-                 }
-                 # files_list.append(metadata)
-                 files_list.append(file.name)
-         # df = pd.DataFrame.from_records(files_list)
-         # return df.sort_values(by='server_modified', ascending=False)
-         return files_list
-     except Exception as e:
-         print('Error getting list of files from Dropbox: ' + str(e))
-         raise
+
+def dropbox_list_files(dropbox_connection, path) -> []:
+    #  a Pandas dataframe of files in a given Dropbox folder path in the Apps directory.
+    # dropbox_connection = dropbox_connect(access_token)
+    try:
+        files = dropbox_connection.files_list_folder(path).entries
+        files_list = []
+        for file in files:
+            if isinstance(file, dropbox.files.FileMetadata):
+                metadata = {
+                    'name': file.name,
+                    'path_display': file.path_display,
+                    'client_modified': file.client_modified,
+                    'server_modified': file.server_modified
+                }
+                # files_list.append(metadata)
+                files_list.append(file.name)
+        # df = pd.DataFrame.from_records(files_list)
+        # return df.sort_values(by='server_modified', ascending=False)
+        return files_list
+    except Exception as e:
+        print('Error getting list of files from Dropbox: ' + str(e))
+        raise
+
 
 def dropbox_file_exists(dropbox_connection, path, filename):
     # dropbox_connection = dropbox_connect(access_token)
@@ -139,8 +142,9 @@ def get_refresh_access_token(app_key: str, app_secret: str, access_code_generate
     response = requests.post('https://api.dropboxapi.com/oauth2/token',
                              data=data,
                              auth=(app_key, app_secret))
-    refresh_token_str = response.text[response.text.index('refresh_token": "')+17:response.text.index('"scope": "')-3]
-    #print("->" + refresh_token_str)
+    refresh_token_str = response.text[
+                        response.text.index('refresh_token": "') + 17:response.text.index('"scope": "') - 3]
+    # print("->" + refresh_token_str)
     print("Result from api call:")
     print(json.dumps(json.loads(response.text), indent=2))
     print()

@@ -8,11 +8,12 @@ import optparse
 from optparse import OptionGroup
 # import stdiomask
 from pdatabase import *
-import getpass
-from termcolor import colored
+# import getpass
+# from termcolor import colored
 import colorama
 from dropboxconnector import *
 from pshell import *
+import informal_connector_interface
 
 colorama.init()
 
@@ -62,9 +63,7 @@ def add(p_database: PDatabase):
         print("Strg-C detected.")
         return
     if answer == "y" or answer == "":
-        # p_database.add_account_and_encrypt(None, new_name, new_url, new_loginname, new_password, new_type)
         p_database.add_account_and_encrypt(account)
-        # print("Added")
     else:
         print("Canceled")
 
@@ -78,7 +77,7 @@ def edit(p_database: PDatabase, edit_uuid: str):
     print("Press <return> to adopt old value or <space>+<return> to delete an existing value.")
     old_name = account.name
     old_url = account.url
-    old_loginame = account.loginname
+    old_loginname = account.loginname
     old_password = account.password
     old_type = account.type
 
@@ -93,10 +92,10 @@ def edit(p_database: PDatabase, edit_uuid: str):
         if new_url == "":
             new_url = old_url
 
-        print("Loginname (old) : " + old_loginame)
+        print("Loginname (old) : " + old_loginname)
         new_loginname = input("Loginname (new) : ")
         if new_loginname == "":
-            new_loginname = old_loginame
+            new_loginname = old_loginname
 
         # print("Password (old)  : " + old_password)
         # new_password = input("Password (new)  : ")
@@ -291,6 +290,48 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
     return dropbox_connection
 
 
+def merge_database(p_database: PDatabase, connector: informal_connector_interface.InformalConnectorInterface):
+    print("Merging database")
+    if not connector.exists("\\p\\" + p_database.get_database_filename_without_path()):
+        print("Creating initial remote database...")
+        PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
+        set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
+                                                   CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                   "Cloud Database")
+        print("Merging local database into initial remote database...")
+        p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+        print("Uploading initial database: '" +
+              TEMP_MERGE_DATABASE_FILENAME + "' to connector...")
+        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+        #                     "/" + p_database.get_database_filename_without_path())
+        connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+                              # "\\p\\" + p_database.get_database_filename_without_path())
+                              os.path.join("p" + p_database.get_database_filename_without_path()))
+        os.remove(TEMP_MERGE_DATABASE_FILENAME)
+        return
+    print("Downloading database...")
+    # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+    #                       TEMP_MERGE_DATABASE_FILENAME)
+    local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+    connector.download_file(os.path.join("p", p_database.get_database_filename_without_path()),
+                            # "\\p\\p.db",
+                            os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
+    print("Merging databases...")
+    return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+    if return_code > 1:
+        print("Uploading merged database...")
+        # local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+        #                     "/" + p_database.get_database_filename_without_path())
+        connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+                              os.path.join("p" + p_database.get_database_filename_without_path()))
+                              # "\\p\\" + p_database.get_database_filename_without_path())
+    else:
+        print("No changes in remote database. Skipping upload.")
+    os.remove(TEMP_MERGE_DATABASE_FILENAME)
+
+
 def merge_with_dropbox(p_database: PDatabase):
     print("Merge with dropbox...")
     dropbox_connection = create_dropbox_connection(p_database)
@@ -300,7 +341,7 @@ def merge_with_dropbox(p_database: PDatabase):
     if not dropbox_database_exists(p_database):
         print("Creating initial cloud database...")
         # print("->" + str(bytes(p_database.database_password).decode("UTF-8")))
-        cloud_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
+        PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
         set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                                                    "Cloud Database")
@@ -314,7 +355,8 @@ def merge_with_dropbox(p_database: PDatabase):
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
         return
     print("Downloading database from dropbox...")
-    dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(), TEMP_MERGE_DATABASE_FILENAME)
+    dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+                          TEMP_MERGE_DATABASE_FILENAME)
     print("Merging local database with the version from dropbox...")
     return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
     if return_code > 1:
@@ -387,13 +429,13 @@ def start_dropbox_configuration():
     print("Example:")
     print("> p.exe -z 'c0f98849-0677-4f12-80ff-c22cb6578d1a'")
     print()
-    print("Configure the #2 account uuid with the -y option (or set it in the pshel with the command " +
+    print("Configure the #2 account uuid with the -y option (or set it in the pshell with the command " +
           "'setdropboxtokenuuid <UUID>' where you set UUID to the UUID of the just created account #2.)")
     print("Example:")
     print("> p.exe -y '123ab849-7395-1672-987f-442cbafb8d1a'")
     print()
     print("Now you should be able to synchronize your p database with the -Y option.")
-    print("It might be helpful to run p in a powershell with '.\p.exe' to be able to see error messages.")
+    print("It might be helpful to run p in a powershell with '.\\p.exe' to be able to see error messages.")
     print()
 
 

@@ -20,6 +20,7 @@ import time
 import textwrap
 import requests
 import print_slow
+import webdavconnector
 
 
 class ShellCommand:
@@ -95,7 +96,7 @@ SHELL_COMMANDS = [
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
                  "be re-encrypted but also account history, aliases, command history and so on."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox " +
-                 "database.\nThe database will be donloaded from the dropbox account and you can enter a new " +
+                 "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
@@ -146,6 +147,8 @@ SHELL_COMMANDS = [
     ShellCommand("merge2lastknownfile", "merge2lastknownfile",
                  "Merge local database with the last known merge database. The last know database can be seen " +
                  "with the status command"),
+    ShellCommand("merge2webdav", "merge2webdav <UUID>",
+                 "Merge local database with a webdav target which has to be accessible with the account UUID"),
     ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
                  " be created.\nWith this command you can switch between multiple p databases."),
@@ -186,7 +189,7 @@ SHELL_COMMANDS = [
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
-    ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" + #
+    ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
                  " account with UUID. If you do not know the uuid, use a SEARCHSTRING and you can choose from " +
                  "possible existing accounts which include your SEARCHSTRING."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
@@ -413,7 +416,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
     # time.sleep(1)
     clear_console()
-    prompt_string = "> "
+    # prompt_string = "> "
     user_input = ""
     latest_found_account = None
 
@@ -711,7 +714,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 for shell_command in SHELL_COMMANDS:
                     # print(str(shell_command))
                     print(colored(shell_command.synopsis, "green"))
-                    #print()
+                    # print()
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
@@ -801,6 +804,18 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2lastknownfile":
             p_database.merge_last_known_database()
             continue
+
+        if shell_command.command == "merge2webdav":
+            if len(shell_command.arguments) == 1:
+                print("UUID of webdav account is missing.")
+                print(shell_command.synopsis)
+                continue
+            webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1])
+            connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                        webdav_account.password)
+            p.merge_database(p_database, connector)
+            continue
+
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
                 print("DATABASE_FILENAME is missing.")
