@@ -30,8 +30,11 @@ class WebdavConnector():
         return string
 
 def main():
-    webdav_connector = WebdavConnector("http://google.de")
+    webdav_connector = WebdavConnector(dav_url="mm", dav_login="mm", dav_password="mm")
     print("Connector is:\n" + str(webdav_connector))
+    # webdav_connector.dav_client.ls("\\")
+    webdav_connector.dav_client.exists("/")
+    webdav_connector.dav_client.upload_file("c:\\temp\\p.exe", "\\p\p.exe")
 
 if __name__ == '__main__':
     main()
