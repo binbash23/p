@@ -825,6 +825,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
             if webdav_account is None:
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
+                continue
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                         webdav_account.password)
