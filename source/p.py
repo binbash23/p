@@ -13,7 +13,7 @@ from pdatabase import *
 import colorama
 from dropboxconnector import *
 from pshell import *
-import informal_connector_interface
+# import informal_connector_interface
 
 colorama.init()
 

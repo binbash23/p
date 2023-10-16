@@ -2,7 +2,7 @@
 20221224 jens heine p
 
 
-dependencies for p
+dependencies for p. You have to install the following modules to run p.py:
 
 termcolor
 colorama

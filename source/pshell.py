@@ -442,7 +442,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
     shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
-        # prompt_string = "[" + p_database.database_filename + "] " "pshell> "
         prompt_string = get_prompt_string(p_database)
         last_activity_date = datetime.datetime.now()
         if not manual_locked:
@@ -806,15 +805,24 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "merge2file":
             if len(shell_command.arguments) == 1:
-                print("FILENAME is missing.")
-                print(shell_command.synopsis)
-                continue
-            p_database.merge_database(shell_command.arguments[1].strip())
+                merge_target_file = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+                if merge_target_file == "":
+                    print("No default merge target file found in configuration table.")
+                    continue
+            else:
+                if len(shell_command.arguments) == 2:
+                    merge_target_file = shell_command.arguments[1].strip()
+                else:
+                    print("Too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            p_database.merge_database(merge_target_file)
             continue
         # if shell_command.command == "merge2lastknownfile":
         #     p_database.merge_database_with_default_merge_target_file()
         #     continue
-
         if shell_command.command == "merge2webdav":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(p_database.database_filename,
@@ -827,7 +835,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if len(shell_command.arguments) == 2:
                     webdav_account_uuid = shell_command.arguments[1].strip()
                     webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
             if webdav_account is None:
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
@@ -836,7 +847,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                         webdav_account.password)
             p_database.merge_database_with_connector(connector)
             continue
-
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
                 print("DATABASE_FILENAME is missing.")
@@ -1429,9 +1439,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 req = requests.get(download_url)
                 open(download_p_filename, "wb").write(req.content)
                 print("Download ready.")
-                # print("Now quit p and rename the file '" + download_p_filename + "' to '" + p_filename +
-                #       "'. Then restart p and you have the latest version.")
-                # input('Press return to start the new version')
                 if not os.path.exists(p_updater):
                     print("updater executable not found.")
                     print("Downloading it...")
