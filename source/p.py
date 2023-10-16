@@ -325,8 +325,8 @@ def merge_database(p_database: PDatabase, connector: informal_connector_interfac
         # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
         #                     "/" + p_database.get_database_filename_without_path())
         connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
-                              os.path.join("p" + p_database.get_database_filename_without_path()))
-                              # "\\p\\" + p_database.get_database_filename_without_path())
+                              # os.path.join("p" + p_database.get_database_filename_without_path()))
+                              "\\p\\" + p_database.get_database_filename_without_path())
     else:
         print("No changes in remote database. Skipping upload.")
     os.remove(TEMP_MERGE_DATABASE_FILENAME)
