@@ -796,6 +796,9 @@ def print_database_statistics(database_filename):
     webdav_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+    default_merge_target_file = \
+        get_attribute_value_from_configuration_table(database_filename,
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
@@ -824,7 +827,8 @@ def print_database_statistics(database_filename):
         print("Database Last Changed               : ", end="")
         print_slow.print_slow(last_change_date)
         print("Accounts (valid/invalid)            : ", end="")
-        print_slow.print_slow(str(account_count) + " (" + str(account_count_valid) + "/" + str(account_count_invalid) + ")")
+        print_slow.print_slow(
+            str(account_count) + " (" + str(account_count_valid) + "/" + str(account_count_invalid) + ")")
         print("Account history entries             : ", end="")
         print_slow.print_slow(str(account_history_count))
         print("Shell command history entries       : ", end="")
@@ -845,6 +849,8 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(dropbox_application_account_uuid))
         print("Webdav account uuid                 : ", end="")
         print_slow.print_slow(str(webdav_account_uuid))
+        print("Default merge target file           : ", end="")
+        print_slow.print_slow(str(default_merge_target_file))
     except KeyboardInterrupt as ke:
         print()
 
@@ -911,14 +917,11 @@ def color_search_string(text_string, search_string, color):
     return colored_string
 
 
-def print_found_n_results(n_results:int):
+def print_found_n_results(n_results: int):
     if n_results == 1:
         print("Found 1 result.")
     else:
         print("Found " + str(n_results) + " results.")
-
-
-
 
 
 class PDatabase:
@@ -981,11 +984,6 @@ class PDatabase:
                 set_attribute_value_in_configuration_table(self.database_filename,
                                                            CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY,
                                                            "False")
-        # if get_attribute_value_from_configuration_table(self.database_filename,
-        #                                                 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME) == "":
-        #     set_attribute_value_in_configuration_table(self.database_filename,
-        #                                                CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
-        #                                                socket.gethostname())
 
     def update_database_schema(self, database_filename: str):
         try:
@@ -998,7 +996,6 @@ class PDatabase:
             print(colored("Error: " + str(e)))
         finally:
             database_connection.close()
-
 
     def print_current_secure_delete_mode(self, database_connection, cursor):
         sqlstring = "pragma secure_delete"
@@ -1064,7 +1061,7 @@ class PDatabase:
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "select count(*) FROM account_history h WHERE h.account_uuid not in (select uuid from account)"
             sqlresult = cursor.execute(sqlstring)
-            #database_connection.commit()
+            # database_connection.commit()
             result = sqlresult.fetchone()
             if result is None:
                 raise ValueError("Error: Could not count orphaned history entries.")
@@ -1074,6 +1071,7 @@ class PDatabase:
             print("Error counting orphaned history entries from database.")
         finally:
             database_connection.close()
+
     def delete_orphaned_account_history_entries(self):
         try:
             database_connection = sqlite3.connect(self.database_filename)
@@ -1772,7 +1770,7 @@ class PDatabase:
         self.print_formatted_account(account, print_slowly=print_slowly)
 
     def print_formatted_account(self, account: Account, show_history_count: bool = True, print_slowly: bool = True):
-        if print_slowly == False:
+        if print_slowly is False:
             print_delay = 0
         else:
             print_delay = print_slow.DEFAULT_DELAY
@@ -1800,8 +1798,8 @@ class PDatabase:
             print_slow.print_slow(colored(str(account.invalid_date), "red"), delay=print_delay)
             if show_history_count:
                 print("Old Versions    : ", end="")
-                print_slow.print_slow(str(get_account_history_count(self.database_filename, account.uuid)), delay=print_delay)
-
+                print_slow.print_slow(str(get_account_history_count(self.database_filename, account.uuid)),
+                                      delay=print_delay)
 
     def decrypt_and_encrypt_with_new_password(self, string_encrypted: str, new_password: str) -> str:
         string_decrypted = self.decrypt_string_if_password_is_present(string_encrypted)
@@ -2220,7 +2218,6 @@ class PDatabase:
     #     else:
     #         print(colored("Error: There is no last known database.", "red"))
 
-
     def merge_database_with_default_merge_target_file(self):
         default_target_file = \
             get_attribute_value_from_configuration_table(self.database_filename,
@@ -2385,7 +2382,7 @@ class PDatabase:
                               count_uuids_in_remote_that_do_not_exist_in_local +
                               count_history_uuids_in_remote_that_do_not_exist_in_local +
                               len(deleted_uuids_in_remote_db_not_in_local)), "red") + " changes have been done)")
-            # remember that there where changes in local db for return code:
+            # remember that there were changes in local db for return code:
             return_code = 0
             if count_uuids_in_remote_with_newer_update_date_than_in_local + \
                     count_uuids_in_remote_that_do_not_exist_in_local > 0:
@@ -2423,7 +2420,7 @@ class PDatabase:
                               len(deleted_uuids_in_local_db_note_in_remote)), "red") + " changes have been done)")
             # Finally commit it
             database_connection.commit()
-            # remember that there where changes in remote db for return code:
+            # remember that there were changes in remote db for return code:
             if count_uuids_in_local_with_newer_update_date_than_in_remote + \
                     count_uuids_in_local_that_do_not_exist_in_remote > 0:
                 return_code += 2
@@ -2490,7 +2487,7 @@ class PDatabase:
         connector.download_file(os.path.join("p", self.get_database_filename_without_path()),
                                 # "\\p\\p.db",
                                 TEMP_MERGE_DATABASE_FILENAME)
-                                # os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
+        # os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
         print("Merging databases...")
         return_code = self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
         if return_code > 1:
