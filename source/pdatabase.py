@@ -27,6 +27,7 @@ import uuid
 import colorama
 # from print_slow import print_slow
 import print_slow
+import informal_connector_interface
 
 colorama.init()
 
@@ -396,6 +397,8 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
 CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
+CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE = "DEFAULT_MERGE_TARGET_FILE"
+TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 
 
 class ShellHistoryEntry:
@@ -913,6 +916,9 @@ def print_found_n_results(n_results:int):
         print("Found 1 result.")
     else:
         print("Found " + str(n_results) + " results.")
+
+
+
 
 
 class PDatabase:
@@ -2205,14 +2211,35 @@ class PDatabase:
         # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
-    def merge_last_known_database(self):
-        last_known_database = \
+    # def merge_database_with_default_merge_target_file(self):
+    #     last_known_database = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE)
+    #     if last_known_database is not None and last_known_database != "":
+    #         self.merge_database(last_known_database)
+    #     else:
+    #         print(colored("Error: There is no last known database.", "red"))
+
+
+    def merge_database_with_default_merge_target_file(self):
+        default_target_file = \
             get_attribute_value_from_configuration_table(self.database_filename,
-                                                         CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE)
-        if last_known_database is not None and last_known_database != "":
-            self.merge_database(last_known_database)
+                                                         CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+        if default_target_file is not None and default_target_file != "":
+            self.merge_database(default_target_file)
         else:
-            print(colored("Error: There is no last known database.", "red"))
+            print(colored("Error: There is no default merge target file configured in configuration table.",
+                          "red"))
+
+    # def merge_database_with_default_file_target(self):
+    #     default_target_file = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+    #     if default_target_file is not None and default_target_file != "":
+    #         self.merge_database(default_target_file)
+    #     else:
+    #         print(colored("Error: There is no default merge target file configured in configuration table.",
+    #                       "red"))
 
     def get_database_password_as_string(self) -> str:
         if self.database_password == "":
@@ -2434,6 +2461,50 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
+
+    def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
+        print("Merging database")
+        if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
+            print("Creating initial remote database...")
+            PDatabase(TEMP_MERGE_DATABASE_FILENAME, self.get_database_password_as_string())
+            set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
+                                                       CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                       "Cloud Database")
+            print("Merging local database into initial remote database...")
+            self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+            print("Uploading initial database: '" +
+                  TEMP_MERGE_DATABASE_FILENAME + "' to connector...")
+            local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+            #                     "/" + p_database.get_database_filename_without_path())
+            connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+                                  # "\\p\\" + p_database.get_database_filename_without_path())
+                                  "\\p\\" + self.get_database_filename_without_path())
+            # os.path.join("p" + p_database.get_database_filename_without_path()))
+            os.remove(TEMP_MERGE_DATABASE_FILENAME)
+            return
+        print("Downloading database...")
+        # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+        #                       TEMP_MERGE_DATABASE_FILENAME)
+        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+        connector.download_file(os.path.join("p", self.get_database_filename_without_path()),
+                                # "\\p\\p.db",
+                                TEMP_MERGE_DATABASE_FILENAME)
+                                # os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
+        print("Merging databases...")
+        return_code = self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+        if return_code > 1:
+            print("Uploading merged database...")
+            # local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+            #                     "/" + p_database.get_database_filename_without_path())
+            connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+                                  # os.path.join("p" + p_database.get_database_filename_without_path()))
+                                  "\\p\\" + self.get_database_filename_without_path())
+
+        else:
+            print("No changes in remote database. Skipping upload.")
+        os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
 
 def main():

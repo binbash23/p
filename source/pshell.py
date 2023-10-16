@@ -142,11 +142,13 @@ SHELL_COMMANDS = [
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
     ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
-    ShellCommand("merge2file", "merge2file <FILENAME>",
-                 "Merge local database with another database identified by FILENAME."),
-    ShellCommand("merge2lastknownfile", "merge2lastknownfile",
-                 "Merge local database with the last known merge database. The last know database can be seen " +
-                 "with the status command"),
+    ShellCommand("merge2file", "merge2file [<FILENAME>]",
+                 "Merge local database with another database identified by FILENAME. If FILENAME is not " +
+                 "given, the configuration table will be searched for a default merget target file. " +
+                 "This can be set with: setdefaultmergetargetfile."),
+    # ShellCommand("merge2lastknownfile", "merge2lastknownfile",
+    #              "Merge local database with the last known merge database. The last know database can be seen " +
+    #              "with the status command"),
     ShellCommand("merge2webdav", "merge2webdav [<UUID>]",
                  "Merge local database with a webdav target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
@@ -169,6 +171,9 @@ SHELL_COMMANDS = [
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
+    ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile <UUID>",
+                 "Set a default merge target file in the configuration table" +
+                 "This filename will be used when merge2file is called without a target filename."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
                  "password of the account found to the clipboard."),
     ShellCommand("sca", "sca <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy one" +
@@ -806,9 +811,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             p_database.merge_database(shell_command.arguments[1].strip())
             continue
-        if shell_command.command == "merge2lastknownfile":
-            p_database.merge_last_known_database()
-            continue
+        # if shell_command.command == "merge2lastknownfile":
+        #     p_database.merge_database_with_default_merge_target_file()
+        #     continue
 
         if shell_command.command == "merge2webdav":
             if len(shell_command.arguments) == 1:
@@ -829,7 +834,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                         webdav_account.password)
-            p.merge_database(p_database, connector)
+            p_database.merge_database_with_connector(connector)
             continue
 
         if shell_command.command == "opendatabase":
@@ -950,6 +955,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             else:
                 latest_found_account = account_array[len(account_array) - 1]
+            continue
+        if shell_command.command == "setdefaultmergetargetfile":
+            if len(shell_command.arguments) == 1:
+                print("Default target filename is missing.")
+                print(shell_command.synopsis)
+                continue
+            new_default_merge_target_file = shell_command.arguments[1].strip()
+            if new_default_merge_target_file == "-":
+                new_default_merge_target_file = ""
+            p.set_attribute_value_in_configuration_table(
+                p_database.database_filename,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
+                new_default_merge_target_file)
             continue
         if shell_command.command == "setwebdavaccountuuid":
             if len(shell_command.arguments) == 1:

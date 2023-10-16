@@ -22,7 +22,7 @@ colorama.init()
 #
 VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.16"
 database_filename = 'p.db'
-TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
+# TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki/%5Bp%5D-Wiki-Home"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
@@ -290,48 +290,48 @@ def create_dropbox_connection(p_database: PDatabase) -> dropbox.Dropbox:
     return dropbox_connection
 
 
-def merge_database(p_database: PDatabase, connector: informal_connector_interface.InformalConnectorInterface):
-    print("Merging database")
-    if not connector.exists("\\p\\" + p_database.get_database_filename_without_path()):
-        print("Creating initial remote database...")
-        PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
-        set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
-                                                   CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
-                                                   "Cloud Database")
-        print("Merging local database into initial remote database...")
-        p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
-        print("Uploading initial database: '" +
-              TEMP_MERGE_DATABASE_FILENAME + "' to connector...")
-        local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-        # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-        #                     "/" + p_database.get_database_filename_without_path())
-        connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
-                              # "\\p\\" + p_database.get_database_filename_without_path())
-                              "\\p\\" + p_database.get_database_filename_without_path())
-                              # os.path.join("p" + p_database.get_database_filename_without_path()))
-        os.remove(TEMP_MERGE_DATABASE_FILENAME)
-        return
-    print("Downloading database...")
-    # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
-    #                       TEMP_MERGE_DATABASE_FILENAME)
-    local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-    connector.download_file(os.path.join("p", p_database.get_database_filename_without_path()),
-                            # "\\p\\p.db",
-                            os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
-    print("Merging databases...")
-    return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
-    if return_code > 1:
-        print("Uploading merged database...")
-        # local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-        # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-        #                     "/" + p_database.get_database_filename_without_path())
-        connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
-                              # os.path.join("p" + p_database.get_database_filename_without_path()))
-                              "\\p\\" + p_database.get_database_filename_without_path())
-
-    else:
-        print("No changes in remote database. Skipping upload.")
-    os.remove(TEMP_MERGE_DATABASE_FILENAME)
+# def merge_database(p_database: PDatabase, connector: informal_connector_interface.InformalConnectorInterface):
+#     print("Merging database")
+#     if not connector.exists("\\p\\" + p_database.get_database_filename_without_path()):
+#         print("Creating initial remote database...")
+#         PDatabase(TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_password_as_string())
+#         set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
+#                                                    CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+#                                                    "Cloud Database")
+#         print("Merging local database into initial remote database...")
+#         p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+#         print("Uploading initial database: '" +
+#               TEMP_MERGE_DATABASE_FILENAME + "' to connector...")
+#         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+#         # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+#         #                     "/" + p_database.get_database_filename_without_path())
+#         connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+#                               # "\\p\\" + p_database.get_database_filename_without_path())
+#                               "\\p\\" + p_database.get_database_filename_without_path())
+#                               # os.path.join("p" + p_database.get_database_filename_without_path()))
+#         os.remove(TEMP_MERGE_DATABASE_FILENAME)
+#         return
+#     print("Downloading database...")
+#     # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+#     #                       TEMP_MERGE_DATABASE_FILENAME)
+#     local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+#     connector.download_file(os.path.join("p", p_database.get_database_filename_without_path()),
+#                             # "\\p\\p.db",
+#                             os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
+#     print("Merging databases...")
+#     return_code = p_database.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+#     if return_code > 1:
+#         print("Uploading merged database...")
+#         # local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+#         # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+#         #                     "/" + p_database.get_database_filename_without_path())
+#         connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
+#                               # os.path.join("p" + p_database.get_database_filename_without_path()))
+#                               "\\p\\" + p_database.get_database_filename_without_path())
+#
+#     else:
+#         print("No changes in remote database. Skipping upload.")
+#     os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
 
 def merge_with_dropbox(p_database: PDatabase):
@@ -668,7 +668,7 @@ def main():
         p_database.search_accounts("")
         sys.exit(0)
     if options.merge_last_known:
-        p_database.merge_last_known_database()
+        p_database.merge_database_with_default_merge_target_file()
         sys.exit(0)
     if options.merge_database is not None:
         p_database.merge_database(options.merge_database)
