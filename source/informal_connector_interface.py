@@ -21,3 +21,7 @@ class InformalConnectorInterface:
 
     def exists(self, remote_path) -> bool:
         pass
+
+    def get_type(self) -> str:
+        # print a type i.e. webdav, sftp, ...
+        pass
