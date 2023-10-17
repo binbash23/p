@@ -4,12 +4,13 @@
 # webdav connector
 #
 from webdav4.client import Client
-from informal_connector_interface import InformalConnectorInterface
+# from informal_connector_interface import InformalConnectorInterface
+from connector_interface import ConnectorInterface
 
 
 # def webdav_file_exists()-> bool:
 
-class WebdavConnector(InformalConnectorInterface):
+class WebdavConnector(ConnectorInterface):
     _dav_client = None
     _dav_login = None
     _dav_password = None

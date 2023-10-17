@@ -5,7 +5,7 @@
 #
 import datetime
 import os.path
-import socket
+# import socket
 import sqlite3
 import logging
 import base64
@@ -27,7 +27,8 @@ import uuid
 import colorama
 # from print_slow import print_slow
 import print_slow
-import informal_connector_interface
+# import informal_connector_interface
+from connector_interface import ConnectorInterface
 
 colorama.init()
 
@@ -2459,7 +2460,8 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
+    def merge_database_with_connector(self, connector: ConnectorInterface):
+    # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
         print("Merging database")
         if not connector.exists(self.get_database_filename_without_path()):
         # if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
