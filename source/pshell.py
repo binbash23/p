@@ -874,7 +874,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                         webdav_account.password)
-            p_database.merge_database_with_connector(connector)
+            try:
+                p_database.merge_database_with_connector(connector)
+            except Exception as e:
+                print("Error: " + str(e))
             continue
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
