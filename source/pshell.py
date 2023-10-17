@@ -118,6 +118,9 @@ SHELL_COMMANDS = [
                  "in the deleted_accounts table."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
                  "configured dropbox account."),
+    ShellCommand("deletewebdavdatabase", "deletewebdavdatabase [<UUID>]", "Delete database file in the webdav " +
+                 " remote folder with the same name as the database that is currently opened. If no UUID " +
+                 "is given, the configuration table will be searched for the default webdav account."),
     ShellCommand("edit", "edit <SEARCHSTRING>>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell."),
@@ -676,6 +679,32 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # print("Error deleting orphaned history entries.")
                 e.with_traceback()
             continue
+
+        if shell_command.command == "deletewebdavdatabase":
+            if len(shell_command.arguments) == 1:
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(p_database.database_filename,
+                                                                                             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                if webdav_account_uuid == "":
+                    print("No default webdav account UUID found in configuration table.")
+                    continue
+                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    webdav_account_uuid = shell_command.arguments[1].strip()
+                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if webdav_account is None:
+                print("Webdav account could not be found: " + str(webdav_account_uuid))
+                continue
+            # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
+            connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                        webdav_account.password)
+            connector.delete_file(p_database.get_database_filename_without_path())
+            continue
+
         if shell_command.command == "forgetdeletedaccounts":
             try:
                 answer = input("Delete information about deleted account uuid's ([y]/n) : ")

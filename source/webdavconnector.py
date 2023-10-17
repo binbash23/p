@@ -31,19 +31,37 @@ class WebdavConnector(InformalConnectorInterface):
         return string
 
     def list_files(self, remote_path) -> []:
-        return self._dav_client.ls(path=remote_path)
+        try:
+            return self._dav_client.ls(path=remote_path)
+        except Exception as e:
+            print("Error: " + str(e))
 
     def upload_file(self, local_path, remote_path):
-        self._dav_client.upload_file(local_path, remote_path, overwrite=True)
+        try:
+            self._dav_client.upload_file(local_path, remote_path, overwrite=True)
+        except Exception as e:
+            print("Error: " + str(e))
 
     def download_file(self, remote_path, local_path):
-        self._dav_client.download_file(remote_path, local_path)
+        try:
+            self._dav_client.download_file(remote_path, local_path)
+        except Exception as e:
+            print("Error: " + str(e))
 
     def delete_file(self, remote_path):
-        self._dav_client.remove(remote_path)
+        try:
+            self._dav_client.remove(remote_path)
+        except Exception as e:
+            print("Error: " + str(e))
 
-    def exists(self, remote_path):
-        return self._dav_client.exists(remote_path)
+    def exists(self, remote_path) -> bool:
+        exists: bool = False
+        try:
+            exists = self._dav_client.exists(remote_path)
+        except Exception as e:
+            print("Error: " + str(e))
+        return exists
+        # return self._dav_client.exists(remote_path)
 
 
 def main():
