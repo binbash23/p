@@ -797,9 +797,24 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "list":
             p_database.search_accounts("")
             continue
+
+        # if shell_command.command == "listdropboxfiles":
+        #     dropbox_connection = p.create_dropbox_connection(p_database)
+        #     dropbox_files = dropboxconnector.dropbox_list_files(dropbox_connection, "")
+        #     if len(dropbox_files) > 0:
+        #         print("Files found in the dropbox folder:")
+        #         for f in dropbox_files:
+        #             print(f)
+        #     else:
+        #         print("No files found in dropbox folder.")
+        #     continue
+
         if shell_command.command == "listdropboxfiles":
-            dropbox_connection = p.create_dropbox_connection(p_database)
-            dropbox_files = dropboxconnector.dropbox_list_files(dropbox_connection, "")
+            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                 dropbox_connection_credentials[1],
+                                                 dropbox_connection_credentials[2])
+            dropbox_files = dropbox_connector.list_files("")
             if len(dropbox_files) > 0:
                 print("Files found in the dropbox folder:")
                 for f in dropbox_files:
