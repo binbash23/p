@@ -439,14 +439,14 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-            ", Name=" + self.name + \
-            ", URL=" + self.url + \
-            ", Loginname=" + self.loginname + \
-            ", Password=" + self.password + \
-            ", Type=" + self.type + \
-            ", Createdate=" + self.create_date + \
-            ", Changedate=" + self.change_date + \
-            ", Invaliddate=" + self.invalid_date
+               ", Name=" + self.name + \
+               ", URL=" + self.url + \
+               ", Loginname=" + self.loginname + \
+               ", Password=" + self.password + \
+               ", Type=" + self.type + \
+               ", Createdate=" + self.create_date + \
+               ", Changedate=" + self.change_date + \
+               ", Invaliddate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -2461,10 +2461,10 @@ class PDatabase:
             database_connection.close()
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
-    # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
+        # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
         print("Merging database")
         if not connector.exists(self.get_database_filename_without_path()):
-        # if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
+            # if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
             print("Creating initial remote database...")
             if os.path.isfile(TEMP_MERGE_DATABASE_FILENAME):
                 os.remove(TEMP_MERGE_DATABASE_FILENAME)
@@ -2483,7 +2483,7 @@ class PDatabase:
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
                                   # "\\p\\" + p_database.get_database_filename_without_path())
                                   self.get_database_filename_without_path())
-                                  # "\\p\\" + self.get_database_filename_without_path())
+            # "\\p\\" + self.get_database_filename_without_path())
             # os.path.join("p" + p_database.get_database_filename_without_path()))
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
             return
@@ -2492,7 +2492,7 @@ class PDatabase:
         #                       TEMP_MERGE_DATABASE_FILENAME)
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         connector.download_file(self.get_database_filename_without_path(),
-        # connector.download_file(os.path.join("p", self.get_database_filename_without_path()),
+                                # connector.download_file(os.path.join("p", self.get_database_filename_without_path()),
                                 # "\\p\\p.db",
                                 TEMP_MERGE_DATABASE_FILENAME)
         # os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
@@ -2506,11 +2506,65 @@ class PDatabase:
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
                                   # os.path.join("p" + p_database.get_database_filename_without_path()))
                                   self.get_database_filename_without_path())
-                                  # "\\p\\" + self.get_database_filename_without_path())
+            # "\\p\\" + self.get_database_filename_without_path())
 
         else:
             print("No changes in remote database. Skipping upload.")
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
+
+    def get_dropbox_connection_credentials(self) -> []:
+        # This method will try to get the 3 strings you need to open a dropbox api connection as a list
+        # [dropbox_application_key, dropbox_application_secret, access_token]
+        # #1 retrieve dropbox token account uuid...
+        dropbox_account_uuid = \
+            get_attribute_value_from_configuration_table(self.database_filename,
+                                                         CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
+        if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
+            print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
+            print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
+            return None
+        else:
+            print("Using Dropbox Account Token uuid from config : " +
+                  colored(dropbox_account_uuid, "green"))
+        # print("Token uuid : " + dropbox_account_uuid)
+        access_token = self.get_password_from_account_and_decrypt(dropbox_account_uuid)
+        # print("Token      : " + access_token)
+        if access_token is None or str(access_token).strip() == "":
+            print(colored("Error: Dropbox Account Token is empty. Make sure the token is set in the password field.",
+                          "red"))
+            return None
+        else:
+            print("Dropbox Account Token found.")
+
+        # #2 retrieve dropbox application account uuid...
+        dropbox_application_account_uuid = \
+            get_attribute_value_from_configuration_table(self.database_filename,
+                                                         CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
+        if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
+            print(
+                colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
+            print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
+            return None
+        else:
+            print("Using Dropbox Application Account uuid from config : " +
+                  colored(dropbox_application_account_uuid, "green"))
+
+        # #3 retrieve dropbox_application_key and dropbox_application_secret...
+        dropbox_application_key = self.get_loginname_from_account_and_decrypt(dropbox_application_account_uuid)
+        dropbox_application_secret = \
+            self.get_password_from_account_and_decrypt(dropbox_application_account_uuid)
+        if dropbox_application_key is None or str(dropbox_application_key).strip() == "":
+            print(colored("Error: Dropbox application_key is empty. Make sure the application_key is set in the " +
+                          "loginname field.", "red"))
+            return None
+        if dropbox_application_secret is None or str(dropbox_application_secret).strip() == "":
+            print(
+                colored("Error: Dropbox application_secret is empty. Make sure the application_secret is set in the " +
+                        "password field.", "red"))
+            return None
+        print("Dropbox application_key and application_secret found.")
+
+        return [dropbox_application_key, dropbox_application_secret, access_token]
 
 
 def main():

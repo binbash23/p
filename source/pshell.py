@@ -21,6 +21,7 @@ import textwrap
 import requests
 import print_slow
 import webdavconnector
+from dropbox_connector import DropboxConnector
 
 
 class ShellCommand:
@@ -829,8 +830,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error setting pshell max history size: " + str(e))
             continue
+        # if shell_command.command == "merge2dropbox":
+        #     p.merge_with_dropbox(p_database)
+        #     continue
         if shell_command.command == "merge2dropbox":
-            p.merge_with_dropbox(p_database)
+            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                 dropbox_connection_credentials[1],
+                                                 dropbox_connection_credentials[2])
+            p_database.merge_database_with_connector(dropbox_connector)
             continue
         if shell_command.command == "merge2file":
             if len(shell_command.arguments) == 1:
