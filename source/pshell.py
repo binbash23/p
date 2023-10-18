@@ -20,7 +20,7 @@ import time
 import textwrap
 import requests
 import print_slow
-import webdavconnector
+import webdav_connector
 from dropbox_connector import DropboxConnector
 
 
