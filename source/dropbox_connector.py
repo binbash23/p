@@ -101,6 +101,7 @@ class DropboxConnector(ConnectorInterface):
             raise
 
     def delete_file(self, remote_path):
+        remote_path = "/" + remote_path
         try:
             # dropbox_connection = dropbox_connect(access_token)
             self._dropbox_connection.files_delete_v2(remote_path)

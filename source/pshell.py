@@ -669,9 +669,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             p_database.delete_account(uuid_to_delete)
             continue
+
         if shell_command.command == "deletedropboxdatabase":
-            p.delete_dropbox_database(p_database)
+            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                 dropbox_connection_credentials[1],
+                                                 dropbox_connection_credentials[2])
+            p_database.delete_database_in_connector(dropbox_connector)
             continue
+        # if shell_command.command == "deletedropboxdatabase":
+        #     p.delete_dropbox_database(p_database)
+        #     continue
         if shell_command.command == "edit":
             uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if uuid_to_edit is not None:
