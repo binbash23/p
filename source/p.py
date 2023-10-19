@@ -162,19 +162,22 @@ def edit(p_database: PDatabase, edit_uuid: str):
         print("Canceled")
 
 
-def change_database_password(p_database: PDatabase) -> bool:
-    try:
-        new_password = getpass.getpass("Enter new database password   : ")
-        new_password_confirm = getpass.getpass("Confirm new database password : ")
-        if new_password != new_password_confirm:
-            logging.error("Passwords do not match.")
-            return False
-    except KeyboardInterrupt:
-        print()
-        print("Canceled")
-        return False
-    return p_database.change_database_password(new_password)
+#def change_database_password(p_database: PDatabase) -> bool:
+#    try:
+#        new_password = getpass.getpass("Enter new database password   : ")
+#        new_password_confirm = getpass.getpass("Confirm new database password : ")
+#        if new_password != new_password_confirm:
+#            logging.error("Passwords do not match.")
+#            return False
+#    except KeyboardInterrupt:
+#        print()
+#        print("Canceled")
+#        return False
+#    return p_database.change_database_password(new_password)
 
+def change_database_password(p_database: PDatabase) -> bool:
+    new_password = read_confirmed_database_password_from_user()
+    return p_database.change_database_password(new_password)
 
 def change_dropbox_database_password(p_database: PDatabase) -> bool:
     print("Change dropbox database password")

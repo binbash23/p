@@ -614,6 +614,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
         if shell_command.command == "changedropboxdbpassword":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            if dropbox_connection_credentials is None:
+                continue
             dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
