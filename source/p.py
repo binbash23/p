@@ -5,6 +5,7 @@
 # Password/account database for managing all your accounts
 #
 import optparse
+import sys
 from optparse import OptionGroup
 # import stdiomask
 from pdatabase import *
@@ -13,6 +14,7 @@ from pdatabase import *
 import colorama
 from dropboxconnector import *
 from pshell import *
+
 # import informal_connector_interface
 
 colorama.init()
@@ -20,7 +22,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.17"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.19"
 database_filename = 'p.db'
 # TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
@@ -616,8 +618,11 @@ def main():
     if options.show_invalidated:
         show_invalidated_accounts = True
     # Now try to open/create the database:
-    p_database = PDatabase(database_filename, database_password, show_account_details,
-                           show_invalidated_accounts, initial_database_name=database_logical_name)
+    try:
+        p_database = PDatabase(database_filename, database_password, show_account_details,
+                               show_invalidated_accounts, initial_database_name=database_logical_name)
+    except:
+        sys.exit(1)
 
     # from here we have a valid database ready to access
 

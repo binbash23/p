@@ -12,6 +12,7 @@ import base64
 import os
 import sys
 import time
+from getpass import getpass
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -925,6 +926,16 @@ def print_found_n_results(n_results: int):
         print("Found " + str(n_results) + " results.")
 
 
+def read_confirmed_database_password_from_user() -> str:
+    new_password = getpass("Enter new database password   : ")
+    new_password_confirm = getpass("Confirm new database password : ")
+    while new_password != new_password_confirm:
+        logging.error("Passwords do not match.")
+        new_password = getpass("Enter new database password   : ")
+        new_password_confirm = getpass("Confirm new database password : ")
+    return new_password
+
+
 class PDatabase:
     DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
     DEFAULT_ITERATION_COUNT = 500000
@@ -972,7 +983,8 @@ class PDatabase:
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
             time.sleep(3)
-            sys.exit(1)
+            # sys.exit(1)
+            raise Exception("Database password is wrong.")
 
     def set_default_values_in_configuration_table(self):
         if get_attribute_value_from_configuration_table(self.database_filename,
@@ -2462,7 +2474,7 @@ class PDatabase:
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
         # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
-        print("Merging database")
+        # print("Merging database")
         if not connector.exists(self.get_database_filename_without_path()):
             # if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
             print("Creating initial remote database...")
@@ -2565,6 +2577,43 @@ class PDatabase:
         print("Dropbox application_key and application_secret found.")
 
         return [dropbox_application_key, dropbox_application_secret, access_token]
+
+    def change_database_password_from_connector(self, connector: ConnectorInterface) -> bool:
+        # def change_connector_database_password(p_database: PDatabase) -> bool:
+        print("Change remote database password")
+        # if not dropbox_database_exists(p_database):
+        print("Searching for remote database: " + str(self.get_database_filename_without_path()))
+        if not connector.exists(self.get_database_filename_without_path()):
+            print("Remote database does not exist.")
+            return False
+        print("Downloading remote database...")
+        # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
+        #                      TEMP_MERGE_DATABASE_FILENAME)
+        connector.download_file(self.get_database_filename_without_path(),
+                                TEMP_MERGE_DATABASE_FILENAME)
+        try:
+            remote_password = getpass("Enter current remote database password: ")
+            temp_remote_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
+            new_password = read_confirmed_database_password_from_user()
+            result = self.change_database_password(new_password)
+            # result = change_database_password(dropbox_p_database)
+            if not result:
+                print("Error changing remote database password.")
+                return False
+            print("Uploading changed database...")
+            local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
+            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
+            #                    "/" + p_database.get_database_filename_without_path())
+            connector.upload_file(TEMP_MERGE_DATABASE_FILENAME, self.get_database_filename_without_path())
+        except KeyboardInterrupt:
+            print()
+            print("Canceled")
+            return False
+        except Exception as e:
+            print(str(e))
+        finally:
+            os.remove(TEMP_MERGE_DATABASE_FILENAME)
+        return True
 
 
 def main():

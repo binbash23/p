@@ -613,7 +613,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             pyperclip3.clear()
             continue
         if shell_command.command == "changedropboxdbpassword":
-            p.change_dropbox_database_password(p_database)
+            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                 dropbox_connection_credentials[1],
+                                                 dropbox_connection_credentials[2])
+            p_database.change_database_password_from_connector(dropbox_connector)
+            # p.change_dropbox_database_password(p_database)
             continue
         if shell_command.command == "changepassword":
             try:
@@ -683,8 +688,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "deletewebdavdatabase":
             if len(shell_command.arguments) == 1:
-                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(p_database.database_filename,
-                                                                                             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -701,8 +707,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
-            connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-                                                        webdav_account.password)
+            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                         webdav_account.password)
             connector.delete_file(p_database.get_database_filename_without_path())
             continue
 
@@ -811,6 +817,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "listdropboxfiles":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            if dropbox_connection_credentials is None:
+                continue
             dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
@@ -877,8 +885,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         #     continue
         if shell_command.command == "merge2webdav":
             if len(shell_command.arguments) == 1:
-                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(p_database.database_filename,
-                                                                                             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -895,8 +904,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
-            connector = webdavconnector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-                                                        webdav_account.password)
+            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                         webdav_account.password)
             try:
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
@@ -1538,16 +1547,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
-        # if shell_command.command == "upload2dropbox":
-        #     continue
-        #     # tobe implemented
-        #     print("An eventually existing database in dropbox will be overwritten!")
-        #     local_path = os.path.dirname(p_database.database_filename)
-        #     # dropbox_upload_file(access_token, local_path, p_database.database_filename,
-        #     #                     "/" + DROPBOX_P_DATABASE_FILENAME)
-        #     dropboxconnector.dropbox_upload_file(dropbox_connection, local_path, p_database.database_filename,
-        #                                          "/" + DROPBOX_P_DATABASE_FILENAME)
-        #     continue
         if shell_command.command == "version":
             print(p.VERSION)
             continue

@@ -66,7 +66,7 @@ class DropboxConnector(ConnectorInterface):
                     # print("search   - " + filename)
                     # if file.name == filename:
                     if file.name == remote_path:
-                            return True
+                        return True
         except AuthError as e:
             print('Error getting list of files from Dropbox: ' + str(e))
             raise
