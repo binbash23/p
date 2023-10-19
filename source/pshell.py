@@ -10,7 +10,7 @@ import getpass
 import p
 import pdatabase
 from pdatabase import ShellHistoryEntry
-import dropboxconnector
+# import dropboxconnector
 import pyperclip3
 import datetime
 from termcolor import colored
@@ -674,6 +674,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "deletedropboxdatabase":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            if dropbox_connection_credentials is None:
+                continue
             dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
@@ -868,6 +870,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
         #     continue
         if shell_command.command == "merge2dropbox":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            if dropbox_connection_credentials is None:
+                continue
             dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
