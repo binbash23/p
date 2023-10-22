@@ -728,6 +728,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                          webdav_account.password)
             connector.delete_file(p_database.get_database_filename_without_path())
+            p_database.delete_database_in_connector(connector)
             continue
 
         if shell_command.command == "forgetdeletedaccounts":
