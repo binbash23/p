@@ -5,12 +5,10 @@
 #
 import datetime
 import os.path
-# import socket
 import sqlite3
 import logging
 import base64
 import os
-import sys
 import time
 from getpass import getpass
 
@@ -26,9 +24,7 @@ from re import finditer
 from re import IGNORECASE
 import uuid
 import colorama
-# from print_slow import print_slow
 import print_slow
-# import informal_connector_interface
 from connector_interface import ConnectorInterface
 
 colorama.init()
@@ -2222,14 +2218,6 @@ class PDatabase:
         # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
-    # def merge_database_with_default_merge_target_file(self):
-    #     last_known_database = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE)
-    #     if last_known_database is not None and last_known_database != "":
-    #         self.merge_database(last_known_database)
-    #     else:
-    #         print(colored("Error: There is no last known database.", "red"))
 
     def merge_database_with_default_merge_target_file(self):
         default_target_file = \
@@ -2241,15 +2229,6 @@ class PDatabase:
             print(colored("Error: There is no default merge target file configured in configuration table.",
                           "red"))
 
-    # def merge_database_with_default_file_target(self):
-    #     default_target_file = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
-    #     if default_target_file is not None and default_target_file != "":
-    #         self.merge_database(default_target_file)
-    #     else:
-    #         print(colored("Error: There is no default merge target file configured in configuration table.",
-    #                       "red"))
 
     def get_database_password_as_string(self) -> str:
         if self.database_password == "":
