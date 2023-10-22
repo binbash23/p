@@ -7,8 +7,6 @@
 import optparse
 from optparse import OptionGroup
 
-import colorama
-
 from dropbox_connector import *
 from pdatabase import *
 from pshell import *
