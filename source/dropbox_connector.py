@@ -41,12 +41,13 @@ class DropboxConnector(ConnectorInterface):
                 if isinstance(file, dropbox.files.FileMetadata):
                     metadata = {
                         'name': file.name,
-                        'path_display': file.path_display,
+                        #'path_display': file.path_display,
                         'client_modified': file.client_modified,
                         'server_modified': file.server_modified
                     }
-                    # files_list.append(metadata)
-                    files_list.append(file.name)
+                    files_list.append(metadata)
+                    #files_list.append(file.name)
+                    # files_list.append(file.name + '\t' + str(file.server_modified))
             # df = pd.DataFrame.from_records(files_list)
             # return df.sort_values(by='server_modified', ascending=False)
             return files_list

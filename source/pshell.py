@@ -139,6 +139,8 @@ SHELL_COMMANDS = [
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
     ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
+    ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
+                 "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
@@ -689,9 +691,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.delete_database_in_connector(dropbox_connector)
             continue
 
-        # if shell_command.command == "deletedropboxdatabase":
-        #     p.delete_dropbox_database(p_database)
-        #     continue
         if shell_command.command == "edit":
             uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if uuid_to_edit is not None:
@@ -828,17 +827,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_accounts("")
             continue
 
-        # if shell_command.command == "listdropboxfiles":
-        #     dropbox_connection = p.create_dropbox_connection(p_database)
-        #     dropbox_files = dropboxconnector.dropbox_list_files(dropbox_connection, "")
-        #     if len(dropbox_files) > 0:
-        #         print("Files found in the dropbox folder:")
-        #         for f in dropbox_files:
-        #             print(f)
-        #     else:
-        #         print("No files found in dropbox folder.")
-        #     continue
-
         if shell_command.command == "listdropboxfiles":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
@@ -857,6 +845,41 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "listinvalidated":
             p_database.search_invalidated_accounts("")
+            continue
+
+        if shell_command.command == "listwebdavfiles":
+            if len(shell_command.arguments) == 1:
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                if webdav_account_uuid == "":
+                    print("No default webdav account UUID found in configuration table.")
+                    continue
+                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    webdav_account_uuid = shell_command.arguments[1].strip()
+                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if webdav_account is None:
+                print("Webdav account could not be found: " + str(webdav_account_uuid))
+                continue
+            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                         webdav_account.password)
+            try:
+                webdav_files = connector.list_files("/")
+                if len(webdav_files) > 0:
+                    print("Files found in the webdav folder:")
+                    for f in webdav_files:
+                        print(f)
+                else:
+                    print("No files found in webdav folder.")
+
+            except Exception as e:
+                print("Error: " + str(e))
             continue
 
         if shell_command.command == "lock" or shell_command.command == "#":
