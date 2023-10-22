@@ -3,8 +3,8 @@
 #
 # webdav connector
 #
-import webdav4.client
 from webdav4.client import Client
+
 # from informal_connector_interface import InformalConnectorInterface
 from connector_interface import ConnectorInterface
 
@@ -36,7 +36,7 @@ class WebdavConnector(ConnectorInterface):
 
     def list_files(self, remote_path) -> []:
         try:
-            files = self._dav_client.ls(path=remote_path)
+            # files = self._dav_client.ls(path=remote_path)
             return self._dav_client.ls(path=remote_path)
         except Exception as e:
             print("Error: " + str(e))

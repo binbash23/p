@@ -4,8 +4,8 @@
 #
 # Password/account database for managing all your accounts
 #
-import time
 import sys
+import time
 
 DEFAULT_DELAY: float = 0.008
 DELAY_ENABLED: bool = True

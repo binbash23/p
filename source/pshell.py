@@ -4,24 +4,24 @@
 #
 # Password/account database for managing all your accounts
 #
-import sys
+import datetime
 import getpass
-# import stdiomask
+import os
+import sys
+import textwrap
+import time
+
+import pyperclip3
+import requests
+from inputimeout import inputimeout, TimeoutOccurred
+from termcolor import colored
+
 import p
 import pdatabase
-from pdatabase import ShellHistoryEntry
-# import dropboxconnector
-import pyperclip3
-import datetime
-from termcolor import colored
-import os
-from inputimeout import inputimeout, TimeoutOccurred
-import time
-import textwrap
-import requests
 import print_slow
 import webdav_connector
 from dropbox_connector import DropboxConnector
+from pdatabase import ShellHistoryEntry
 
 
 class ShellCommand:
@@ -100,6 +100,11 @@ SHELL_COMMANDS = [
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
+    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword", "Change password of the webdav " +
+                 "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
+                 "password. After re-encrypting the dropbox version of the database, the database will be " +
+                 "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
+                 " webdav UUID from the configuration table will be taken."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
@@ -626,6 +631,31 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                  dropbox_connection_credentials[2])
             p_database.change_database_password_from_connector(dropbox_connector)
             # p.change_dropbox_database_password(p_database)
+            continue
+
+        if shell_command.command == "changewebdavdbpassword":
+            if len(shell_command.arguments) == 1:
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                if webdav_account_uuid == "":
+                    print("No default webdav account UUID found in configuration table.")
+                    continue
+                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    webdav_account_uuid = shell_command.arguments[1].strip()
+                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if webdav_account is None:
+                print("Webdav account could not be found: " + str(webdav_account_uuid))
+                continue
+            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                         webdav_account.password)
+            p_database.change_database_password_from_connector(connector)
             continue
 
         if shell_command.command == "changepassword":

@@ -4,14 +4,15 @@
 # thanks to matt clarke
 # for his example: https://practicaldatascience.co.uk/data-science/how-to-use-the-dropbox-api-with-python
 #
-import os.path
-import pathlib
-import dropbox
-from dropbox.exceptions import AuthError
-import webbrowser
 import base64
-import requests
 import json
+import pathlib
+import webbrowser
+
+import dropbox
+import requests
+from dropbox.exceptions import AuthError
+
 from connector_interface import ConnectorInterface
 
 

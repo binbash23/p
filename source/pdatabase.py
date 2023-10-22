@@ -3,27 +3,28 @@
 #
 # Copyright
 #
+import base64
+import binascii
 import datetime
+import logging
+import os
 import os.path
 import sqlite3
-import logging
-import base64
-import os
 import time
+import uuid
 from getpass import getpass
+from re import IGNORECASE
+from re import finditer
 
+import colorama
+import progressbar
+from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
+from cryptography.fernet import InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.exceptions import InvalidSignature
-from cryptography.fernet import InvalidToken
-import binascii
-import progressbar
 from termcolor import colored
-from re import finditer
-from re import IGNORECASE
-import uuid
-import colorama
+
 import print_slow
 from connector_interface import ConnectorInterface
 

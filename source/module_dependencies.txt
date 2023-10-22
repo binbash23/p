@@ -11,7 +11,7 @@ pyperclip3
 cryptography
 progressbar
 dropbox
-pandas
+#pandas
 inputimeout
 getpass
 #stdiomask

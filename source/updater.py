@@ -4,10 +4,9 @@
 #
 # Password/account database for managing all your accounts
 #
-import os
-import subprocess
-import sys
 import optparse
+import os
+import sys
 import time
 
 VERSION = "[updater] by Jens Heine <binbash@gmx.net> version: 2023.09.07"

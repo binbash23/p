@@ -6,16 +6,19 @@
 #
 import optparse
 from optparse import OptionGroup
-from pdatabase import *
+
 import colorama
+
 from dropbox_connector import *
+from pdatabase import *
 from pshell import *
+
 colorama.init()
 
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.19"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.22"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki/%5Bp%5D-Wiki-Home"
