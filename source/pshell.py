@@ -583,6 +583,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "add":
             p.add(p_database)
             continue
+
         if shell_command.command == "alias":
             if len(shell_command.arguments) == 1:
                 aliases = p_database.get_alias_commands_decrypted()
@@ -609,9 +610,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                             current_command = ""
                         p_database.set_alias_command_and_encrypt(current_alias, current_command)
             continue
+
         if shell_command.command == "cc":
             pyperclip3.clear()
             continue
+
         if shell_command.command == "changedropboxdbpassword":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
@@ -622,6 +625,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.change_database_password_from_connector(dropbox_connector)
             # p.change_dropbox_database_password(p_database)
             continue
+
         if shell_command.command == "changepassword":
             try:
                 p.change_database_password(p_database)
@@ -629,13 +633,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 print("Canceled.")
             continue
+
         if shell_command.command == "clear":
             clear_console()
             continue
+
         if shell_command.command == "clearhistory":
             # shell_history_array = []
             p_database.delete_all_shell_history_entries()
             continue
+
         if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
@@ -681,6 +688,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                  dropbox_connection_credentials[2])
             p_database.delete_database_in_connector(dropbox_connector)
             continue
+
         # if shell_command.command == "deletedropboxdatabase":
         #     p.delete_dropbox_database(p_database)
         #     continue
@@ -718,7 +726,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if webdav_account is None:
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
-            # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                          webdav_account.password)
             connector.delete_file(p_database.get_database_filename_without_path())
@@ -737,6 +744,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 print("Canceled")
             continue
+
         if shell_command.command == "forgetaccounthistory":
             try:
                 answer = input("Delete older versions of all accounts ([y]/n) : ")
@@ -750,6 +758,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 print("Canceled")
             continue
+
         if shell_command.command == "help":
             if len(shell_command.arguments) == 1:
                 print()
@@ -779,6 +788,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 else:
                     print("Unknown command: " + shell_command.arguments[1])
             continue
+
         if shell_command.command == "helpverbose":
             print()
             for sc in SHELL_COMMANDS:
@@ -799,6 +809,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
             print("Idle time: " + idle_time_str)
             continue
+
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING or UUID is missing.")
@@ -812,6 +823,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is empty.")
             # p_database.invalidate_account(shell_command.arguments[1].strip())
             continue
+
         if shell_command.command == "list":
             p_database.search_accounts("")
             continue
@@ -842,13 +854,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 print("No files found in dropbox folder.")
             continue
+
         if shell_command.command == "listinvalidated":
             p_database.search_invalidated_accounts("")
             continue
+
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
             # print("Pshell locked.")
             continue
+
         if shell_command.command == "maxhistorysize":
             if len(shell_command.arguments) == 1:
                 if pshell_max_history_size < 1:
@@ -865,9 +880,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error setting pshell max history size: " + str(e))
             continue
-        # if shell_command.command == "merge2dropbox":
-        #     p.merge_with_dropbox(p_database)
-        #     continue
+
         if shell_command.command == "merge2dropbox":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
@@ -877,6 +890,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                  dropbox_connection_credentials[2])
             p_database.merge_database_with_connector(dropbox_connector)
             continue
+
         if shell_command.command == "merge2file":
             if len(shell_command.arguments) == 1:
                 merge_target_file = pdatabase.get_attribute_value_from_configuration_table(
@@ -894,9 +908,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
             p_database.merge_database(merge_target_file)
             continue
-        # if shell_command.command == "merge2lastknownfile":
-        #     p_database.merge_database_with_default_merge_target_file()
-        #     continue
+
         if shell_command.command == "merge2webdav":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
@@ -925,6 +937,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error: " + str(e))
             continue
+
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
                 print("DATABASE_FILENAME is missing.")
@@ -957,9 +970,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
             sys.exit()
+
         if shell_command.command == "quit" or shell_command.command == "exit":
             clear_console()
             break
+
         if shell_command.command == "revalidate":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
@@ -977,6 +992,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 print("Could not revalidate account " + uuid_to_revalidate + ".")
             continue
+
         if shell_command.command == "search" or shell_command.command == "/":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1044,6 +1060,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 latest_found_account = account_array[len(account_array) - 1]
             continue
+
         if shell_command.command == "setdefaultmergetargetfile":
             if len(shell_command.arguments) == 1:
                 print("Default target filename is missing.")
@@ -1057,6 +1074,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
                 new_default_merge_target_file)
             continue
+
         if shell_command.command == "setwebdavaccountuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID of webdav account is missing.")
@@ -1070,6 +1088,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID,
                 new_webdav_account_uuid)
             continue
+
         if shell_command.command == "cplast":
             if latest_found_account is None:
                 print("There is no account to copy.")
@@ -1078,6 +1097,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Account   : " + latest_found_account.name)
             print("Clipboard : Password")
             continue
+
         if shell_command.command == "sc":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1126,6 +1146,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
             continue
+
         if shell_command.command == "sca":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1161,6 +1182,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error copying URL, loginname and password to the clipboard: " + str(e))
             continue
+
         if shell_command.command == "scl":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1179,6 +1201,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error copying loginname to the clipboard: " + str(e))
             continue
+
         if shell_command.command == "scu":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1198,12 +1221,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error copying URL to the clipboard: " + str(e))
         if shell_command.command == "slowprintenabled":
             if len(shell_command.arguments) == 1:
-                # print("on/off is missing.")
-                # print(shell_command)
-                # current_status = pdatabase.get_attribute_value_from_configuration_table(
-                #     p_database.database_filename,
-                #     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
-                # print("Status: " + current_status)
                 print("Status: " + str(print_slow.DELAY_ENABLED))
                 continue
             if shell_command.arguments[1] == "on":
@@ -1222,6 +1239,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
         if shell_command.command == "setdatabasename":
             if len(shell_command.arguments) == 1:
                 print("NAME is missing.")
@@ -1235,6 +1253,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                 new_database_name)
             continue
+
         if shell_command.command == "setdropboxapplicationuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
@@ -1245,6 +1264,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
                 shell_command.arguments[1].strip())
             continue
+
         if shell_command.command == "setdropboxtokenuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
@@ -1255,6 +1275,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
                 shell_command.arguments[1].strip())
             continue
+
         if shell_command.command == "shadowpasswords":
             if len(shell_command.arguments) == 1:
                 # print("on/off is missing.")
@@ -1280,6 +1301,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
         if shell_command.command == "showaccounthistory":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
@@ -1291,6 +1313,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             p_database.search_account_history(uuid_to_show_accounthistory_from)
             continue
+
         if shell_command.command == "showconfig":
             print("PShell timeout                      : ", end="")
             print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
@@ -1311,6 +1334,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Slow print enabled                  : ", end="")
             print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
             continue
+
         if shell_command.command == "showlinks":
             print("p github home            : ", end="")
             print_slow.print_slow(colored(str(p.URL_GITHUB_P_HOME), "green"))
@@ -1325,6 +1349,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("p updater binary linux   : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX), "green"))
             continue
+
         if shell_command.command == "showinvalidated":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
@@ -1395,6 +1420,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
         if shell_command.command == "sp":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
@@ -1429,6 +1455,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 print("Canceled")
             continue
+
         if shell_command.command == "sql":
             if len(shell_command.arguments) == 1:
                 print("COMMAND is missing.")
@@ -1441,9 +1468,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error executing sql command: " + str(e))
             continue
+
         if shell_command.command == "status":
             pdatabase.print_database_statistics(p_database.database_filename)
             continue
+
         if shell_command.command == "st":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
@@ -1458,6 +1487,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 latest_found_account = account_array[len(account_array) - 1]
             continue
+
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
                 print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
@@ -1472,6 +1502,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error setting pshell timeout: " + str(e))
             continue
+
         if shell_command.command == "trackaccounthistory":
             # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
@@ -1498,6 +1529,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
         if shell_command.command == "updatep":
             try:
                 if os_is_windows():
@@ -1536,6 +1568,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as ex:
                 print("Error updating: " + str(ex.with_traceback()))
             continue
+
         if shell_command.command == "verbose":
             if len(shell_command.arguments) == 1:
                 # print("on/off is missing.")
@@ -1561,9 +1594,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
         if shell_command.command == "version":
             print(p.VERSION)
             continue
+
         # # Unknown command detected
         # print("Command ")
     print("Exiting pshell.")
