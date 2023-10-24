@@ -437,14 +437,14 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-               ", Name=" + self.name + \
-               ", URL=" + self.url + \
-               ", Loginname=" + self.loginname + \
-               ", Password=" + self.password + \
-               ", Type=" + self.type + \
-               ", Createdate=" + self.create_date + \
-               ", Changedate=" + self.change_date + \
-               ", Invaliddate=" + self.invalid_date
+            ", Name=" + self.name + \
+            ", URL=" + self.url + \
+            ", Loginname=" + self.loginname + \
+            ", Password=" + self.password + \
+            ", Type=" + self.type + \
+            ", Createdate=" + self.create_date + \
+            ", Changedate=" + self.change_date + \
+            ", Invaliddate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -2219,7 +2219,6 @@ class PDatabase:
         # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
-
     def merge_database_with_default_merge_target_file(self):
         default_target_file = \
             get_attribute_value_from_configuration_table(self.database_filename,
@@ -2229,7 +2228,6 @@ class PDatabase:
         else:
             print(colored("Error: There is no default merge target file configured in configuration table.",
                           "red"))
-
 
     def get_database_password_as_string(self) -> str:
         if self.database_password == "":
@@ -2242,10 +2240,10 @@ class PDatabase:
         else:
             return None
 
-    # returns -1 in error case, 0 when no error and no changes where made,
-    # 1 when changes where made locally and 2 when changes where made in remote db
-    # and 3 when changes where made locally and remote
     def merge_database(self, merge_database_filename: str) -> int:
+        """ returns -1 in error case, 0 when no error and no changes where made,
+        1 when changes where made locally and 2 when changes where made in remote db
+        and 3 when changes where made locally and remote """
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
             return -1
@@ -2323,6 +2321,7 @@ class PDatabase:
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
             print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
+            # xxx
             database_connection.commit()
 
             #
@@ -2413,11 +2412,11 @@ class PDatabase:
                               len(deleted_uuids_in_local_db_note_in_remote)), "red") + " changes have been done)")
             # Finally commit it
             database_connection.commit()
-            # remember that there were changes in remote db for return code:
-            if count_uuids_in_local_with_newer_update_date_than_in_remote + \
-                    count_uuids_in_local_that_do_not_exist_in_remote > 0:
+            # remember that there were changes in remote db for return code
+            # (and also check for deleted accs in remote db):
+            if (count_uuids_in_local_with_newer_update_date_than_in_remote + count_uuids_in_local_that_do_not_exist_in_remote > 0) or (
+                    len(deleted_uuids_in_local_db_note_in_remote) > 0):
                 return_code += 2
-
         except Exception as e:
             raise
         finally:
