@@ -10,6 +10,7 @@ import os
 import sys
 import textwrap
 import time
+import uuid
 
 import pyperclip3
 import requests
@@ -131,6 +132,10 @@ SHELL_COMMANDS = [
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell."),
     ShellCommand("exit", "exit", "Quit pshell."),
+    ShellCommand("generatenewdatabaseuuid", "generatenewdatabaseuuid", "Generate a " +
+                 "new UUID for the current database. This is useful if you have copied the database file and want " +
+                 "to use it as a new instance. You might also set a new database name. This is just for identifying " +
+                 "the different database files."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
@@ -1028,6 +1033,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "quit" or shell_command.command == "exit":
             clear_console()
             break
+
+        if shell_command.command == "generatenewdatabaseuuid":
+            new_database_uuid = str(uuid.uuid4())
+            pdatabase.set_attribute_value_in_configuration_table(p_database.database_filename,
+                                                                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_UUID,
+                                                                 new_database_uuid)
+            print("New database UUID is now: " + pdatabase.get_database_uuid(p_database.database_filename))
+            continue
 
         if shell_command.command == "revalidate":
             if len(shell_command.arguments) == 1:
