@@ -944,10 +944,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
                 continue
-            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                 dropbox_connection_credentials[1],
-                                                 dropbox_connection_credentials[2])
-            p_database.merge_database_with_connector(dropbox_connector)
+            try:
+                dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                     dropbox_connection_credentials[1],
+                                                     dropbox_connection_credentials[2])
+                p_database.merge_database_with_connector(dropbox_connector)
+            except Exception as e:
+                print("Error: " + str(e))
             continue
 
         if shell_command.command == "merge2file":
@@ -989,9 +992,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
-            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-                                                         webdav_account.password)
             try:
+                print("1")
+                connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                             webdav_account.password)
+
+                print("2")
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))

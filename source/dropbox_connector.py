@@ -28,6 +28,9 @@ class DropboxConnector(ConnectorInterface):
         self._refresh_token = refresh_token
         self._dropbox_connection = dropbox.Dropbox(app_key=app_key, app_secret=app_secret,
                                                    oauth2_refresh_token=refresh_token)
+        # test connection
+        self._dropbox_connection.files_list_folder("").entries
+        #self.list_files("")
 
     def get_type(self) -> str:
         return "dropbox"

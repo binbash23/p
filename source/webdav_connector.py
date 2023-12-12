@@ -23,6 +23,9 @@ class WebdavConnector(ConnectorInterface):
             self._dav_client = Client(dav_url, auth=(dav_login, dav_password))
         else:
             self._dav_client = Client(dav_url)
+        # check connection
+        self._dav_client.ls(path="/")
+        #self.list_files("/")
 
     def __str__(self):
         to_string: str = "Webdav Connector attributes: "
