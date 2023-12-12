@@ -21,6 +21,7 @@ import p
 import pdatabase
 import print_slow
 import webdav_connector
+import ssh_connector
 from dropbox_connector import DropboxConnector
 from pdatabase import ShellHistoryEntry
 
@@ -167,10 +168,16 @@ SHELL_COMMANDS = [
     # ShellCommand("merge2lastknownfile", "merge2lastknownfile",
     #              "Merge local database with the last known merge database. The last know database can be seen " +
     #              "with the status command"),
+    ShellCommand("merge2ssh", "merge2ssh [<UUID>]",
+                 "Merge local database with a ssh target which has to be accessible with the account UUID.\n" +
+                 "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
+                 "and, if one is found, it will be used to connect to the ssh target. You can use the " +
+                 "command 'setsshaccountuuid' to set the default ssh account UUID."),
     ShellCommand("merge2webdav", "merge2webdav [<UUID>]",
                  "Merge local database with a webdav target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
-                 "and,m if one is found, it will be used to connect to the webdav target."),
+                 "and, if one is found, it will be used to connect to the webdav target. You can use the " +
+                 "command 'setwebdavaccountuuid' to set the default webdav account UUID."),
     ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
                  " be created.\nWith this command you can switch between multiple p databases."),
@@ -186,6 +193,9 @@ SHELL_COMMANDS = [
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
+    ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>",
+                 "Set a default account in the configuration table to connect to a ssh target." +
+                 "This account will be used if the command merge2ssh is called without an account UUID."),
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
@@ -979,6 +989,34 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.merge_database(merge_target_file)
             continue
 
+        if shell_command.command == "merge2ssh":
+            if len(shell_command.arguments) == 1:
+                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                if ssh_account_uuid == "":
+                    print("No default ssh account UUID found in configuration table.")
+                    continue
+                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    ssh_account_uuid = shell_command.arguments[1].strip()
+                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if ssh_account is None:
+                print("SSH account could not be found: " + str(ssh_account_uuid))
+                continue
+            try:
+                connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname,
+                                                       ssh_account.password)
+                p_database.merge_database_with_connector(connector)
+            except Exception as e:
+                print("Error: " + str(e))
+            continue
+
         if shell_command.command == "merge2webdav":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
@@ -1150,6 +1188,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
                 new_default_merge_target_file)
+            continue
+
+        if shell_command.command == "setsshaccountuuid":
+            if len(shell_command.arguments) == 1:
+                print("UUID of ssh account is missing.")
+                print(shell_command.synopsis)
+                continue
+            new_ssh_account_uuid = shell_command.arguments[1].strip()
+            if new_ssh_account_uuid == "-":
+                new_ssh_account_uuid = ""
+            p.set_attribute_value_in_configuration_table(
+                p_database.database_filename,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID,
+                new_ssh_account_uuid)
             continue
 
         if shell_command.command == "setwebdavaccountuuid":

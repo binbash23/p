@@ -386,6 +386,7 @@ CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION = "SCHEMA_VERSION"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID = "WEBDAV_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID = "SSH_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "PSHELL_MAX_IDLE_TIMEOUT_MIN"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE = "PSHELL_MAX_HISTORY_SIZE"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "PSHELL_SHADOW_PASSWORDS"
@@ -792,6 +793,9 @@ def print_database_statistics(database_filename):
     dropbox_application_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
+    ssh_account_uuid = \
+        get_attribute_value_from_configuration_table(database_filename,
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
     webdav_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
@@ -846,6 +850,8 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(dropbox_account_uuid))
         print("Dropbox application account uuid    : ", end="")
         print_slow.print_slow(str(dropbox_application_account_uuid))
+        print("SSH account uuid                    : ", end="")
+        print_slow.print_slow(str(ssh_account_uuid))
         print("Webdav account uuid                 : ", end="")
         print_slow.print_slow(str(webdav_account_uuid))
         print("Default merge target file           : ", end="")
