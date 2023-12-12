@@ -75,7 +75,8 @@ class ShellCommand:
 
 SHELL_COMMANDS = [
     ShellCommand("/", "/ <SEARCHSTRING>", "/ is an alias to the search command. For " +
-                 "more info see the help for the search command."),
+                 "more info see the help for the search command. It is also possible to search like this: " +
+                 "'/SEARCHSTRING' (without the space after the slash)."),
     ShellCommand("0", "0", "Alias. This alias can be set with the alias command."),
     ShellCommand("1", "1", "Alias. This alias can be set with the alias command."),
     ShellCommand("2", "2", "Alias. This alias can be set with the alias command."),
@@ -130,7 +131,8 @@ SHELL_COMMANDS = [
                  "is given, the configuration table will be searched for the default webdav account."),
     ShellCommand("edit", "edit <SEARCHSTRING>>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
-    ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell."),
+    ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
+                 "to execute the command without the space before the slash like '!dir' for example."),
     ShellCommand("exit", "exit", "Quit pshell."),
     ShellCommand("generatenewdatabaseuuid", "generatenewdatabaseuuid", "Generate a " +
                  "new UUID for the current database. This is useful if you have copied the database file and want " +
@@ -508,6 +510,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                         manual_locked = False
                     user_input = ""
                     break
+        # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
+        # so I seperate / and ! here from the rest
+        if user_input.startswith("/"):
+            user_input = user_input.replace("/", "/ ", 1)
+        if user_input.startswith("!"):
+            user_input = user_input.replace("!", "! ", 1)
         shell_command = expand_string_2_shell_command(user_input)
         # check for empty string
         if shell_command is None:
@@ -991,11 +999,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if webdav_account is None:
                 print("Webdav account could not be found: " + str(webdav_account_uuid))
                 continue
-            # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             try:
                 connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                              webdav_account.password)
-
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))

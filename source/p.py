@@ -16,7 +16,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.10.24"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2023.12.12"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki/%5Bp%5D-Wiki-Home"
