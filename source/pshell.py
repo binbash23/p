@@ -993,11 +993,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             # webdav_account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             try:
-                print("1")
                 connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                              webdav_account.password)
 
-                print("2")
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
