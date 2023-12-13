@@ -152,6 +152,7 @@ SHELL_COMMANDS = [
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
     ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
+    ShellCommand("listsshfiles", "listsshfiles [UUID]", "List all files in ssh folder."),
     ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
                  "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
@@ -901,6 +902,40 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_invalidated_accounts("")
             continue
 
+        if shell_command.command == "listsshfiles":
+            if len(shell_command.arguments) == 1:
+                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                if ssh_account_uuid == "":
+                    print("No default ssh account UUID found in configuration table.")
+                    continue
+                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    ssh_account_uuid = shell_command.arguments[1].strip()
+                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if ssh_account is None:
+                print("SSH account could not be found: " + str(ssh_account_uuid))
+                continue
+            connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
+            try:
+                ssh_files = connector.list_files()
+                if len(ssh_files) > 0:
+                    print("Files found in the ssh folder:")
+                    for f in ssh_files:
+                        print(f)
+                else:
+                    print("No files found in ssh folder.")
+
+            except Exception as e:
+                print("Error: " + str(e))
+            continue
+
         if shell_command.command == "listwebdavfiles":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
@@ -966,6 +1001,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
                                                      dropbox_connection_credentials[1],
                                                      dropbox_connection_credentials[2])
+                print("Using connector: " + str(dropbox_connector))
                 p_database.merge_database_with_connector(dropbox_connector)
             except Exception as e:
                 print("Error: " + str(e))
@@ -1012,6 +1048,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname,
                                                        ssh_account.password)
+                print("Using connector: " + str(connector))
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
@@ -1040,6 +1077,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                              webdav_account.password)
+                print("Using connector: " + str(connector))
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))

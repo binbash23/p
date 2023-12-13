@@ -31,7 +31,7 @@ class WebdavConnector(ConnectorInterface):
         to_string: str = "Webdav Connector attributes: "
         if self._dav_client is None:
             return to_string + "not initialized."
-        to_string = to_string + "base url : " + str(self._dav_client.base_url) + ", login    : " + str(self._dav_login)
+        to_string = to_string + "base url: " + str(self._dav_client.base_url) + ", login: " + str(self._dav_login)
         return to_string
 
     def get_type(self) -> str:
