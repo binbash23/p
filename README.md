@@ -82,7 +82,7 @@ Who wants to have a master database copy in the cloud can also do this by using 
 
 ### Merging different password databases
 
-Usually you have different copies of your p database. One on your desktop computer, another on the laptop... To synchronize them, there is a merge feature to do this for you.
+Usually you have different copies of your p database. One on your desktop computer, another on the laptop... To synchronize them, there is a merge feature to do this for you. By now it is possible to merge to different targets like Dropbox, WEBDAV and SSH and for sure to an ordinary file on the same host that you are working on.
 
 ### SQLite database
 
