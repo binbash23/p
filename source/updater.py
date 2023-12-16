@@ -9,7 +9,16 @@ import os
 import sys
 import time
 
-VERSION = "[updater] by Jens Heine <binbash@gmx.net> version: 2023.09.07"
+VERSION = "[updater] by Jens Heine <binbash@gmx.net> version: 2023.12.16"
+
+
+def os_is_windows() -> bool:
+    # windows
+    if os.name == 'nt':
+        return True
+    # for mac and linux os.name is posix
+    else:
+        return False
 
 
 def main():
@@ -68,7 +77,10 @@ def main():
     print("Starting p...")
     # subprocess.Popen(old_filename, shell=True)
     time.sleep(3)
-    os.startfile(old_filename)
+    if os_is_windows():
+        os.startfile(old_filename)
+    else:
+        print("Please start p again.")
     # subprocess.Popen([old_filename + " -D " + absolute_filename])
     print("Exiting updater")
     sys.exit(0)

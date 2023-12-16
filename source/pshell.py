@@ -1719,22 +1719,30 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 req = requests.get(download_url)
                 open(download_p_filename, "wb").write(req.content)
                 print("Download ready.")
-                if not os.path.exists(p_updater):
-                    print("updater executable not found.")
-                    print("Downloading it...")
-                    req = requests.get(p_updater_download_url)
-                    open(p_updater, "wb").write(req.content)
-                    print("Download ready.")
-                    # continue
 
-                print("Starting updater: " + p_updater + "...")
-                time.sleep(2)
-                # os.startfile(p_updater + " -D " + p_database.database_filename + " -o " + p_filename +
-                #              " -n " + download_p_filename)
-                # os.startfile(p_updater, " -D " + p_database.database_filename + " -o " + p_filename +
-                #             " -n " + download_p_filename)
-                os.startfile(p_updater)
-                sys.exit(0)
+                if os_is_windows():
+                    if not os.path.exists(p_updater):
+                        print("updater executable not found.")
+                        print("Downloading it...")
+                        req = requests.get(p_updater_download_url)
+                        open(p_updater, "wb").write(req.content)
+                        print("Download ready.")
+                        # continue
+
+                    print("Starting updater: " + p_updater + "...")
+                    time.sleep(2)
+                    # os.startfile(p_updater + " -D " + p_database.database_filename + " -o " + p_filename +
+                    #              " -n " + download_p_filename)
+                    # os.startfile(p_updater, " -D " + p_database.database_filename + " -o " + p_filename +
+                    #             " -n " + download_p_filename)
+                    os.startfile(p_updater)
+                    sys.exit(0)
+                else:
+                    print("Renaming downloaded file " + p.DOWNLOAD_P_UPDATE_FILENAME_LINUX + " to " +
+                          p.P_FILENAME_LINUX)
+                    os.rename(p.DOWNLOAD_P_UPDATE_FILENAME_LINUX, p.P_FILENAME_LINUX)
+                    print("Please start p again.")
+                    sys.exit(0)
             except Exception as ex:
                 print("Error updating: " + str(ex.with_traceback()))
             continue
