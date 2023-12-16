@@ -1747,6 +1747,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Renaming downloaded file " + p.DOWNLOAD_P_UPDATE_FILENAME_LINUX + " to " +
                           p.P_FILENAME_LINUX)
                     os.rename(p.DOWNLOAD_P_UPDATE_FILENAME_LINUX, p.P_FILENAME_LINUX)
+                    print("Making p binary executable...")
+                    os.system("chmod +x " + p.P_FILENAME_LINUX)
                     print("Please start p again.")
                     sys.exit(0)
             except Exception as ex:
