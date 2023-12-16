@@ -11,6 +11,7 @@ import sys
 import textwrap
 import time
 import uuid
+import wget
 
 import pyperclip3
 import requests
@@ -1716,16 +1717,18 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     p_updater = p.P_UPDATER_FILENAME_LINUX
                 print("Downloading latest p binary to: " + download_p_filename)
                 print("Please wait, this can take a while...")
-                req = requests.get(download_url)
-                open(download_p_filename, "wb").write(req.content)
+                # req = requests.get(download_url)
+                # open(download_p_filename, "wb").write(req.content)
+                wget.download(download_url, out=download_p_filename)
                 print("Download ready.")
 
                 if os_is_windows():
                     if not os.path.exists(p_updater):
                         print("updater executable not found.")
                         print("Downloading it...")
-                        req = requests.get(p_updater_download_url)
-                        open(p_updater, "wb").write(req.content)
+                        # req = requests.get(p_updater_download_url)
+                        # open(p_updater, "wb").write(req.content)
+                        wget.download(p_updater_download_url, out=p_updater)
                         print("Download ready.")
                         # continue
 
