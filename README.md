@@ -94,7 +94,7 @@ Just make shure to encrypt the account after this by changing the password again
 
 To use the copy function in p (to copy passwords to the clipboard) you need to install python3-pyperclip and xclip.
 ```
-apt-get install python3-pyperclip xclip
+sudo apt-get install python3-pyperclip xclip
 ```
 
 ### Help
