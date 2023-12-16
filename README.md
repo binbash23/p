@@ -92,7 +92,10 @@ Just make shure to encrypt the account after this by changing the password again
 
 ### Copy&Paste with Ubuntu
 
-To use the copy function in p (to copy passwords to the clipboard) you need to install python3-pyperclip.
+To use the copy function in p (to copy passwords to the clipboard) you need to install python3-pyperclip and xclip.
+```
+apt-get install python3-pyperclip xclip
+```
 
 ### Help
 
