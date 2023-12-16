@@ -88,6 +88,7 @@ SHELL_COMMANDS = [
     ShellCommand("7", "7", "Alias. This alias can be set with the alias command."),
     ShellCommand("8", "8", "Alias. This alias can be set with the alias command."),
     ShellCommand("9", "9", "Alias. This alias can be set with the alias command."),
+    ShellCommand("10", "10", "Alias. This alias can be set with the alias command."),
     ShellCommand("add", "add", "Add a new account."),
     ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
                  "programmable command. Possible alias names are the numbers from 0 to 9.\nTo set the " +
@@ -331,11 +332,7 @@ def expand_string_2_shell_command(string: str) -> ShellCommand:
     tokens = string.split()
     first_token = tokens[0]
     for shell_command in SHELL_COMMANDS:
-        # print("x" + first_token + "x in x" + shell_command.command + "x")
-        # if first_token.lower() in shell_command.command.lower():
         if shell_command.command.startswith(first_token):
-            # print("xx-" + str(string[len(tokens[0]) + 1:len(string)]) + "-")
-            # print("--" + str(len(tokens)))
             if len(tokens) == 1:
                 shell_command.arguments = [tokens[0]]
             else:
@@ -597,14 +594,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # and proceed parsing the command...:
 
         # check if the command is an alias. then the alias must be replaced with the stored command
-        if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
+        if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             shell_command = expand_string_2_shell_command(alias_command)
             current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
             # shell_history_array.append(current_shell_history_entry)
             p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
         if shell_command is None:
-            print("Error: Alias is not set. Use \"help alias\" for more information.")
+            print("Error: Alias is not set or aliased command is unknown. Use \"help alias\" for more information.")
             continue
 
         # continue with command processing
@@ -632,10 +629,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:  # 2 arguments
                 alias_argument_list = shell_command.arguments[1].split(maxsplit=1)
                 current_alias = alias_argument_list[0]
-                if current_alias not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
+                if current_alias not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
                     print("Error: Only aliases from 0..9 are allowed.")
                     continue
                 else:
+                    print("current alias: " + str(current_alias))
                     if len(alias_argument_list) == 1:
                         command = p_database.get_alias_command_decrypted(current_alias)
                         print(command)

@@ -1143,7 +1143,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select alias, command from alias order by 1"
+            sqlstring = "select alias, command from alias order by cast(alias as int)"
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             for row in result:
@@ -1163,8 +1163,11 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select command from alias where alias = ?"
-            sqlresult = cursor.execute(sqlstring, alias)
+            sqlstring = "select command from alias where alias = " + alias
+            # sqlstring = "select command from alias where alias = ?"
+            # print("alias_>" + alias)
+            # sqlresult = cursor.execute(sqlstring, (alias))
+            sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchone()
             if result is None:
                 return alias_command
@@ -1173,6 +1176,7 @@ class PDatabase:
             alias_command = decrypted_command
         except Exception as e:
             print("Error getting alias from database.")
+            print(str(e))
             return alias_command
         finally:
             database_connection.close()
@@ -1186,8 +1190,10 @@ class PDatabase:
             cursor = database_connection.cursor()
             encrypted_command = self.encrypt_string_if_password_is_present(command)
             if encrypted_command == "":
-                sqlstring = "delete from alias where alias = ?"
-                cursor.execute(sqlstring, alias)
+                # sqlstring = "delete from alias where alias = ?"
+                # cursor.execute(sqlstring, alias)
+                sqlstring = "delete from alias where alias = " + alias
+                cursor.execute(sqlstring)
             else:
                 sqlstring = "insert or replace into alias (alias, command) values (?, ?)"
                 cursor.execute(sqlstring, (alias, encrypted_command))
