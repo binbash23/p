@@ -18,4 +18,4 @@ getpass
 webdav4
 pysftp
 
-To use copy&paste in ubuntu you need to install "python3-pyperclip"
+To use copy&paste in ubuntu you need to install "python3-pyperclip" and "xclip"
