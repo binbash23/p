@@ -62,7 +62,7 @@ class ShellCommand:
         print()
         print("DESCRIPTION")
         formatted_description = []
-        for line in self.description.splitlines():
+        for line in self.description.splitlines(keepends=True):
             for sub_line in textwrap.wrap(line,
                                           width=78,
                                           initial_indent=" ",
@@ -203,14 +203,19 @@ SHELL_COMMANDS = [
     ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile <UUID>",
                  "Set a default merge target file in the configuration table" +
                  "This filename will be used when merge2file is called without a target filename."),
-    ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the " +
-                 "password of the account found to the clipboard."),
-    ShellCommand("sca", "sca <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy one" +
-                 " after another the URL, loginname and password of the account found to the clipboard."),
-    ShellCommand("scl", "scl <SEARCHSTRING>", "Search for SEARCHSTRING in account columns and copy the loginname" +
-                 " of the account found to the clipboard."),
-    ShellCommand("scu", "scu <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns and copy the URL of the" +
-                 " account found to the clipboard."),
+    ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
+                 "If one or more account(s) match the SEARCHSTRING, the password of the first account will be copied " +
+                 "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
+    ShellCommand("sca <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
+                 "If one or more account(s) match the SEARCHSTRING, the URL, loginname and password of the first " +
+                 "account will be copied to the clipboard one after another.\nNote: Linux users need to install " +
+                 "pyperclip3 and xclip to use the copy/paste feature!"),
+    ShellCommand("scl <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
+                 "If one or more account(s) match the SEARCHSTRING, the loginname of the first account will be copied " +
+                 "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
+    ShellCommand("scu <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
+                 "If one or more account(s) match the SEARCHSTRING, the URL of the first account will be copied " +
+                 "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
     ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
                  "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
                  " which looks kinda cool :) But if you think it's anoying, disable it (created for ben)."),
