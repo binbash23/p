@@ -2,20 +2,27 @@
 20221224 jens heine p
 
 
-dependencies for p. You have to install the following modules to run p.py:
+Python module dependencies for password manager p.
+--------------------------------------------------
+
+=> Note: If you use the p executable you need no modules!
+
+You have to install the following modules to run p.py:
 
 termcolor
 colorama
-#clipboard
 pyperclip3
 cryptography
 progressbar
 dropbox
-#pandas
 inputimeout
 getpass
-#stdiomask
 webdav4
 pysftp
 
+If you use Ubuntu/Linux and want to use the clipboard features:
+---------------------------------------------------------------
+
 To use copy&paste in ubuntu you need to install "python3-pyperclip" and "xclip"
+> sudo apt-get install python3-pyperclip xclip
+
