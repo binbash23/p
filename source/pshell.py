@@ -1702,6 +1702,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "updatep":
+            print("Staring update process.")
+            print("Please make sure that you are in the directory where the p binary is located.")
+            input("Press enter to start...")
             try:
                 if os_is_windows():
                     download_url = p.URL_DOWNLOAD_BINARY_P_WIN
