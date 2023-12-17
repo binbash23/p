@@ -14,7 +14,7 @@ import uuid
 import wget
 
 import pyperclip3
-import requests
+# import requests
 from inputimeout import inputimeout, TimeoutOccurred
 from termcolor import colored
 
@@ -1749,6 +1749,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     os.startfile(p_updater)
                     sys.exit(0)
                 else:
+                    # This is a linux system
                     print("Renaming downloaded file " + p.DOWNLOAD_P_UPDATE_FILENAME_LINUX + " to " +
                           p.P_FILENAME_LINUX)
                     os.rename(p.DOWNLOAD_P_UPDATE_FILENAME_LINUX, p.P_FILENAME_LINUX)

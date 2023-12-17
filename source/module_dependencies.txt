@@ -19,6 +19,7 @@ inputimeout
 getpass
 webdav4
 pysftp
+wget
 
 If you use Ubuntu/Linux and want to use the clipboard features:
 ---------------------------------------------------------------
