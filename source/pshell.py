@@ -14,7 +14,6 @@ import uuid
 import wget
 
 import pyperclip3
-# import requests
 from inputimeout import inputimeout, TimeoutOccurred
 from termcolor import colored
 
@@ -69,7 +68,6 @@ class ShellCommand:
                                           initial_indent=" ",
                                           subsequent_indent=" "):
                 formatted_description.append(sub_line)
-            # formatted_description.append("\n")
         for row in formatted_description:
             print(row)
         print()
@@ -366,8 +364,6 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_PRINT_SLOW_ENABLED)
     if config_value is not None and (config_value == "True" or config_value == "False"):
-        # pshell_print_slow_enabled = parse_bool(config_value)
-        # print_slow.set_delay_enabled(pshell_print_slow_enabled)
         print_slow.set_delay_enabled(parse_bool(config_value))
 
     global pshell_max_idle_minutes_timeout
@@ -850,11 +846,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "helpverbose":
             print()
             for sc in SHELL_COMMANDS:
-                print(sc)
+                # print(sc)
+                sc.print_manual()
                 print()
             continue
         if shell_command.command == "history":
-            # print_shell_command_history(shell_history_array)
             print_shell_command_history(p_database.get_shell_history_entries_decrypted())
             continue
         if shell_command.command == "idletime":
@@ -864,7 +860,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 idle_time = round(idle_time / 60)
                 idle_time_str = str(idle_time) + " min"
-            # print("Idle time: " + str(round(time_diff.total_seconds())) + " s")
             print("Idle time: " + idle_time_str)
             continue
 
@@ -879,7 +874,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Account with UUID: " + uuid_to_invalidate + " has been invalidated.")
             else:
                 print("UUID is empty.")
-            # p_database.invalidate_account(shell_command.arguments[1].strip())
             continue
 
         if shell_command.command == "list":
@@ -977,7 +971,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
-            # print("Pshell locked.")
             continue
 
         if shell_command.command == "maxhistorysize":

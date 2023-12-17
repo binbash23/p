@@ -9,8 +9,6 @@ from webdav4.client import Client
 from connector_interface import ConnectorInterface
 
 
-# def webdav_file_exists()-> bool:
-
 class WebdavConnector(ConnectorInterface):
     _dav_client = None
     _dav_login = None
@@ -25,7 +23,6 @@ class WebdavConnector(ConnectorInterface):
             self._dav_client = Client(dav_url)
         # check connection
         self._dav_client.ls(path="/")
-        #self.list_files("/")
 
     def __str__(self):
         to_string: str = "Webdav Connector attributes: "
@@ -39,7 +36,6 @@ class WebdavConnector(ConnectorInterface):
 
     def list_files(self, remote_path) -> []:
         try:
-            # files = self._dav_client.ls(path=remote_path)
             return self._dav_client.ls(path=remote_path)
         except Exception as e:
             print("Error: " + str(e))
@@ -76,15 +72,10 @@ def main():
     webdav_connector = WebdavConnector(dav_url="xyz", dav_login="xyz",
                                        dav_password="xyz")
     print("Connector is:\n" + str(webdav_connector))
-    # files = webdav_connector._dav_client.ls("\\p")
     files = webdav_connector.list_files("\\p\\")
     for file in files:
         print(str(file))
-    # webdav_connector._dav_client.exists("/")
     print("uploading...")
-    # webdav_connector.upload_file("/home/melvin/tmp/p", "\\p\\p")
-    # print("downloading...")
-    # webdav_connector.download_file("/p/p", "/home/melvin/tmp/p")
 
     print("uploading...")
     webdav_connector.delete_file("\\p\\p")

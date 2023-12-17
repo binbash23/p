@@ -92,11 +92,6 @@ def edit(p_database: PDatabase, edit_uuid: str):
         if new_loginname == "":
             new_loginname = old_loginname
 
-        # print("Password (old)  : " + old_password)
-        # new_password = input("Password (new)  : ")
-        # if new_password == "":
-        #     new_password = old_password
-
         if p_database.shadow_passwords:
             print("Password (old)  : ****")
             change_shadowed_password = input("Do you want to change the password (y/[n]) : ")
@@ -132,8 +127,6 @@ def edit(p_database: PDatabase, edit_uuid: str):
 
     new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password,
                           new_type.strip())
-    # new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password.strip(),
-    #                       new_type.strip())
     if accounts_are_equal(account, new_account):
         print("Nothing changed.")
         return
@@ -163,9 +156,6 @@ def start_dropbox_configuration():
     print("First register a new app in your dropbox account.")
     input("Press enter and a webbrowser will open the dropbox developer site (login with your dropbox account)...")
     webbrowser.open("https://www.dropbox.com/developers")
-    # webbrowser.open("https://www.dropbox.com/developers/reference/getting-started")
-    # https: // www.dropbox.com / developers
-    # or https: // www.dropbox.com / developers / apps?_tk = pilot_lp & _ad = topbar4 & _camp = myapps
 
     print("Now you have to change the permissions for the app to read/write files and folders (permissions tab).")
     print("You have to check:")
@@ -421,7 +411,6 @@ def main():
                                              dropbox_connection_credentials[1],
                                              dropbox_connection_credentials[2])
         p_database.merge_database_with_connector(dropbox_connector)
-        # merge_with_dropbox(p_database)
         sys.exit(0)
 
     if options.add_account_cli:

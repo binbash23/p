@@ -499,11 +499,9 @@ def set_attribute_value_in_configuration_table(_database_filename, _attribute_na
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
             cursor.execute(sqlstring, [_attribute_name, ""])
             database_connection.commit()
-            # print("--done")
         sqlstring = "update configuration set value=? where attribute=?"
         cursor.execute(sqlstring, [_value, _attribute_name])
         database_connection.commit()
-        # print("--done2")
     except Exception:
         raise
     finally:
@@ -546,7 +544,6 @@ def get_attribute_value_from_configuration_table(_database_filename, _attribute_
         sqlresult = cursor.execute(sqlstring, [_attribute_name])
         value = sqlresult.fetchone()
         if value is None:
-            # raise ValueError("Attribute: \"" + _attribute_name + "\" does not exist")
             return ""
         value = value[0]
     except Exception:
@@ -598,7 +595,6 @@ def get_account_count_valid(database_filename):
 
 
 def get_database_creation_date(database_filename):
-    # count = 0
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -766,7 +762,6 @@ def print_database_statistics(database_filename):
     if not os.path.exists(database_filename):
         print(colored("Can not show database statistics because database file does not exist.", "red"))
         return
-    # print()
     account_count = get_account_count(database_filename)
     account_count_valid = get_account_count_valid(database_filename)
     account_count_invalid = get_account_count_invalid(database_filename)
@@ -890,8 +885,6 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
 
 
 def create_fernet(salt, password, iteration_count: int) -> Fernet:
-    # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=232323)
-    # _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
     _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=iteration_count)
     key = base64.urlsafe_b64encode(_hash.derive(password))
     f = Fernet(key)
@@ -905,7 +898,6 @@ def color_search_string(text_string, search_string, color):
     if search_string is None or search_string == "":
         return text_string
     list_matching_indices = [m.start() for m in finditer(search_string, text_string, flags=IGNORECASE)]
-    # print(list_matching_indices)
     if len(list_matching_indices) == 0:
         return text_string
     colored_string = text_string[0:list_matching_indices[0]]
