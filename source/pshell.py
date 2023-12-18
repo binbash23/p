@@ -191,6 +191,7 @@ SHELL_COMMANDS = [
                  "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
+    ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp."),
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
@@ -1158,7 +1159,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 latest_found_account = account_array[len(account_array) - 1]
             continue
 
-        if shell_command.command == "searchhelp":
+        if shell_command.command == "searchhelp" or shell_command.command == "she":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
