@@ -73,6 +73,33 @@ class ShellCommand:
         print()
 
 
+    def generate_git_manual(self) -> str:
+        t = ""
+        t = t + "# " + self.__escape_for_git_doc(self.command) + "\n\n"
+        t = t + "**SYNOPSIS**" + "\n\n"
+        t = t + " " + self.__escape_for_git_doc(self.synopsis) + "\n\n"
+        t = t + "**DESCRIPTION**" + "\n\n"
+        formatted_description = []
+        for line in self.description.splitlines():
+            for sub_line in textwrap.wrap(line,
+                                          width=78,
+                                          initial_indent=" ",
+                                          subsequent_indent=" "):
+                formatted_description.append(sub_line)
+        for row in formatted_description:
+            t = t + self.__escape_for_git_doc(row) + "\n\n"
+        t = t + "\n\n"
+        return t
+
+    def __escape_for_git_doc(self, string: str) -> str:
+        if string.startswith("#"):
+            string = "\\" + string
+        string = string.replace("<", "\<")
+        string = string.replace(">", "\>")
+        return string
+
+
+
 SHELL_COMMANDS = [
     ShellCommand("/", "/ <SEARCHSTRING>", "/ is an alias to the search command. For " +
                  "more info see the help for the search command. It is also possible to search like this: " +
@@ -135,6 +162,8 @@ SHELL_COMMANDS = [
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
                  "to execute the command without the space before the slash like '!dir' for example."),
     ShellCommand("exit", "exit", "Quit pshell."),
+    ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
+    ShellCommand("generategithelp", "generategithelp", "Generate full help documentation in git style"),
     ShellCommand("generatenewdatabaseuuid", "generatenewdatabaseuuid", "Generate a " +
                  "new UUID for the current database. This is useful if you have copied the database file and want " +
                  "to use it as a new instance. You might also set a new database name. This is just for identifying " +
@@ -143,7 +172,6 @@ SHELL_COMMANDS = [
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
     ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
-    ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
                  "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
@@ -812,6 +840,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Deleted.")
             else:
                 print("Canceled")
+            continue
+
+        if shell_command.command == "generategithelp":
+            print("Saving git formatted full documentation to: " + p.GIT_FULL_DOCUMENTATION_FILENAME)
+            lines = ""
+            for sc in SHELL_COMMANDS:
+                lines = lines + sc.generate_git_manual()
+            try:
+                doc_file = open(p.GIT_FULL_DOCUMENTATION_FILENAME, "w")
+                doc_file.write(lines)
+                doc_file.close()
+            except Exception as e:
+                print("Error generating git documentation: " + str(e))
             continue
 
         if shell_command.command == "help":

@@ -30,6 +30,7 @@ P_FILENAME_WIN = "p.exe"
 P_FILENAME_LINUX = "p"
 P_UPDATER_FILENAME_WIN = "updater.exe"
 P_UPDATER_FILENAME_LINUX = "updater"
+GIT_FULL_DOCUMENTATION_FILENAME = "Full-help-documentation.md"
 
 
 def add(p_database: PDatabase):
