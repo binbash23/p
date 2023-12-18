@@ -1696,7 +1696,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "updatep":
-            print("Staring update process.")
+            print("Starting update process.")
             print("Please make sure that you are in the directory where the p binary is located.")
             print("Your current directory is: " + os.getcwd())
             try:
