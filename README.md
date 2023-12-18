@@ -25,6 +25,9 @@ little it.
 keep coding,
 Jens
 
+### Use the wiki
+Use the [wiki](https://github.com/binbash23/p/wiki) for more help.
+
 ### Binaries/executeable program:
 You can use the python code or the binaries that I have compiled to the following folders.
 
