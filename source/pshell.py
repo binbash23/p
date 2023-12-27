@@ -72,7 +72,6 @@ class ShellCommand:
             print(row)
         print()
 
-
     def generate_git_manual(self) -> str:
         t = ""
         t = t + "# " + self.__escape_for_git_doc(self.command) + "\n\n"
@@ -97,7 +96,6 @@ class ShellCommand:
         string = string.replace("<", "\<")
         string = string.replace(">", "\>")
         return string
-
 
 
 SHELL_COMMANDS = [
@@ -157,6 +155,9 @@ SHELL_COMMANDS = [
                  "in the deleted_accounts table."),
     ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
                  "configured dropbox account."),
+    ShellCommand("deletesshdatabase", "deletesshdatabase [<UUID>]", "Delete database file in the ssh " +
+                 " remote folder with the same name as the database that is currently opened. If no UUID " +
+                 "is given, the configuration table will be searched for the default ssh account."),
     ShellCommand("deletewebdavdatabase", "deletewebdavdatabase [<UUID>]", "Delete database file in the webdav " +
                  " remote folder with the same name as the database that is currently opened. If no UUID " +
                  "is given, the configuration table will be searched for the default webdav account."),
@@ -502,7 +503,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
-    # while True:
+        # while True:
         prompt_string = get_prompt_string(p_database)
         last_activity_date = datetime.datetime.now()
 
@@ -827,6 +828,30 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 e.with_traceback()
             continue
 
+        if shell_command.command == "deletesshdatabase":
+            if len(shell_command.arguments) == 1:
+                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                if ssh_account_uuid == "":
+                    print("No default ssh account UUID found in configuration table.")
+                    continue
+                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    ssh_account_uuid = shell_command.arguments[1].strip()
+                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+                else:
+                    print("Too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if ssh_account is None:
+                print("SSH account could not be found: " + str(ssh_account_uuid))
+                continue
+            connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
+            p_database.delete_database_in_connector(connector)
+            continue
+
         if shell_command.command == "deletewebdavdatabase":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
@@ -841,7 +866,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     webdav_account_uuid = shell_command.arguments[1].strip()
                     webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
                 else:
-                    print("too many arguments.")
+                    print("Too many arguments.")
                     print(shell_command.synopsis)
                     continue
             if webdav_account is None:
@@ -849,7 +874,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                          webdav_account.password)
-            connector.delete_file(p_database.get_database_filename_without_path())
+            # connector.delete_file(p_database.get_database_filename_without_path())
             p_database.delete_database_in_connector(connector)
             continue
 
