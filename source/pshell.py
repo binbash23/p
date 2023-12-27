@@ -131,6 +131,11 @@ SHELL_COMMANDS = [
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
+    ShellCommand("changesshdbpassword", "changesshdbpassword", "Change password of the ssh " +
+                 "database.\nThe database will be downloaded from the ssh account and you can enter a new " +
+                 "password. After re-encrypting the ssh version of the database, the database will be " +
+                 "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
+                 " ssh UUID from the configuration table will be taken."),
     ShellCommand("changewebdavdbpassword", "changewebdavdbpassword", "Change password of the webdav " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
@@ -726,6 +731,30 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # p.change_dropbox_database_password(p_database)
             continue
 
+        if shell_command.command == "changesshdbpassword":
+            if len(shell_command.arguments) == 1:
+                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                if ssh_account_uuid == "":
+                    print("No default ssh account UUID found in configuration table.")
+                    continue
+                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    ssh_account_uuid = shell_command.arguments[1].strip()
+                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+                else:
+                    print("Too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if ssh_account is None:
+                print("SSH account could not be found: " + str(ssh_account_uuid))
+                continue
+            connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
+            p_database.change_database_password_from_connector(connector)
+            continue
+
         if shell_command.command == "changewebdavdbpassword":
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
@@ -740,7 +769,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     webdav_account_uuid = shell_command.arguments[1].strip()
                     webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
                 else:
-                    print("too many arguments.")
+                    print("Too many arguments.")
                     print(shell_command.synopsis)
                     continue
             if webdav_account is None:
