@@ -119,9 +119,12 @@ SHELL_COMMANDS = [
     ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
                  "programmable command. Possible alias names are the numbers from 0 to 9.\nTo set the " +
                  "command 'sc email' on the alias 1 you have to type: 'alias 1 sc Email'. After that you" +
-                 " can run the command by just typing 1.\nTo see all aliases just type 'alias'. If you want " +
+                 " can run the command by just typing '1'.\nTo see all aliases just type 'alias'. If you want " +
                  "to see the command programmed on the alias 3 for example, type 'alias 3'.\nTo unset an alias, " +
-                 "for example the 3, type 'alias 3 -'."),
+                 "for example the 3, type 'alias 3 -'.\nIt is possible to combine multiple commands in one alias " +
+                 "with separating the commands by a semicolon.\nExample: 'alias 1 status;version'\nThis will execute " +
+                 "the command 'status' and after that the command 'version' when you type '1' on the " +
+                 "command line."),
     ShellCommand("cc", "cc", "Clear clipboard. Remove anything from clipboard."),
     ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
@@ -301,6 +304,7 @@ pshell_max_history_size = DEFAULT_PSHELL_MAX_HISTORY_SIZE
 show_unmerged_changes_warning_on_startup = True
 show_status_on_startup = True
 pshell_print_slow_enabled = True
+PSHELL_COMMAND_DELIMITER = ";"
 
 
 # Try to find the uuid for a given searchstring. If there are multiple accounts that match,
@@ -481,10 +485,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
     global show_status_on_startup
     load_pshell_configuration(p_database)
 
-    # time.sleep(1)
     clear_console()
-    # prompt_string = "> "
     user_input = ""
+    user_input_list = []
     latest_found_account = None
 
     if show_status_on_startup is True:
@@ -499,25 +502,38 @@ def start_pshell(p_database: pdatabase.PDatabase):
     shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
+    # while True:
         prompt_string = get_prompt_string(p_database)
         last_activity_date = datetime.datetime.now()
-        if not manual_locked:
+
+        # process pending commands in user_input_list if > 0 or read new input from keyboard into user_input_list
+        # if not manual_locked:
+        if not manual_locked and len(user_input_list) == 0:
             try:
-                # user_input = input(prompt_string)
                 # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
-                    user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    # user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    # user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
                 else:
-                    user_input = input(prompt_string)
-                if user_input.strip() != "":
-                    current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
-                    # shell_history_array.append(current_shell_history_entry)
+                    # user_input = input(prompt_string)
+                    input_line = input(prompt_string)
+                    # user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
+                # if user_input.strip() != "":
+                #     current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
+                user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
             except KeyboardInterrupt:
-                # return
                 print()
                 continue
             except TimeoutOccurred:
                 pass
+
+        if len(user_input_list) > 0:
+            user_input = user_input_list.pop(0).strip()
+
+        if user_input != "":
+            current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
+
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
         if manual_locked or (int(pshell_max_idle_minutes_timeout) != 0 and
@@ -540,7 +556,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
                     print("Error: password is wrong.")
                     time.sleep(2)
-                    # clear_console()
                 else:
                     # password is ok
                     clear_console()
@@ -549,13 +564,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
                         manual_locked = False
                     user_input = ""
                     break
+
         # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
-        # so I seperate / and ! here from the rest
+        # so I separate / and ! here from the rest
         if user_input.startswith("/"):
             user_input = user_input.replace("/", "/ ", 1)
         if user_input.startswith("!"):
             user_input = user_input.replace("!", "! ", 1)
+
+        # Create shell_command object from user_input
         shell_command = expand_string_2_shell_command(user_input)
+
         # check for empty string
         if shell_command is None:
             if user_input == "":
@@ -565,6 +584,18 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Unknown command '" + user_input + "'")
                 print("Enter 'help' for command help")
             continue
+
+        # check if the (next) command is the alias command and there are more commands in the user_input_list.
+        # The alias command has to be used with 2 arguments for our special case here: alias NO CMD
+        # Then the rest of the user_input_list is used as the argument for the alias command.
+        # This is necessary to enable i.e. : alias 1 c1;c2;c3
+        if (shell_command.command == "alias"
+                and len(user_input_list) > 0
+                and len(shell_command.arguments) > 1):
+            while len(user_input_list) > 0:
+                shell_command.arguments[1] = (shell_command.arguments[1] + PSHELL_COMMAND_DELIMITER +
+                                              user_input_list.pop(0))
+
         #
         # proceed possible commands
         #
@@ -619,16 +650,23 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
         # and proceed parsing the command...:
 
-        # check if the command is an alias. then the alias must be replaced with the stored command
+        # check if the command is an alias. then the alias must be replaced with the stored command(s)
         if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
+            # Read storde command(s) from database and populate user_input_list
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
-            shell_command = expand_string_2_shell_command(alias_command)
-            current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
-            # shell_history_array.append(current_shell_history_entry)
-            p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
-        if shell_command is None:
-            print("Error: Alias is not set or aliased command is unknown. Use \"help alias\" for more information.")
+            if alias_command == "":
+                print("Error: Alias " + shell_command.command + " is not set")
+            else:
+                user_input_list = alias_command.split(PSHELL_COMMAND_DELIMITER)
             continue
+
+            # shell_command = expand_string_2_shell_command(alias_command)
+            # current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
+            # p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
+
+        # if shell_command is None:
+        #     print("Error: Alias is not set or aliased command is unknown. Use \"help alias\" for more information.")
+        #     continue
 
         # continue with command processing
 
@@ -639,6 +677,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             os.system(shell_command.arguments[1])
             continue
+
         if shell_command.command == "add":
             p.add(p_database)
             continue
