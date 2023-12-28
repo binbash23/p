@@ -2277,7 +2277,9 @@ class PDatabase:
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
             return -1
-        print("Using merge database: " + merge_database_filename + " " + get_database_name(merge_database_filename))
+        # print("Using merge database: " + merge_database_filename + " " + get_database_name(merge_database_filename))
+        print("Using merge database: " + merge_database_filename + ": " +
+              get_database_identification_string(merge_database_filename))
         # Check remote db for password
         print("Checking merge database password...")
         if not self.is_valid_database_password(merge_database_filename, self.database_password):
