@@ -993,9 +993,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 sc.print_manual()
                 print()
             continue
+
         if shell_command.command == "history":
             print_shell_command_history(p_database.get_shell_history_entries_decrypted())
             continue
+
         if shell_command.command == "idletime":
             idle_time = round(time_diff.total_seconds())
             if idle_time < 120:

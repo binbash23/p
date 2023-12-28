@@ -1151,6 +1151,7 @@ class PDatabase:
             return shell_history_array
         finally:
             database_connection.close()
+        shell_history_array.reverse()
         return shell_history_array
 
     def get_alias_commands_decrypted(self) -> [str]:
