@@ -1855,7 +1855,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Please wait, this can take a while...")
                 # req = requests.get(download_url)
                 # open(download_p_filename, "wb").write(req.content)
-                wget.download(download_url, out=download_p_filename)
+                # wget.download(download_url, out=download_p_filename, bar=wget.bar_thermometer)
+                try:
+                    wget.download(download_url, out=download_p_filename)
+                except KeyboardInterrupt:
+                    print()
+                    print("Download canceled.")
+                    continue
                 print("Download ready.")
 
                 if os_is_windows():
@@ -1864,7 +1870,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                         print("Downloading it...")
                         # req = requests.get(p_updater_download_url)
                         # open(p_updater, "wb").write(req.content)
-                        wget.download(p_updater_download_url, out=p_updater)
+                        try:
+                            wget.download(p_updater_download_url, out=p_updater)
+                        except KeyboardInterrupt:
+                            print()
+                            print("Download canceled.")
+                            continue
                         print("Download ready.")
                         # continue
 
