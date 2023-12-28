@@ -566,15 +566,22 @@ def is_encrypted_database(database_filename):
         return True
 
 
-def get_database_uuid(database_filename):
+def get_database_uuid(database_filename) -> str:
     value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_UUID)
     return value
 
 
-def get_database_name(database_filename):
+def get_database_name(database_filename) -> str:
     value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
     return value
 
+def get_database_identification_string(database_filename) -> str:
+    id_string = ""
+    database_name = get_database_name(database_filename)
+    if database_name is not None and database_name != "":
+        id_string = database_name
+    id_string = id_string + "/" + get_database_uuid(database_filename)
+    return id_string
 
 def get_account_count_valid(database_filename):
     count = 0
@@ -593,6 +600,22 @@ def get_account_count_valid(database_filename):
         database_connection.close()
     return count
 
+def add_merge_history_entry(database_filename, merge_date: str, master_database: str, slave_database: str,
+                            connector_type="unknown"):
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = "select value from configuration where attribute = 'DATABASE_CREATED'"
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not get database creation date.")
+        created_date = result[0]
+    except Exception as e:
+        raise
+    finally:
+        database_connection.close()
+    return created_date
 
 def get_database_creation_date(database_filename):
     try:
@@ -2263,7 +2286,10 @@ class PDatabase:
         # Set some attribute values in configuration table and create some attributes if not exist
         set_attribute_value_in_configuration_table(self.database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE,
-                                                   merge_database_filename)
+                                                   get_database_identification_string(merge_database_filename))
+        # set_attribute_value_in_configuration_table(self.database_filename,
+        #                                            CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE,
+        #                                            merge_database_filename)
         set_attribute_value_in_configuration_table(self.database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE,
                                                    "")
