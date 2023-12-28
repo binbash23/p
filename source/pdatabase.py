@@ -1393,6 +1393,8 @@ class PDatabase:
                   "* in " + str(
                 get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
             # print("Found " + str(len(result)) + " result(s):")
+            if len(result) > 0:
+                print()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1409,7 +1411,7 @@ class PDatabase:
                         search_string_matches_account(search_string, decrypted_account):
                     results_found += 1
                     try:
-                        if results_found < 4:
+                        if results_found < 2:
                             self.print_formatted_account_search_string_colored(decrypted_account, search_string,
                                                                                print_slowly=True)
                         else:

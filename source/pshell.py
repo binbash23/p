@@ -367,6 +367,14 @@ def get_prompt_string(p_database: pdatabase.PDatabase) -> str:
 def expand_string_2_shell_command(string: str) -> ShellCommand:
     if string is None or string.strip() == "":
         return None
+
+    # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
+    # so I separate / and ! here from the rest
+    if string.startswith("/"):
+        string = string.replace("/", "/ ", 1)
+    if string.startswith("!"):
+        string = string.replace("!", "! ", 1)
+
     tokens = string.split()
     first_token = tokens[0]
     for shell_command in SHELL_COMMANDS:
@@ -571,12 +579,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = ""
                     break
 
-        # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
-        # so I separate / and ! here from the rest
-        if user_input.startswith("/"):
-            user_input = user_input.replace("/", "/ ", 1)
-        if user_input.startswith("!"):
-            user_input = user_input.replace("!", "! ", 1)
+        # # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
+        # # so I separate / and ! here from the rest
+        # if user_input.startswith("/"):
+        #     user_input = user_input.replace("/", "/ ", 1)
+        # if user_input.startswith("!"):
+        #     user_input = user_input.replace("!", "! ", 1)
 
         # Create shell_command object from user_input
         shell_command = expand_string_2_shell_command(user_input)
