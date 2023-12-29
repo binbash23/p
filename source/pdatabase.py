@@ -623,9 +623,9 @@ def append_merge_history(database_filename,
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
-        new_uuid = uuid.uuid4()
+        new_uuid = str(uuid.uuid4())
         execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        sqlstring = ("insert merge_history (uuid, execution_date, database_name_local, database_uuid_local, " +
+        sqlstring = ("insert into merge_history (uuid, execution_date, database_name_local, database_uuid_local, " +
                      "database_name_remote, database_uuid_remote, connector, connector_type) " +
                      "values (?, ?, ?, ?, ?, ?, ?, ?)")
         cursor.execute(sqlstring, (new_uuid, execution_date, database_name_local, database_uuid_local,
@@ -633,7 +633,7 @@ def append_merge_history(database_filename,
 
         database_connection.commit()
     except Exception as e:
-        print("Error writing merge history entry to database.")
+        print("Error writing merge history entry to database: " + str(e))
     finally:
         database_connection.close()
 
@@ -1344,6 +1344,7 @@ class PDatabase:
                 # print(str(row[i]))
                 print(str(row))
                 i += 1
+            database_connection.commit()
         except Exception as e:
             raise
         finally:
@@ -2577,6 +2578,14 @@ class PDatabase:
                                   self.get_database_filename_without_path())
             # "\\p\\" + self.get_database_filename_without_path())
             # os.path.join("p" + p_database.get_database_filename_without_path()))
+            append_merge_history(database_filename=self.database_filename,
+                                 database_uuid_local=get_database_uuid(self.database_filename),
+                                 database_name_local=get_database_name(self.database_filename),
+                                 database_uuid_remote=get_database_uuid(TEMP_MERGE_DATABASE_FILENAME),
+                                 database_name_remote=get_database_name(TEMP_MERGE_DATABASE_FILENAME),
+                                 connector=str(connector),
+                                 connector_type=connector.get_type()
+                                 )
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
             return
         print("Downloading database...")
@@ -2602,6 +2611,14 @@ class PDatabase:
 
         else:
             print("No changes in remote database. Skipping upload.")
+        append_merge_history(database_filename=self.database_filename,
+                             database_uuid_local=get_database_uuid(self.database_filename),
+                             database_name_local=get_database_name(self.database_filename),
+                             database_uuid_remote=get_database_uuid(TEMP_MERGE_DATABASE_FILENAME),
+                             database_name_remote=get_database_name(TEMP_MERGE_DATABASE_FILENAME),
+                             connector=str(connector),
+                             connector_type=connector.get_type()
+                             )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
     def get_dropbox_connection_credentials(self) -> []:

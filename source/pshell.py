@@ -1775,7 +1775,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("COMMAND is missing.")
                 print(shell_command.synopsis)
                 continue
-            print("->" + shell_command.arguments[1])
+            # print("->" + shell_command.arguments[1])
             print("Executing sql command: <" + shell_command.arguments[1] + ">")
             try:
                 p_database.execute_sql(shell_command.arguments[1])
