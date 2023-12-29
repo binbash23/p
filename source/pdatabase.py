@@ -13,6 +13,7 @@ import sqlite3
 import time
 import uuid
 from getpass import getpass
+import pandas as pd
 from re import IGNORECASE
 from re import finditer
 
@@ -598,20 +599,30 @@ def get_database_name(database_filename) -> str:
     return value
 
 
+# def print_merge_history(database_filename):
+#     try:
+#         database_connection = sqlite3.connect(database_filename)
+#         cursor = database_connection.cursor()
+#         sqlstring = "select * from merge_history"
+#         sqlresult = cursor.execute(sqlstring)
+#         result = sqlresult.fetchall()
+#         for row in result:
+#             print(row)
+#     except Exception as e:
+#         print("Error getting merge history entries from database.")
+#     finally:
+#         database_connection.close()
+
 def print_merge_history(database_filename):
     try:
         database_connection = sqlite3.connect(database_filename)
-        cursor = database_connection.cursor()
-        sqlstring = "select * from merge_history"
-        sqlresult = cursor.execute(sqlstring)
-        result = sqlresult.fetchall()
-        for row in result:
-            print(row)
+        df = pd.read_sql_query("SELECT * from merge_history", database_connection)
+        # Verify that result of SQL query is stored in the dataframe
+        print(df)
     except Exception as e:
-        print("Error getting merge history entries from database.")
+        print("Error getting merge history entries from database: " + str(e))
     finally:
         database_connection.close()
-
 
 def append_merge_history(database_filename,
                          database_uuid_local: str,

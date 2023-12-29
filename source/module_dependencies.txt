@@ -20,6 +20,7 @@ getpass
 webdav4
 pysftp
 wget
+pandas
 
 If you use Ubuntu/Linux and want to use the clipboard features:
 ---------------------------------------------------------------
