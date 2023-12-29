@@ -280,6 +280,7 @@ SHELL_COMMANDS = [
                  "downloads etc."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
+    ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
@@ -625,7 +626,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             redo_index = -1
             # when there is no index of the command history array given, use the latest one
             if len(shell_command.arguments) == 1:
-                redo_index = len(shell_history_array)
+                # redo_index = len(shell_history_array)
+                redo_index = 1
             else:
                 if shell_command.arguments[1].strip() == "?":
                     print_shell_command_history(shell_history_array)
@@ -1685,6 +1687,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
+        if shell_command.command == "showmergehistory":
+            pdatabase.print_merge_history(p_database.database_filename)
 
         if shell_command.command == "showstatusonstartup":
             # print(shell_command.arguments)

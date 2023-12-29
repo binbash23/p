@@ -286,6 +286,17 @@ CREATE TABLE if not exists "alias" (
     "alias" TEXT NOT NULL UNIQUE,
 	"command" TEXT
 );
+CREATE TABLE if not exists "merge_history" (
+    "uuid" TEXT NOT NULL UNIQUE,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "execution_date" TEXT,
+    "database_name_local" TEXT,
+    "database_uuid_local" TEXT NOT NULL,
+    "database_name_remote" TEXT,
+    "database_uuid_remote" TEXT NOT NULL,
+    "connector" TEXT,
+    "connector_type" TEXT
+);
 """
 SQL_CREATE_MERGE_DATABASE_SCHEMA = """
 -- main table with accounts
@@ -339,6 +350,17 @@ CREATE TABLE if not exists merge_database.shell_history (
 CREATE TABLE if not exists merge_database.alias (
     "alias" TEXT NOT NULL UNIQUE,
 	"command" TEXT
+);
+CREATE TABLE if not exists merge_database.merge_history (
+    "uuid" TEXT NOT NULL UNIQUE,
+    "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
+    "execution_date" TEXT,
+    "database_name_local" TEXT,
+    "database_uuid_local" TEXT NOT NULL,
+    "database_name_remote" TEXT,
+    "database_uuid_remote" TEXT NOT NULL,
+    "connector" TEXT,
+    "connector_type" TEXT
 );
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
@@ -575,6 +597,47 @@ def get_database_name(database_filename) -> str:
     value = get_attribute_value_from_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
     return value
 
+
+def print_merge_history(database_filename):
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = "select * from merge_history"
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchall()
+        for row in result:
+            print(row)
+    except Exception as e:
+        print("Error getting merge history entries from database.")
+    finally:
+        database_connection.close()
+
+
+def append_merge_history(database_filename,
+                         database_uuid_local: str,
+                         database_uuid_remote: str,
+                         database_name_local: str = "",
+                         database_name_remote: str = "",
+                         connector: str = "",
+                         connector_type: str = ""):
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        new_uuid = uuid.uuid4()
+        execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sqlstring = ("insert merge_history (uuid, execution_date, database_name_local, database_uuid_local, " +
+                     "database_name_remote, database_uuid_remote, connector, connector_type) " +
+                     "values (?, ?, ?, ?, ?, ?, ?, ?)")
+        cursor.execute(sqlstring, (new_uuid, execution_date, database_name_local, database_uuid_local,
+                                   database_name_remote, database_uuid_remote, connector, connector_type))
+
+        database_connection.commit()
+    except Exception as e:
+        print("Error writing merge history entry to database.")
+    finally:
+        database_connection.close()
+
+
 def get_database_identification_string(database_filename) -> str:
     id_string = ""
     database_name = get_database_name(database_filename)
@@ -582,6 +645,7 @@ def get_database_identification_string(database_filename) -> str:
         id_string = database_name
     id_string = id_string + "/" + get_database_uuid(database_filename)
     return id_string
+
 
 def get_account_count_valid(database_filename):
     count = 0
@@ -600,6 +664,7 @@ def get_account_count_valid(database_filename):
         database_connection.close()
     return count
 
+
 def add_merge_history_entry(database_filename, merge_date: str, master_database: str, slave_database: str,
                             connector_type="unknown"):
     try:
@@ -616,6 +681,7 @@ def add_merge_history_entry(database_filename, merge_date: str, master_database:
     finally:
         database_connection.close()
     return created_date
+
 
 def get_database_creation_date(database_filename):
     try:
@@ -2277,7 +2343,6 @@ class PDatabase:
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
             return -1
-        # print("Using merge database: " + merge_database_filename + " " + get_database_name(merge_database_filename))
         print("Using merge database: " + merge_database_filename + ": " +
               get_database_identification_string(merge_database_filename))
         # Check remote db for password
@@ -2449,7 +2514,8 @@ class PDatabase:
             database_connection.commit()
             # remember that there were changes in remote db for return code
             # (and also check for deleted accs in remote db):
-            if (count_uuids_in_local_with_newer_update_date_than_in_remote + count_uuids_in_local_that_do_not_exist_in_remote > 0) or (
+            if (
+                    count_uuids_in_local_with_newer_update_date_than_in_remote + count_uuids_in_local_that_do_not_exist_in_remote > 0) or (
                     len(deleted_uuids_in_local_db_note_in_remote) > 0):
                 return_code += 2
         except Exception as e:
