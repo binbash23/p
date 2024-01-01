@@ -35,14 +35,17 @@ colorama.init()
 #
 SQL_SELECT_MERGE_HISTORY = """
 select
-mh.connector_type as type,
+mh.connector_type,
+mh.connector,
 mh.execution_date,
 mh.database_name_local as 'DB local',
-substr(mh.database_uuid_local, 1, 8) as 'UUID local',
+mh.database_uuid_local as 'UUID local',
 mh.database_name_remote as 'DB remote',
-substr(mh.database_uuid_remote, 1, 8) as 'UUID remote'
+mh.database_uuid_remote as 'UUID remote'
 FROM
 merge_history mh
+order by 
+mh.execution_date 
 """
 SQL_GET_MAX_CHANGE_DATE_IN_DATABASE = """
 SELECT
@@ -630,7 +633,14 @@ def print_merge_history(database_filename):
         sqlresult = cursor.execute(SQL_SELECT_MERGE_HISTORY)
         result = sqlresult.fetchall()
         for row in result:
-            print(row)
+            print()
+            print("Connection type : " + str(row[0]))
+            print("Connector       : " + str(row[1]))
+            print("Date            : " + str(row[2]))
+            print("Local DB Name   : " + str(row[3]))
+            print("Local DB UUID   : " + str(row[4]))
+            print("Remote DB Name  : " + str(row[5]))
+            print("Remote DB UUID  : " + str(row[6]))
     except Exception as e:
         print("Error getting merge history entries from database: " + str(e))
     finally:
