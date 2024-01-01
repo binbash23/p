@@ -1249,7 +1249,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select execution_date, user_input from shell_history"
+            sqlstring = "select execution_date, user_input from shell_history order by execution_date desc"
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             for row in result:
@@ -1265,7 +1265,7 @@ class PDatabase:
             return shell_history_array
         finally:
             database_connection.close()
-        shell_history_array.reverse()
+        # shell_history_array.reverse()
         return shell_history_array
 
     def get_alias_commands_decrypted(self) -> [str]:

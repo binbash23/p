@@ -397,13 +397,23 @@ def parse_bool(string: str) -> bool:
         return False
 
 
+# def print_shell_command_history(shell_history_array: [ShellCommand]):
+#     # i = len(shell_history_array)
+#     i = 1
+#     for current_shell_history_entry in shell_history_array:
+#         print(" [" + str(i).rjust(2) + "] - " +
+#               str(current_shell_history_entry.execution_date) +
+#               " - " + current_shell_history_entry.user_input)
+#         i += 1
+
+
 def print_shell_command_history(shell_history_array: [ShellCommand]):
-    i = 1
-    for current_shell_history_entry in shell_history_array:
-        print(" [" + str(i).rjust(2) + "] - " +
-              str(current_shell_history_entry.execution_date) +
-              " - " + current_shell_history_entry.user_input)
-        i += 1
+    i = len(shell_history_array)
+    while i > 0:
+        print(" [" + str(i).rjust(3) + "] - " +
+              str(shell_history_array[i-1].execution_date) +
+              " - " + shell_history_array[i-1].user_input)
+        i -= 1
 
 
 def load_pshell_configuration(p_database: pdatabase.PDatabase):
@@ -675,14 +685,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 user_input_list = alias_command.split(PSHELL_COMMAND_DELIMITER)
             continue
-
-            # shell_command = expand_string_2_shell_command(alias_command)
-            # current_shell_history_entry = ShellHistoryEntry(user_input=alias_command)
-            # p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
-
-        # if shell_command is None:
-        #     print("Error: Alias is not set or aliased command is unknown. Use \"help alias\" for more information.")
-        #     continue
 
         # continue with command processing
 
