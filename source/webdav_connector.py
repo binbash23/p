@@ -5,7 +5,6 @@
 #
 from webdav4.client import Client
 
-# from informal_connector_interface import InformalConnectorInterface
 from connector_interface import ConnectorInterface
 
 

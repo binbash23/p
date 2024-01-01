@@ -13,7 +13,6 @@ import sqlite3
 import time
 import uuid
 from getpass import getpass
-import pandas as pd
 from re import IGNORECASE
 from re import finditer
 
@@ -34,6 +33,17 @@ colorama.init()
 #
 # GLOBAL VARIABLES
 #
+SQL_SELECT_MERGE_HISTORY = """
+select
+mh.connector_type as type,
+mh.execution_date,
+mh.database_name_local as 'DB local',
+substr(mh.database_uuid_local, 1, 8) as 'UUID local',
+mh.database_name_remote as 'DB remote',
+substr(mh.database_uuid_remote, 1, 8) as 'UUID remote'
+FROM
+merge_history mh
+"""
 SQL_GET_MAX_CHANGE_DATE_IN_DATABASE = """
 SELECT
   max(change_date)
@@ -616,13 +626,17 @@ def get_database_name(database_filename) -> str:
 def print_merge_history(database_filename):
     try:
         database_connection = sqlite3.connect(database_filename)
-        df = pd.read_sql_query("SELECT * from merge_history", database_connection)
-        # Verify that result of SQL query is stored in the dataframe
-        print(df)
+        cursor = database_connection.cursor()
+        sqlresult = cursor.execute(SQL_SELECT_MERGE_HISTORY)
+        result = sqlresult.fetchall()
+        for row in result:
+            print(row)
     except Exception as e:
         print("Error getting merge history entries from database: " + str(e))
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
+
 
 def append_merge_history(database_filename,
                          database_uuid_local: str,
@@ -646,7 +660,8 @@ def append_merge_history(database_filename,
     except Exception as e:
         print("Error writing merge history entry to database: " + str(e))
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
 
 
 def get_database_identification_string(database_filename) -> str:
@@ -672,26 +687,28 @@ def get_account_count_valid(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
-def add_merge_history_entry(database_filename, merge_date: str, master_database: str, slave_database: str,
-                            connector_type="unknown"):
-    try:
-        database_connection = sqlite3.connect(database_filename)
-        cursor = database_connection.cursor()
-        sqlstring = "select value from configuration where attribute = 'DATABASE_CREATED'"
-        sqlresult = cursor.execute(sqlstring)
-        result = sqlresult.fetchone()
-        if result is None:
-            raise ValueError("Error: Could not get database creation date.")
-        created_date = result[0]
-    except Exception as e:
-        raise
-    finally:
-        database_connection.close()
-    return created_date
+# def add_merge_history_entry(database_filename, merge_date: str, master_database: str, slave_database: str,
+#                             connector_type="unknown"):
+#     try:
+#         database_connection = sqlite3.connect(database_filename)
+#         cursor = database_connection.cursor()
+#         sqlstring = "select value from configuration where attribute = 'DATABASE_CREATED'"
+#         sqlresult = cursor.execute(sqlstring)
+#         result = sqlresult.fetchone()
+#         if result is None:
+#             raise ValueError("Error: Could not get database creation date.")
+#         created_date = result[0]
+#     except Exception as e:
+#         raise
+#     finally:
+#         if database_connection:
+#             database_connection.close()
+#     return created_date
 
 
 def get_database_creation_date(database_filename):
@@ -707,7 +724,8 @@ def get_database_creation_date(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return created_date
 
 
@@ -725,7 +743,8 @@ def get_last_change_date_in_database(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return created_date
 
 
@@ -743,7 +762,8 @@ def get_account_count_invalid(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -761,7 +781,8 @@ def get_account_history_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -779,7 +800,8 @@ def get_deleted_account_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -797,7 +819,8 @@ def get_shell_history_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -815,7 +838,8 @@ def get_alias_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -833,7 +857,8 @@ def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -854,7 +879,8 @@ def get_account_count(database_filename, also_count_invalidated_accounts: bool =
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return count
 
 
@@ -969,7 +995,8 @@ def get_database_sqlite_version(database_filename: str) -> str:
     except Exception as e:
         raise
     finally:
-        database_connection.close()
+        if database_connection:
+            database_connection.close()
     return version
 
 
