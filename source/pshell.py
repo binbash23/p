@@ -716,7 +716,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Error: Only aliases from 0..9 are allowed.")
                     continue
                 else:
-                    print("current alias: " + str(current_alias))
+                    # print("current alias: " + str(current_alias))
                     if len(alias_argument_list) == 1:
                         command = p_database.get_alias_command_decrypted(current_alias)
                         print(command)
