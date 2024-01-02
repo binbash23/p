@@ -612,6 +612,11 @@ def get_database_name(database_filename) -> str:
     return value
 
 
+def set_database_name(database_filename, new_database_name:str):
+    set_attribute_value_in_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                               new_database_name)
+
+
 # def print_merge_history(database_filename):
 #     try:
 #         database_connection = sqlite3.connect(database_filename)
@@ -2723,17 +2728,42 @@ class PDatabase:
 
         return [dropbox_application_key, dropbox_application_secret, access_token]
 
-    def change_database_password_from_connector(self, connector: ConnectorInterface) -> bool:
-        # def change_connector_database_password(p_database: PDatabase) -> bool:
-        print("Change remote database password")
-        # if not dropbox_database_exists(p_database):
+    def change_database_name_from_connector(self, connector: ConnectorInterface) -> bool:
+        print("Change remote database name")
         print("Searching for remote database: " + str(self.get_database_filename_without_path()))
         if not connector.exists(self.get_database_filename_without_path()):
             print("Remote database does not exist.")
             return False
         print("Downloading remote database...")
-        # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
-        #                      TEMP_MERGE_DATABASE_FILENAME)
+        connector.download_file(self.get_database_filename_without_path(),
+                                TEMP_MERGE_DATABASE_FILENAME)
+        try:
+            old_database_name = get_database_name(TEMP_MERGE_DATABASE_FILENAME)
+            print("Current database name   : " + old_database_name)
+            new_database_name = input("Enter new database name : ")
+            set_database_name(TEMP_MERGE_DATABASE_FILENAME, new_database_name)
+            if old_database_name == new_database_name:
+                print("Database names are equal. Skipping upload.")
+                return True
+            print("Uploading changed database...")
+            connector.upload_file(TEMP_MERGE_DATABASE_FILENAME, self.get_database_filename_without_path())
+        except KeyboardInterrupt:
+            print()
+            print("Canceled")
+            return False
+        except Exception as e:
+            print(str(e))
+        finally:
+            os.remove(TEMP_MERGE_DATABASE_FILENAME)
+        return True
+
+    def change_database_password_from_connector(self, connector: ConnectorInterface) -> bool:
+        print("Change remote database password")
+        print("Searching for remote database: " + str(self.get_database_filename_without_path()))
+        if not connector.exists(self.get_database_filename_without_path()):
+            print("Remote database does not exist.")
+            return False
+        print("Downloading remote database...")
         connector.download_file(self.get_database_filename_without_path(),
                                 TEMP_MERGE_DATABASE_FILENAME)
         try:
@@ -2741,14 +2771,10 @@ class PDatabase:
             temp_remote_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
             new_password = read_confirmed_database_password_from_user()
             result = self.change_database_password(new_password)
-            # result = change_database_password(dropbox_p_database)
             if not result:
                 print("Error changing remote database password.")
                 return False
             print("Uploading changed database...")
-            local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-            #                    "/" + p_database.get_database_filename_without_path())
             connector.upload_file(TEMP_MERGE_DATABASE_FILENAME, self.get_database_filename_without_path())
         except KeyboardInterrupt:
             print()
