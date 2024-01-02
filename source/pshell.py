@@ -131,14 +131,28 @@ SHELL_COMMANDS = [
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
-    ShellCommand("changesshdbpassword", "changesshdbpassword", "Change password of the ssh " +
+    ShellCommand("changedropboxdbname", "changedropboxdbname", "Change database name of the dropbox " +
+                 "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
+                 "database name. Then the database will be " +
+                 "uploaded again."),
+    ShellCommand("changesshdbpassword", "changesshdbpassword [<UUID>]", "Change password of the ssh " +
                  "database.\nThe database will be downloaded from the ssh account and you can enter a new " +
                  "password. After re-encrypting the ssh version of the database, the database will be " +
                  "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
                  " ssh UUID from the configuration table will be taken."),
-    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword", "Change password of the webdav " +
-                 "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
-                 "password. After re-encrypting the dropbox version of the database, the database will be " +
+    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword [<UUID>]", "Change password of the webdav " +
+                 "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
+                 "password. After re-encrypting the webdav version of the database, the database will be " +
+                 "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
+                 " webdav UUID from the configuration table will be taken."),
+    ShellCommand("changesshdbname", "changesshdbname [<UUID>]", "Change the database name of the ssh " +
+                 "database.\nThe database will be downloaded from the ssh account and you can enter a new " +
+                 "database name. Then the database will be " +
+                 "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
+                 " ssh UUID from the configuration table will be taken."),
+    ShellCommand("changewebdavdbname", "changewebdavdbname [<UUID>]", "Change the database name of the webdav " +
+                 "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
+                 "database name. Then the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
                  " webdav UUID from the configuration table will be taken."),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
@@ -716,7 +730,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Error: Only aliases from 0..9 are allowed.")
                     continue
                 else:
-                    # print("current alias: " + str(current_alias))
                     if len(alias_argument_list) == 1:
                         command = p_database.get_alias_command_decrypted(current_alias)
                         print(command)
@@ -740,7 +753,40 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
             p_database.change_database_password_from_connector(dropbox_connector)
-            # p.change_dropbox_database_password(p_database)
+            continue
+
+        if shell_command.command == "changedropboxdbname":
+            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+            if dropbox_connection_credentials is None:
+                continue
+            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+                                                 dropbox_connection_credentials[1],
+                                                 dropbox_connection_credentials[2])
+            p_database.change_database_name_from_connector(dropbox_connector)
+            continue
+
+        if shell_command.command == "changesshdbname":
+            if len(shell_command.arguments) == 1:
+                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                if ssh_account_uuid == "":
+                    print("No default ssh account UUID found in configuration table.")
+                    continue
+                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    ssh_account_uuid = shell_command.arguments[1].strip()
+                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+                else:
+                    print("Too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if ssh_account is None:
+                print("SSH account could not be found: " + str(ssh_account_uuid))
+                continue
+            connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
+            p_database.change_database_name_from_connector(connector)
             continue
 
         if shell_command.command == "changesshdbpassword":
@@ -790,6 +836,31 @@ def start_pshell(p_database: pdatabase.PDatabase):
             connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
                                                          webdav_account.password)
             p_database.change_database_password_from_connector(connector)
+            continue
+
+        if shell_command.command == "changewebdavdbname":
+            if len(shell_command.arguments) == 1:
+                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+                    p_database.database_filename,
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                if webdav_account_uuid == "":
+                    print("No default webdav account UUID found in configuration table.")
+                    continue
+                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+            else:
+                if len(shell_command.arguments) == 2:
+                    webdav_account_uuid = shell_command.arguments[1].strip()
+                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+                else:
+                    print("Too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
+            if webdav_account is None:
+                print("Webdav account could not be found: " + str(webdav_account_uuid))
+                continue
+            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+                                                         webdav_account.password)
+            p_database.change_database_name_from_connector(connector)
             continue
 
         if shell_command.command == "changepassword":
