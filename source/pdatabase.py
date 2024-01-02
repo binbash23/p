@@ -272,7 +272,7 @@ CREATE TABLE if not EXISTS "configuration" (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '5');   
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '6');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS "deleted_account" (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -337,7 +337,7 @@ CREATE TABLE if not EXISTS merge_database.configuration (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '5');   
+insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '6');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS merge_database.deleted_account (
     "uuid"	TEXT NOT NULL UNIQUE,
