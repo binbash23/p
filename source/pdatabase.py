@@ -256,6 +256,7 @@ CREATE TABLE if not EXISTS "account" (
     "loginname"	TEXT,
     "password"	TEXT,
     "type"	TEXT,
+    "connector_type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "change_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "invalid_date"	datetime, 
@@ -272,7 +273,6 @@ CREATE TABLE if not EXISTS "configuration" (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '6');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS "deleted_account" (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -287,6 +287,7 @@ CREATE TABLE if not exists "account_history" (
     "loginname"	TEXT,
     "password"	TEXT,
     "type"	TEXT,
+    "connector_type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 );
 -- table for command history entries
@@ -311,6 +312,7 @@ CREATE TABLE if not exists "merge_history" (
     "connector" TEXT,
     "connector_type" TEXT
 );
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '7');   
 """
 SQL_CREATE_MERGE_DATABASE_SCHEMA = """
 -- main table with accounts
@@ -321,6 +323,7 @@ CREATE TABLE if not EXISTS merge_database.account (
     "loginname"	TEXT,
     "password"	TEXT,
     "type"	TEXT,
+    "connector_type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "change_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime')),
     "invalid_date"	datetime, 
@@ -337,7 +340,6 @@ CREATE TABLE if not EXISTS merge_database.configuration (
     "value"	TEXT,
     PRIMARY KEY("attribute")
 );
-insert or replace into merge_database.configuration (attribute, value) values ('SCHEMA_VERSION', '6');   
 -- table for uuids that have been deleted
 CREATE TABLE if not EXISTS merge_database.deleted_account (
     "uuid"	TEXT NOT NULL UNIQUE,
@@ -352,6 +354,7 @@ CREATE TABLE if not exists merge_database.account_history (
     "loginname"	TEXT,
     "password"	TEXT,
     "type"	TEXT,
+    "connector_type"	TEXT,
     "create_date"	datetime not null default (datetime(CURRENT_TIMESTAMP, 'localtime'))
 );	
 -- table for command history entries
@@ -376,6 +379,9 @@ CREATE TABLE if not exists merge_database.merge_history (
     "connector" TEXT,
     "connector_type" TEXT
 );
+alter TABLE merge_database.account add COLUMN connector_type TEXT;
+alter TABLE merge_database.account_history add COLUMN connector_type TEXT;
+insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '7'); 
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
 SQL_SELECT_ALL_ACCOUNTS = """
@@ -456,18 +462,20 @@ class Account:
     loginname = ""
     password = ""
     type = ""
+    connector_type = ""
     create_date = ""
     change_date = ""
     invalid_date = ""
 
-    def __init__(self, uuid="", name="", url="", loginname="", password="", type="", create_date="", change_date="",
-                 invalid_date=""):
+    def __init__(self, uuid="", name="", url="", loginname="", password="", type="", connector_type="",
+                 create_date="", change_date="", invalid_date=""):
         self.uuid = uuid
         self.name = name
         self.url = url
         self.loginname = loginname
         self.password = password
         self.type = type
+        self.connector_type = connector_type
         self.create_date = create_date
         self.change_date = change_date
         self.invalid_date = invalid_date
@@ -479,6 +487,7 @@ class Account:
             ", Loginname=" + self.loginname + \
             ", Password=" + self.password + \
             ", Type=" + self.type + \
+            ", Connectortype=" + self.connector_type + \
             ", Createdate=" + self.create_date + \
             ", Changedate=" + self.change_date + \
             ", Invaliddate=" + self.invalid_date
@@ -492,6 +501,7 @@ def accounts_are_equal(account1: Account, account2: Account) -> bool:
             (account1.url == account2.url) and \
             (account1.loginname == account2.loginname) and \
             (account1.password == account2.password) and \
+            (account1.connector_type == account2.connector_type) and \
             (account1.type == account2.type):
         return True
     else:
@@ -516,6 +526,7 @@ def search_string_matches_account(search_string: str, account: Account) -> bool:
             search_string in account.create_date.lower() or \
             search_string in account.change_date.lower() or \
             search_string in account.invalid_date.lower() or \
+            search_string in account.connector_type.lower() or \
             search_string in account.type.lower():
         return True
     return False
@@ -1822,13 +1833,22 @@ class PDatabase:
         else:
             return None
 
+    def get_connector_type_from_account_and_decrypt(self, account_uuid: str) -> str:
+        if account_uuid is None or account_uuid.strip() == "":
+            return None
+        account = self.get_account_by_uuid_and_decrypt(account_uuid)
+        if account is not None:
+            return account.connector_type
+        else:
+            return None
+
     def get_account_by_uuid_and_decrypt(self, search_uuid: str) -> Account:
         if search_uuid is None or search_uuid == "":
             return None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, invalid_date " + \
+            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, invalid_date, connector_type " + \
                         "from account where uuid = '" + str(search_uuid) + "'"
             sqlresult = cursor.execute(sqlstring)
             row = sqlresult.fetchone()
@@ -1839,12 +1859,14 @@ class PDatabase:
                 decrypted_loginname = self.decrypt_string_if_password_is_present(row[3])
                 decrypted_password = self.decrypt_string_if_password_is_present(row[4])
                 decrypted_type = self.decrypt_string_if_password_is_present(row[5])
+                decrypted_connector_type = self.decrypt_string_if_password_is_present(row[9])
                 account = Account(uuid=search_uuid,
                                   name=decrypted_name,
                                   url=decrypted_url,
                                   loginname=decrypted_loginname,
                                   password=decrypted_password,
                                   type=decrypted_type,
+                                  connector_type=decrypted_connector_type,
                                   create_date=str(row[6]),
                                   change_date=str(row[7]),
                                   invalid_date=str(row[8])
@@ -1869,7 +1891,7 @@ class PDatabase:
 
     # Set account by uuid = edit account. If account_history is enabled the old version
     # of the account will be saved in the table account_history
-    def set_account_by_uuid_and_encrypt(self, account_uuid, name, url, loginname, password, type):
+    def set_account_by_uuid_and_encrypt(self, account_uuid, name, url, loginname, password, type, connector_type):
         if account_uuid is None or account_uuid == "":
             raise Exception("Account UUID is not set or empty.")
         # encrypt
@@ -1878,6 +1900,7 @@ class PDatabase:
         loginname = self.encrypt_string_if_password_is_present(loginname)
         password = self.encrypt_string_if_password_is_present(password)
         type = self.encrypt_string_if_password_is_present(type)
+        connector_type = self.encrypt_string_if_password_is_present(connector_type)
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1890,9 +1913,9 @@ class PDatabase:
                     == "True":
                 # cursor = database_connection.cursor()
                 account_history_uuid = uuid.uuid4()
-                sqlstring = "insert into account_history (uuid, account_uuid, name, url, loginname, password, type) " + \
+                sqlstring = "insert into account_history (uuid, account_uuid, name, url, loginname, password, type, connector_type) " + \
                             " select '" + str(account_history_uuid) + \
-                            "' as uuid, uuid as account_uuid, name, url, loginname, password, type " + \
+                            "' as uuid, uuid as account_uuid, name, url, loginname, password, type, connector_type " + \
                             " from account where uuid = '" + str(account_uuid) + "'"
                 cursor.execute(sqlstring)
                 # database_connection.commit()
@@ -1904,6 +1927,7 @@ class PDatabase:
                         "url = '" + url + "', " + \
                         "loginname = '" + loginname + "', " + \
                         "password = '" + password + "', " + \
+                        "connector_type = '" + connector_type + "', " + \
                         "type = '" + type + "' " + \
                         "where uuid = '" + str(account_uuid) + "'"
             cursor.execute(sqlstring)
@@ -1949,6 +1973,8 @@ class PDatabase:
             print_slow.print_slow(str(account.password), delay=print_delay)
         print("Type            : ", end="")
         print_slow.print_slow(str(account.type), delay=print_delay)
+        print("Connectortype   : ", end="")
+        print_slow.print_slow(str(account.connector_type), delay=print_delay)
         if self.show_account_details:
             print("Created         : ", end="")
             print_slow.print_slow(str(account.create_date), delay=print_delay)
@@ -2270,6 +2296,7 @@ class PDatabase:
             # logging.debug("Setting PRAGMA secure_delete = True for database.")
             # cursor.execute("PRAGMA secure_delete = True")
             # database_connection.commit()
+            #
             sqlstring = "select count(*) from account"
             sqlresult = cursor.execute(sqlstring)
             value = sqlresult.fetchone()[0]

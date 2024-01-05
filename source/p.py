@@ -38,21 +38,22 @@ def add(p_database: PDatabase):
     account = Account()
     try:
         account.uuid = uuid.uuid4()
-        print("UUID      : " + str(account.uuid))
-        account.name = input("Name      : ")
-        account.url = input("URL       : ")
-        account.loginname = input("Loginname : ")
+        print("UUID          : " + str(account.uuid))
+        account.name = input("Name          : ")
+        account.url = input("URL           : ")
+        account.loginname = input("Loginname     : ")
         if p_database.shadow_passwords:
             while True:
-                password1 = getpass.getpass("Password  : ")
-                password2 = getpass.getpass("Confirm   : ")
+                password1 = getpass.getpass("Password      : ")
+                password2 = getpass.getpass("Confirm       : ")
                 if (password1 == password2) or (password1 is None and password2 is None):
                     account.password = password1
                     break
                 print("Error: Passwords do not match. Please try again.")
         else:
-            account.password = input("Password  : ")
-        account.type = input("Type      : ")
+            account.password = input("Password      : ")
+        account.type =           input("Type          : ")
+        account.connector_type = input("Connectortype : ")
         answer = input("Correct ([y]/n) : ")
     except KeyboardInterrupt:
         print()
@@ -76,6 +77,7 @@ def edit(p_database: PDatabase, edit_uuid: str):
     old_loginname = account.loginname
     old_password = account.password
     old_type = account.type
+    old_connector_type = account.connector_type
 
     try:
         print("Name (old)      : " + old_name)
@@ -119,6 +121,11 @@ def edit(p_database: PDatabase, edit_uuid: str):
         if new_type == "":
             new_type = old_type
 
+        print("Connectortype (old)      : " + old_connector_type)
+        new_connector_type = input("Connectortype (new)      : ")
+        if new_connector_type == "":
+            new_connector_type = old_connector_type
+
         answer = input("Correct ([y]/n) : ")
     except KeyboardInterrupt:
         print()
@@ -127,7 +134,7 @@ def edit(p_database: PDatabase, edit_uuid: str):
         # sys.exit(0)
 
     new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password,
-                          new_type.strip())
+                          new_type.strip(), new_connector_type.strip())
     if accounts_are_equal(account, new_account):
         print("Nothing changed.")
         return
@@ -137,7 +144,8 @@ def edit(p_database: PDatabase, edit_uuid: str):
                                                    new_url.strip(),
                                                    new_loginname.strip(),
                                                    new_password,
-                                                   new_type.strip())
+                                                   new_type.strip(),
+                                                   new_connector_type.strip())
         print("Account changed")
     else:
         print("Canceled")
