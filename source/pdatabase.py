@@ -391,7 +391,8 @@ SQL_SELECT_ALL_ACCOUNTS = """
         url,
         loginname,
         password,
-        type
+        type,
+        connector_type
     from 
         account 
 """
@@ -403,7 +404,8 @@ SQL_SELECT_ALL_ACCOUNT_HISTORY = """
         url,
         loginname,
         password,
-        type
+        type,
+        connector_type
     from 
         account_history
 """
@@ -1458,6 +1460,7 @@ class PDatabase:
         account.loginname = self.decrypt_string_if_password_is_present(account.loginname)
         account.password = self.decrypt_string_if_password_is_present(account.password)
         account.type = self.decrypt_string_if_password_is_present(account.type)
+        account.connector_type = self.decrypt_string_if_password_is_present(account.connector_type)
         account.create_date = account.create_date
         account.change_date = account.change_date
         account.invalid_date = account.invalid_date
@@ -1513,18 +1516,16 @@ class PDatabase:
             cursor = database_connection.cursor()
             if self.show_invalidated_accounts:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account "
+                            invalid_date, connector_type from account "
             else:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account where invalid = 0 "
+                            invalid_date, connector_type from account where invalid = 0 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
-            # print("exceuting: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
                   "* in " + str(
                 get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
-            # print("Found " + str(len(result)) + " result(s):")
             if len(result) > 0:
                 print()
             for row in result:
@@ -1536,7 +1537,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
@@ -1557,7 +1559,6 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
     def search_invalidated_accounts(self, search_string: str):
@@ -1566,7 +1567,7 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                         invalid_date from account where invalid = 1 "
+                         invalid_date, connector_type from account where invalid = 1 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             # print("exceuting: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
@@ -1583,7 +1584,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
@@ -1605,7 +1607,6 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
     def search_accounts_by_type(self, type_search_string: str):
@@ -1615,12 +1616,11 @@ class PDatabase:
             cursor = database_connection.cursor()
             if self.show_invalidated_accounts:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account "
+                            invalid_date, connector_type from account "
             else:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account where invalid = 0 "
+                            invalid_date, connector_type from account where invalid = 0 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
-            # print("exceuting: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(type_search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
@@ -1636,7 +1636,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if type_search_string == "" or \
@@ -1657,7 +1658,6 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
     def get_accounts_decrypted(self, search_string: str) -> []:
@@ -1668,10 +1668,10 @@ class PDatabase:
             cursor = database_connection.cursor()
             if self.show_invalidated_accounts:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account "
+                            invalid_date, connector_type from account "
             else:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account where invalid = 0 "
+                            invalid_date, connector_type from account where invalid = 0 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
@@ -1684,7 +1684,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
@@ -1704,18 +1705,11 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            # if self.show_invalidated_accounts:
-            #     sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-            #                 invalid_date from account "
-            # else:
             sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                         invalid_date from account where invalid = 1 "
+                         invalid_date, connector_type from account where invalid = 1 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            # print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
-            # "* in " + str(get_account_count(self.database_filename)) + " accounts:")
-            # print()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -1725,7 +1719,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if search_string == "" or \
@@ -1745,10 +1740,10 @@ class PDatabase:
             cursor = database_connection.cursor()
             if self.show_invalidated_accounts:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account "
+                            invalid_date, connector_type from account "
             else:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
-                            invalid_date from account where invalid = 0 "
+                            invalid_date, connector_type from account where invalid = 0 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
@@ -1761,7 +1756,8 @@ class PDatabase:
                                   type=row[5],
                                   create_date=row[6],
                                   change_date=row[7],
-                                  invalid_date=row[8]
+                                  invalid_date=row[8],
+                                  connector_type=row[9]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 if type_search_string == "" or \
@@ -1779,7 +1775,7 @@ class PDatabase:
             cursor = database_connection.cursor()
             if search_uuid is None or search_uuid == "":
                 return False
-            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, invalid_date from \
+            sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, invalid_date, connector_type from \
                          account where uuid = '" + str(search_uuid) + "'"
             sqlresult = cursor.execute(sqlstring)
             row = sqlresult.fetchone()
@@ -1795,7 +1791,8 @@ class PDatabase:
                               type=row[5],
                               create_date=row[6],
                               change_date=row[7],
-                              invalid_date=row[8]
+                              invalid_date=row[8],
+                              connector_type=row[9]
                               )
             try:
                 self.print_formatted_account(self.decrypt_account(account))
@@ -1945,6 +1942,7 @@ class PDatabase:
         account.loginname = color_search_string(account.loginname, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.password = color_search_string(account.password, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.type = color_search_string(account.type, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.connector_type = color_search_string(account.connector_type, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.create_date = color_search_string(account.create_date, search_string,
                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.change_date = color_search_string(account.change_date, search_string,
@@ -2048,6 +2046,7 @@ class PDatabase:
                 current_loginname = row[3]
                 current_password = row[4]
                 current_type = row[5]
+                current_connector_type = row[6]
                 # print(row)
                 # re-encrypt that shit
                 new_current_name = self.decrypt_and_encrypt_with_new_password(current_name, new_password)
@@ -2055,15 +2054,17 @@ class PDatabase:
                 new_current_loginname = self.decrypt_and_encrypt_with_new_password(current_loginname, new_password)
                 new_current_password = self.decrypt_and_encrypt_with_new_password(current_password, new_password)
                 new_current_type = self.decrypt_and_encrypt_with_new_password(current_type, new_password)
+                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type, new_password)
                 # and push it back into the db
                 update_sql_string = "update account set name=?, " + \
                                     "url=?, " + \
                                     "loginname=?, " + \
                                     "password=?, " + \
-                                    "type=? " + \
+                                    "type=?, " + \
+                                    "connector_type=? " + \
                                     "where uuid = '" + str(current_uuid) + "'"
                 cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
-                                                   new_current_password, new_current_type))
+                                                   new_current_password, new_current_type, new_current_connector_type))
                 bar.update(results_found)
 
             # reencrypt account_history table
@@ -2081,6 +2082,7 @@ class PDatabase:
                 current_loginname = row[4]
                 current_password = row[5]
                 current_type = row[6]
+                current_connector_type = row[7]
                 # current_create_date = row[7]
                 # print(row)
                 # re-encrypt that shit
@@ -2089,15 +2091,17 @@ class PDatabase:
                 new_current_loginname = self.decrypt_and_encrypt_with_new_password(current_loginname, new_password)
                 new_current_password = self.decrypt_and_encrypt_with_new_password(current_password, new_password)
                 new_current_type = self.decrypt_and_encrypt_with_new_password(current_type, new_password)
+                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type, new_password)
                 # and push it back into the db
                 update_sql_string = "update account_history set name=?, " + \
                                     "url=?, " + \
                                     "loginname=?, " + \
                                     "password=?, " + \
-                                    "type=? " + \
+                                    "type=?, " + \
+                                    "connector_type=? " + \
                                     "where uuid = '" + str(current_uuid) + "'"
                 cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
-                                                   new_current_password, new_current_type))
+                                                   new_current_password, new_current_type, new_current_connector_type))
                 bar.update(results_found)
 
             # reencrypt deleted_account table
@@ -2225,18 +2229,20 @@ class PDatabase:
         account.loginname = self.encrypt_string_if_password_is_present(account.loginname)
         account.password = self.encrypt_string_if_password_is_present(account.password)
         account.type = self.encrypt_string_if_password_is_present(account.type)
+        account.connector_type = self.encrypt_string_if_password_is_present(account.connector_type)
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             if account.uuid is None or account.uuid == "":
                 account.uuid = uuid.uuid4()
-            sqlstring = "insert into account (uuid, name, url, loginname, password, type) values " + \
+            sqlstring = "insert into account (uuid, name, url, loginname, password, type, connector_type) values " + \
                         "('" + str(account.uuid) + \
                         "', '" + account.name + \
                         "', '" + account.url + \
                         "', '" + account.loginname + \
                         "', '" + account.password + \
-                        "', '" + account.type + "')"
+                        "', '" + account.type + \
+                        "', '" + account.connector_type + "')"
             cursor.execute(sqlstring)
             database_connection.commit()
             print("New account added: [UUID " + str(account.uuid) + "]")
