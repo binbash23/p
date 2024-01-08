@@ -158,6 +158,9 @@ SHELL_COMMANDS = [
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
+    ShellCommand("duplicate", "duplicate <UUID>|<SEARCHSTRING>",
+                 "Duplicate account with UUID into a new account. You can also use a SEARCHSTRING to " +
+                 "identify the account to be duplicated."),
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
@@ -924,6 +927,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                  dropbox_connection_credentials[1],
                                                  dropbox_connection_credentials[2])
             p_database.delete_database_in_connector(dropbox_connector)
+            continue
+
+        if shell_command.command == "duplicate":
+            if len(shell_command.arguments) == 1:
+                print("UUID or SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
+                continue
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_duplicate = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_duplicate is None:
+                print("SEARCHSTRING or UUID not found.")
+                continue
+            p_database.duplicate_account(uuid_to_duplicate)
             continue
 
         if shell_command.command == "edit":

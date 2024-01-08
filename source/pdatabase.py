@@ -76,7 +76,7 @@ FROM
 )
 """
 SQL_MERGE_INSERT_MISSING_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE = """
-insert into main.account (uuid, name, url, loginname, password, type, create_date, change_date, invalid_date)
+insert into main.account (uuid, name, url, loginname, password, type, create_date, change_date, invalid_date, connector_type)
 select 
 uuid, 
 name,
@@ -86,14 +86,15 @@ password,
 type, 
 create_date, 
 change_date, 
-invalid_date 
+invalid_date,
+connector_type
 from 
 merge_database.account 
 where 
 uuid not in (select uuid from main.account)
 """
 SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE = """
-insert into main.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date)
+insert into main.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date, connector_type)
 select 
 uuid,
 account_uuid, 
@@ -102,7 +103,8 @@ url,
 loginname, 
 password, 
 type, 
-create_date
+create_date,
+connector_type
 from 
 merge_database.account_history 
 where 
@@ -142,7 +144,7 @@ uuid not in (select uuid from merge_database.account_history)
 """
 SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER = "drop trigger if exists main.update_change_date_Trigger"
 SQL_MERGE_INSERT_MISSING_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE = """
-insert into merge_database.account (uuid, name, url, loginname, password, type, create_date, change_date, invalid_date)
+insert into merge_database.account (uuid, name, url, loginname, password, type, create_date, change_date, invalid_date, connector_type)
 select 
 uuid, 
 name, 
@@ -152,14 +154,15 @@ password,
 type, 
 create_date, 
 change_date, 
-invalid_date 
+invalid_date ,
+connector_type
 from 
 main.account 
 where 
 uuid not in (select uuid from merge_database.account)    
 """
 SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE = """
-insert into merge_database.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date)
+insert into merge_database.account_history (uuid, account_uuid, name, url, loginname, password, type, create_date, connector_type)
 select 
 uuid, 
 account_uuid,
@@ -168,7 +171,8 @@ url,
 loginname, 
 password, 
 type, 
-create_date
+create_date,
+connector_type
 from 
 main.account_history
 where 
@@ -1167,6 +1171,27 @@ class PDatabase:
         except Exception as e:
             raise
 
+    def duplicate_account(self, copy_uuid):
+        if copy_uuid is None or copy_uuid == "":
+            print("Error copying account: UUID is empty.")
+            return
+        if self.get_account_exists(copy_uuid) is False:
+            print("Error: Account uuid " + copy_uuid + " does not exist.")
+            return
+        try:
+            origin_account = self.get_account_by_uuid_and_decrypt(copy_uuid)
+            new_account_uuid = str(uuid.uuid4())
+            new_account = Account(new_account_uuid,
+                                  origin_account.name,
+                                  origin_account.url,
+                                  origin_account.loginname,
+                                  origin_account.password,
+                                  origin_account.type,
+                                  origin_account.connector_type)
+            self.add_account_and_encrypt(new_account)
+        except Exception as e:
+            print(colored("Error: " + str(e)))
+
     def delete_account(self, delete_uuid):
         if delete_uuid is None or delete_uuid == "":
             print("Error deleting account: UUID is empty.")
@@ -1174,7 +1199,8 @@ class PDatabase:
         if self.get_account_exists(delete_uuid) is False:
             print("Error: Account uuid " + delete_uuid + " does not exist.")
             return
-        answer = input("Delete account with UUID: " + delete_uuid + " ([y]/n) : ")
+        account_name_to_be_deleted = self.get_account_by_uuid_and_decrypt(delete_uuid).name
+        answer = input("Delete account: " + account_name_to_be_deleted + " [" + delete_uuid + "] ([y]/n) : ")
         if answer != "y" and answer != "":
             print("Canceled.")
             return
@@ -1267,7 +1293,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select execution_date, user_input from shell_history order by execution_date desc"
+            sqlstring = "select execution_date, user_input from shell_history order by create_date desc"
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             for row in result:
@@ -2508,7 +2534,6 @@ class PDatabase:
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
             print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
-            # xxx
             database_connection.commit()
 
             #
