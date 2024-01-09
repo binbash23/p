@@ -261,8 +261,8 @@ SHELL_COMMANDS = [
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
-    ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile <UUID>",
-                 "Set a default merge target file in the configuration table" +
+    ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile FILENAME",
+                 "Set a default merge target file in the configuration table. " +
                  "This filename will be used when merge2file is called without a target filename."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
                  "If one or more account(s) match the SEARCHSTRING, the password of the first account will be copied " +
