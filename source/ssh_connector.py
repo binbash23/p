@@ -20,7 +20,7 @@ class SshConnector(ConnectorInterface):
     _ssh_login = None
     _ssh_password = None
     _ssh_connection = None
-    _ssh_remote_path = ""
+    _ssh_remote_base_path = "/"
 
     def __init__(self, ssh_server_url=None, ssh_login=None, ssh_password=None):
         self._ssh_server_url = ssh_server_url
@@ -89,6 +89,9 @@ class SshConnector(ConnectorInterface):
         except Exception as e:
             print("Error: " + str(e))
         return exists
+
+    def get_remote_base_path(self) -> str:
+        return self._remote_base_path
 
 
 def main():

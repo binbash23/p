@@ -2663,6 +2663,17 @@ class PDatabase:
             database_connection.close()
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
+        if connector.get_type() == "file":
+            self.merge_database(
+                os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
+            # print("-> " + str(connector.get_remote_base_path()))
+            # if os.path.isdir(connector.get_remote_base_path()):
+            #     print("d")
+            #     self.merge_database(os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
+            # elif os.path.isfile(connector.get_remote_base_path()):
+            #     print("f")
+            #     self.merge_database(connector.get_remote_base_path())
+            return
         # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
         # print("Merging database")
         if not connector.exists(self.get_database_filename_without_path()):

@@ -4,6 +4,7 @@
 # file connector
 #
 import os.path
+from pathlib import Path
 import shutil
 
 # from informal_connector_interface import InformalConnectorInterface
@@ -16,12 +17,14 @@ class FileConnector(ConnectorInterface):
     _file_path = None
 
     def __init__(self, file_path=None):
+        # self._file_path = str(file_path).replace("\\", "\\\\")
         self._file_path = file_path
+        # if not os.path.isdir(self._file_path):
+        if not Path(self._file_path).is_dir():
+            raise Exception("Error: Path exists, but is a file, not a folder: " + self._file_path)
         if not os.path.exists(self._file_path):
             os.makedirs(self._file_path)
             return
-        if not os.path.isdir(self._file_path):
-            raise Exception("Error: Path exists, but is a file, not a folder: " + self._file_path)
 
     def __str__(self):
         return "File Connector attributes: Path: " + self._file_path
@@ -63,6 +66,9 @@ class FileConnector(ConnectorInterface):
         except Exception as e:
             print("Error: " + str(e))
         return exists
+
+    def get_remote_base_path(self) -> str:
+        return self._file_path
 
 
 def main():

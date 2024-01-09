@@ -23,6 +23,7 @@ import print_slow
 import webdav_connector
 import ssh_connector
 from dropbox_connector import DropboxConnector
+import file_connector
 from pdatabase import ShellHistoryEntry
 
 
@@ -233,6 +234,11 @@ SHELL_COMMANDS = [
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
                  "and, if one is found, it will be used to connect to the webdav target. You can use the " +
                  "command 'setwebdavaccountuuid' to set the default webdav account UUID."),
+    ShellCommand("mergewith", "mergewith <UUID>|SEARCHSTRING",
+                 "Merge with with the account with UUID or the account that matches SEARCHSTRING.\n" +
+                 "If SEARCHSTRING is not a unique account you will be asked, which account should be used.\n" +
+                 "The target account has to have the attribute connector_type set to one of these values:\n" +
+                 "file, ssh, webdav\n"),
     ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
                  " be created.\nWith this command you can switch between multiple p databases."),
@@ -1316,6 +1322,52 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: " + str(e))
             continue
 
+        if shell_command.command == "mergewith":
+            if len(shell_command.arguments) == 1:
+                print("UUID or SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
+                continue
+            search_string = shell_command.arguments[1].strip()
+            uuid_to_mergewith = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if uuid_to_mergewith is None:
+                print("SEARCHSTRING or UUID not found.")
+                continue
+            target_account = p_database.get_account_by_uuid_and_decrypt(uuid_to_mergewith)
+            connector_type = target_account.connector_type
+            if connector_type == "":
+                print("Can not merge with target account because connector type of account is not set.")
+                continue
+            if connector_type == "ssh":
+                try:
+                    ssh_connector.SshConnector(target_account.url, target_account.loginname,
+                                               target_account.password)
+                    print("Using connector: " + str(connector))
+                    p_database.merge_database_with_connector(connector)
+                except Exception as e:
+                    print("Error: " + str(e))
+                continue
+            if connector_type == "webdav":
+                try:
+                    connector = webdav_connector.WebdavConnector(target_account.url, target_account.loginname,
+                                                                 target_account.password)
+                    print("Using connector: " + str(connector))
+                    p_database.merge_database_with_connector(connector)
+                except Exception as e:
+                    print("Error: " + str(e))
+                continue
+            if connector_type == "file":
+                try:
+                    # print("target_account.url-> " + target_account.url)
+                    connector = file_connector.FileConnector(target_account.url)
+                    print("Using connector: " + str(connector))
+                    p_database.merge_database_with_connector(connector)
+                except Exception as e:
+                    print("Error: " + str(e))
+                continue
+            # when we are here, the connector_type is unknown
+            print("Unknown connector type: " + connector_type)
+            continue
+
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
                 print("DATABASE_FILENAME is missing.")
@@ -1402,6 +1454,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             search_string = shell_command.arguments[1].strip().lower()
             if search_string == "":
                 continue
+            print()
             print(colored("Searching in all help texts for: '" + search_string + "'", "green"))
             print()
             results_found = 0

@@ -44,3 +44,8 @@ class ConnectorInterface(ABC):
     def get_type(self) -> str:
         # print a type i.e. webdav, sftp, ...
         raise NotImplementedError
+
+    @abstractmethod
+    def get_remote_base_path(self) -> str:
+        # print a type i.e. webdav, sftp, ...
+        raise NotImplementedError

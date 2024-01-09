@@ -21,6 +21,7 @@ class DropboxConnector(ConnectorInterface):
     _app_key = None
     _app_secret = None
     _refresh_token = None
+    _remote_base_path = "/"
 
     def __init__(self, app_key, app_secret, refresh_token):
         self._app_key = app_key
@@ -68,7 +69,7 @@ class DropboxConnector(ConnectorInterface):
 
     def download_file(self, remote_path, local_path):
         # Download a file from Dropbox to the local machine.
-        remote_path = "/" + remote_path
+        remote_path = self._remote_base_path + remote_path
         try:
             with open(local_path, 'wb') as f:
                 metadata, result = self._dropbox_connection.files_download(path=remote_path)
@@ -78,7 +79,7 @@ class DropboxConnector(ConnectorInterface):
             raise
 
     def upload_file(self, local_path, remote_path):
-        remote_path = "/" + remote_path
+        remote_path = self._remote_base_path + remote_path
         try:
             local_file = pathlib.Path(local_path)
             with local_file.open("rb") as f:
@@ -90,12 +91,15 @@ class DropboxConnector(ConnectorInterface):
             raise
 
     def delete_file(self, remote_path):
-        remote_path = "/" + remote_path
+        remote_path = self._remote_base_path + remote_path
         try:
             self._dropbox_connection.files_delete_v2(remote_path)
         except Exception as e:
             print('Error deleting file from Dropbox: ' + str(e))
             raise
+
+    def get_remote_base_path(self) -> str:
+        return self._remote_base_path
 
 
 def get_generated_access_code(app_key: str):

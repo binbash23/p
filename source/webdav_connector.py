@@ -12,6 +12,7 @@ class WebdavConnector(ConnectorInterface):
     _dav_client = None
     _dav_login = None
     _dav_password = None
+    _remote_base_path = "/"
 
     def __init__(self, dav_url=None, dav_login=None, dav_password=None):
         self._dav_login = dav_login
@@ -65,6 +66,9 @@ class WebdavConnector(ConnectorInterface):
             print("Error: " + str(e))
         return exists
         # return self._dav_client.exists(remote_path)
+
+    def get_remote_base_path(self) -> str:
+        return self._remote_base_path
 
 
 def main():
