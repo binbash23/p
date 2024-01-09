@@ -383,8 +383,6 @@ CREATE TABLE if not exists merge_database.merge_history (
     "connector" TEXT,
     "connector_type" TEXT
 );
-alter TABLE merge_database.account add COLUMN connector_type TEXT;
-alter TABLE merge_database.account_history add COLUMN connector_type TEXT;
 insert or replace into configuration (attribute, value) values ('SCHEMA_VERSION', '7'); 
 """
 ACCOUNTS_ORDER_BY_STATEMENT = "order by change_date, name"
