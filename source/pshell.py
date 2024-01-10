@@ -306,7 +306,9 @@ SHELL_COMMANDS = [
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
-    ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the last successfully merge event."),
+    ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the " +
+                 "last successfully merge event. This includes new created accounts, changed accounts and the " +
+                 "uuids of deleted accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database.\nWith no " +
                  "arguments, the current status will be shown."),
@@ -318,10 +320,7 @@ SHELL_COMMANDS = [
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
                  "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
-    ShellCommand("updatep", "updatep", "Update p. Depending on your operating system, the latest p binary will" +
-                 " be downloaded from git and saved in the current folder with the ending '_latest'.\nFor " +
-                 "windows this will be: p.exe_latest\nFor linux this will be: p_latest\nYou have " +
-                 "to stop p after that and delete the old p binary and replace it with the new downloaded one."),
+    ShellCommand("updatep", "updatep", "Update p program. This command will download the latest p exceutable from git."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false.\nIf verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
@@ -959,8 +958,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 p_database.delete_orphaned_account_history_entries()
             except Exception as e:
-                # print("Error deleting orphaned history entries.")
-                e.with_traceback()
+                print("Error deleting orphaned history entries: " + str(e))
+                # e.with_traceback()
             continue
 
         if shell_command.command == "deletesshdatabase":
@@ -2062,7 +2061,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Please start p again.")
                     sys.exit(0)
             except Exception as ex:
-                print("Error updating: " + str(ex.with_traceback()))
+                print("Error updating: " + str(ex))
             continue
 
         if shell_command.command == "verbose":
