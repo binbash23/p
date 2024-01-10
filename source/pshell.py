@@ -1261,7 +1261,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Too many arguments.")
                     print(shell_command.synopsis)
                     continue
-            p_database.merge_database(merge_target_file)
+            try:
+                p_database.merge_database(merge_target_file)
+            except Exception as e:
+                print("Error: " + str(e))
             continue
 
         if shell_command.command == "merge2ssh":
