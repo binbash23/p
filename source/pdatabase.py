@@ -627,7 +627,7 @@ def get_database_name(database_filename) -> str:
     return value
 
 
-def set_database_name(database_filename, new_database_name:str):
+def set_database_name(database_filename, new_database_name: str):
     set_attribute_value_in_configuration_table(database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                                                new_database_name)
 
@@ -1028,6 +1028,12 @@ def get_database_sqlite_version(database_filename: str) -> str:
         if database_connection:
             database_connection.close()
     return version
+
+
+def get_last_merge_date(database_filename: str) -> str:
+    last_merge_date = get_attribute_value_from_configuration_table(database_filename,
+                                                                   CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE)
+    return last_merge_date
 
 
 def get_database_has_unmerged_changes(database_filename: str) -> str:
@@ -1633,6 +1639,86 @@ class PDatabase:
             database_connection.close()
         print_found_n_results(results_found)
 
+    def get_new_account_uuids_since(self, date_string: str) -> []:
+        uuids = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select uuid from account where create_date >= '" + "" + date_string + "'"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                uuids.append(str(row[0]))
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        return uuids
+
+    def get_changed_account_uuids_since(self, date_string: str) -> []:
+        uuids = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select uuid from account where change_date >= '" + "" + date_string + "'"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                uuids.append(str(row[0]))
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        return uuids
+
+    def get_deleted_account_uuids_since(self, date_string: str) -> []:
+        uuids = []
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            sqlstring = "select uuid from deleted_account where create_date >= '" + "" + date_string + "'"
+            sqlresult = cursor.execute(sqlstring)
+            result = sqlresult.fetchall()
+            for row in result:
+                decrypted_uuid = self.decrypt_string_if_password_is_present(str(row[0]))
+                uuids.append(decrypted_uuid)
+        except Exception as e:
+            raise
+        finally:
+            database_connection.close()
+        return uuids
+
+    def show_unmerged_changes(self):
+        last_merge_date = get_last_merge_date(self.database_filename)
+        last_change_date = get_last_change_date_in_database(self.database_filename)
+        print()
+        print("Last merge date  : " + last_merge_date)
+        print("Last change date : " + last_change_date)
+
+        print()
+        print("New accounts since last merge")
+        print()
+        uuids = self.get_new_account_uuids_since(last_merge_date)
+        for current_uuid in uuids:
+            account = self.get_account_by_uuid_and_decrypt(current_uuid)
+            self.print_formatted_account(account, show_history_count=False, print_slowly=False)
+
+        print()
+        print("Changed accounts since last merge")
+        print()
+        uuids = self.get_changed_account_uuids_since(last_merge_date)
+        for current_uuid in uuids:
+            account = self.get_account_by_uuid_and_decrypt(current_uuid)
+            self.print_formatted_account(account, show_history_count=False, print_slowly=False)
+
+        print()
+        print("Deleted account uuid's since last merge")
+        print()
+        uuids = self.get_changed_account_uuids_since(last_merge_date)
+        for current_uuid in uuids:
+            print(current_uuid)
+        print()
+
     def search_accounts_by_type(self, type_search_string: str):
         results_found = 0
         try:
@@ -1966,7 +2052,8 @@ class PDatabase:
         account.loginname = color_search_string(account.loginname, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.password = color_search_string(account.password, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.type = color_search_string(account.type, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.connector_type = color_search_string(account.connector_type, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.connector_type = color_search_string(account.connector_type, search_string,
+                                                     self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.create_date = color_search_string(account.create_date, search_string,
                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.change_date = color_search_string(account.change_date, search_string,
@@ -2078,7 +2165,8 @@ class PDatabase:
                 new_current_loginname = self.decrypt_and_encrypt_with_new_password(current_loginname, new_password)
                 new_current_password = self.decrypt_and_encrypt_with_new_password(current_password, new_password)
                 new_current_type = self.decrypt_and_encrypt_with_new_password(current_type, new_password)
-                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type, new_password)
+                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type,
+                                                                                        new_password)
                 # and push it back into the db
                 update_sql_string = "update account set name=?, " + \
                                     "url=?, " + \
@@ -2115,7 +2203,8 @@ class PDatabase:
                 new_current_loginname = self.decrypt_and_encrypt_with_new_password(current_loginname, new_password)
                 new_current_password = self.decrypt_and_encrypt_with_new_password(current_password, new_password)
                 new_current_type = self.decrypt_and_encrypt_with_new_password(current_type, new_password)
-                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type, new_password)
+                new_current_connector_type = self.decrypt_and_encrypt_with_new_password(current_connector_type,
+                                                                                        new_password)
                 # and push it back into the db
                 update_sql_string = "update account_history set name=?, " + \
                                     "url=?, " + \
@@ -2666,18 +2755,8 @@ class PDatabase:
         if connector.get_type() == "file":
             self.merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
-            # print("-> " + str(connector.get_remote_base_path()))
-            # if os.path.isdir(connector.get_remote_base_path()):
-            #     print("d")
-            #     self.merge_database(os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
-            # elif os.path.isfile(connector.get_remote_base_path()):
-            #     print("f")
-            #     self.merge_database(connector.get_remote_base_path())
             return
-        # def merge_database_with_connector(self, connector: informal_connector_interface.InformalConnectorInterface):
-        # print("Merging database")
         if not connector.exists(self.get_database_filename_without_path()):
-            # if not connector.exists("\\p\\" + self.get_database_filename_without_path()):
             print("Creating initial remote database...")
             if os.path.isfile(TEMP_MERGE_DATABASE_FILENAME):
                 os.remove(TEMP_MERGE_DATABASE_FILENAME)
@@ -2691,13 +2770,8 @@ class PDatabase:
                   TEMP_MERGE_DATABASE_FILENAME + "' as '" +
                   self.get_database_filename_without_path() + "' to connector...")
             local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-            #                     "/" + p_database.get_database_filename_without_path())
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
-                                  # "\\p\\" + p_database.get_database_filename_without_path())
                                   self.get_database_filename_without_path())
-            # "\\p\\" + self.get_database_filename_without_path())
-            # os.path.join("p" + p_database.get_database_filename_without_path()))
             append_merge_history(database_filename=self.database_filename,
                                  database_uuid_local=get_database_uuid(self.database_filename),
                                  database_name_local=get_database_name(self.database_filename),
@@ -2709,25 +2783,15 @@ class PDatabase:
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
             return
         print("Downloading database...")
-        # dropbox_download_file(dropbox_connection, "/" + p_database.get_database_filename_without_path(),
-        #                       TEMP_MERGE_DATABASE_FILENAME)
         local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
         connector.download_file(self.get_database_filename_without_path(),
-                                # connector.download_file(os.path.join("p", self.get_database_filename_without_path()),
-                                # "\\p\\p.db",
                                 TEMP_MERGE_DATABASE_FILENAME)
-        # os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME))
         print("Merging databases...")
         return_code = self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
         if return_code > 1:
             print("Uploading merged database...")
-            # local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
-            # dropbox_upload_file(dropbox_connection, local_path, TEMP_MERGE_DATABASE_FILENAME,
-            #                     "/" + p_database.get_database_filename_without_path())
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
-                                  # os.path.join("p" + p_database.get_database_filename_without_path()))
                                   self.get_database_filename_without_path())
-            # "\\p\\" + self.get_database_filename_without_path())
 
         else:
             print("No changes in remote database. Skipping upload.")

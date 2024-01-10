@@ -306,6 +306,7 @@ SHELL_COMMANDS = [
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
+    ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the last successfully merge event."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database.\nWith no " +
                  "arguments, the current status will be shown."),
@@ -1856,6 +1857,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     "False")
                 continue
             print("Error: on or off expected.")
+            continue
+
+        if shell_command.command == "showunmergedchanges":
+            p_database.show_unmerged_changes()
             continue
 
         if shell_command.command == "showunmergedwarning":
