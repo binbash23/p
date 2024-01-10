@@ -1699,6 +1699,8 @@ class PDatabase:
         print("New accounts since last merge")
         print()
         uuids = self.get_new_account_uuids_since(last_merge_date)
+        if len(uuids) == 0:
+            print("None")
         for current_uuid in uuids:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
@@ -1707,6 +1709,8 @@ class PDatabase:
         print("Changed accounts since last merge")
         print()
         uuids = self.get_changed_account_uuids_since(last_merge_date)
+        if len(uuids) == 0:
+            print("None")
         for current_uuid in uuids:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
@@ -1715,6 +1719,8 @@ class PDatabase:
         print("Deleted account uuid's since last merge")
         print()
         uuids = self.get_changed_account_uuids_since(last_merge_date)
+        if len(uuids) == 0:
+            print("None")
         for current_uuid in uuids:
             print(current_uuid)
         print()
