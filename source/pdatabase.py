@@ -1692,7 +1692,7 @@ class PDatabase:
         last_merge_date = get_last_merge_date(self.database_filename)
         last_change_date = get_last_change_date_in_database(self.database_filename)
         print()
-        print("Last merge date  : " + last_merge_date)
+        print("Last merge  date : " + last_merge_date)
         print("Last change date : " + last_change_date)
 
         print()
