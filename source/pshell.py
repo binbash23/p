@@ -1339,8 +1339,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             if connector_type == "ssh":
                 try:
-                    ssh_connector.SshConnector(target_account.url, target_account.loginname,
-                                               target_account.password)
+                    connector = ssh_connector.SshConnector(target_account.url, target_account.loginname,
+                                                           target_account.password)
                     print("Using connector: " + str(connector))
                     p_database.merge_database_with_connector(connector)
                 except Exception as e:
