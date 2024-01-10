@@ -38,9 +38,9 @@ class SshConnector(ConnectorInterface):
 
     def __str__(self):
         to_string: str = "SSH Connector attributes: "
-        to_string = (to_string + "base url: " + str(self._ssh_server_url) +
-                     ", hostname: " + self._ssh_server_hostname +
-                     ", path: " + self._ssh_remote_path +
+        to_string = (to_string + "url: " + str(self._ssh_server_url) +
+                     # ", hostname: " + self._ssh_server_hostname +
+                     # ", path: " + self._ssh_remote_path +
                      ", login: " + str(self._ssh_login))
         return to_string
 
@@ -48,8 +48,6 @@ class SshConnector(ConnectorInterface):
         return "ssh"
 
     def list_files(self, remote_path="") -> []:
-        # if remote_path is None:
-        #    remote_path = self._ssh_remote_path
         remote_path = os.path.join(self._ssh_remote_path, remote_path)
         try:
             return self._ssh_connection.listdir(remote_path)
@@ -57,8 +55,6 @@ class SshConnector(ConnectorInterface):
             print("Error: " + str(e))
 
     def upload_file(self, local_path, remote_path=""):
-        # if remote_path is None:
-        #    remote_path = self._ssh_remote_path
         remote_path = os.path.join(self._ssh_remote_path, remote_path)
         try:
             self._ssh_connection.put(local_path, remote_path)
@@ -66,8 +62,6 @@ class SshConnector(ConnectorInterface):
             print("Error: " + str(e))
 
     def download_file(self, remote_path, local_path="."):
-        # if remote_path is None:
-        #    remote_path = self._ssh_remote_path
         remote_path = os.path.join(self._ssh_remote_path, remote_path)
         try:
             self._ssh_connection.get(remote_path, local_path)

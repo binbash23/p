@@ -654,9 +654,9 @@ def print_merge_history(database_filename):
         result = sqlresult.fetchall()
         for row in result:
             print()
+            print("Date            : " + str(row[2]))
             print("Connection type : " + str(row[0]))
             print("Connector       : " + str(row[1]))
-            print("Date            : " + str(row[2]))
             print("Local DB Name   : " + str(row[3]))
             print("Local DB UUID   : " + str(row[4]))
             print("Remote DB Name  : " + str(row[5]))
