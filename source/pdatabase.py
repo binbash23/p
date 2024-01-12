@@ -1501,7 +1501,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select account_uuid as uuid, name, url, loginname, password, type, create_date from account_history where " + \
+            sqlstring = "select account_uuid as uuid, name, url, loginname, password, type, create_date, connector_type from account_history where " + \
                         "account_uuid = '" + str(uuid_string) + "' order by create_date"
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
@@ -1516,7 +1516,8 @@ class PDatabase:
                                   loginname=row[3],
                                   password=row[4],
                                   type=row[5],
-                                  create_date=row[6]
+                                  create_date=row[6],
+                                  connector_type=row[7]
                                   )
                 decrypted_account = self.decrypt_account(account)
                 results_found += 1
