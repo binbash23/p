@@ -199,7 +199,8 @@ SHELL_COMMANDS = [
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
-    ShellCommand("history", "history", "Show history of all user inputs in the the pshell."),
+    ShellCommand("history", "history [MAX_ENTRIES]", "Show history of all user inputs in the the pshell.\n" +
+                 "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
                  "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
@@ -421,18 +422,13 @@ def parse_bool(string: str) -> bool:
         return False
 
 
-# def print_shell_command_history(shell_history_array: [ShellCommand]):
-#     # i = len(shell_history_array)
-#     i = 1
-#     for current_shell_history_entry in shell_history_array:
-#         print(" [" + str(i).rjust(2) + "] - " +
-#               str(current_shell_history_entry.execution_date) +
-#               " - " + current_shell_history_entry.user_input)
-#         i += 1
-
-
-def print_shell_command_history(shell_history_array: [ShellCommand]):
-    i = len(shell_history_array)
+def print_shell_command_history(shell_history_array: [ShellCommand], show_entry_count=0):
+    if show_entry_count == 0:
+        i = len(shell_history_array)
+    else:
+        i = len(shell_history_array) - (len(shell_history_array)  - show_entry_count)
+        if i > len(shell_history_array):
+            i = len(shell_history_array)
     while i > 0:
         print(" [" + str(i).rjust(3) + "] - " +
               str(shell_history_array[i-1].execution_date) +
@@ -1093,7 +1089,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "history":
-            print_shell_command_history(p_database.get_shell_history_entries_decrypted())
+            shell_history_array = p_database.get_shell_history_entries_decrypted()
+            max_hist_entries = len(shell_history_array)
+            if len(shell_command.arguments) > 1:
+                try:
+                    max_hist_entries = int(shell_command.arguments[1])
+                except Exception as e:
+                    print("Error: " + str(e))
+            print_shell_command_history(shell_history_array, max_hist_entries)
             continue
 
         if shell_command.command == "idletime":
