@@ -2000,7 +2000,8 @@ class PDatabase:
                                              account.url,
                                              account.loginname,
                                              new_password,
-                                             account.type)
+                                             account.type,
+                                             account.connector_type)
 
     # Set account by uuid = edit account. If account_history is enabled the old version
     # of the account will be saved in the table account_history

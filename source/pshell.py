@@ -96,6 +96,7 @@ class ShellCommand:
             string = "\\" + string
         string = string.replace("<", "\<")
         string = string.replace(">", "\>")
+        # string = string.replace("'", "\'")
         return string
 
 
@@ -308,7 +309,7 @@ SHELL_COMMANDS = [
                  "Show status when pshell starts."),
     ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the " +
                  "last successfully merge event. This includes new created accounts, changed accounts and the " +
-                 "uuids of deleted accounts."),
+                 "uuid's of deleted accounts."),
     ShellCommand("showunmergedwarning", "showunmergedwarning [on|off]", "Show warning on startup if there are " +
                  "unmerged changes in local database compared to the latest known merge database.\nWith no " +
                  "arguments, the current status will be shown."),
