@@ -8,6 +8,8 @@ import random
 
 
 def get_password(length=10) -> str:
+    random.seed()
+
     base_list = list(string.ascii_lowercase)
     base_list.extend(list(string.ascii_uppercase))
     base_list.extend(list(string.digits))
@@ -15,10 +17,13 @@ def get_password(length=10) -> str:
 
     # print("Base list: " + str(base_list))
 
+    shuffle_iterations = random.randint(4, 18)
+    for i in range(1, shuffle_iterations):
+        random.shuffle(base_list)
+
     start_index = 0
     end_index = len(base_list)
     random_string = ""
-    random.seed()
 
     for i in range(length):
         random.shuffle(base_list)
