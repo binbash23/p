@@ -25,6 +25,7 @@ import ssh_connector
 from dropbox_connector import DropboxConnector
 import file_connector
 from pdatabase import ShellHistoryEntry
+import password_generator
 
 
 class ShellCommand:
@@ -196,6 +197,8 @@ SHELL_COMMANDS = [
                  "new UUID for the current database. This is useful if you have copied the database file and want " +
                  "to use it as a new instance. You might also set a new database name. This is just for identifying " +
                  "the different database files."),
+    ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
+                 "random password with LENGHT characters. When LENGTH is not set, a 10 char password will be generated."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
@@ -1048,6 +1051,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 doc_file.close()
             except Exception as e:
                 print("Error generating git documentation: " + str(e))
+            continue
+
+        if shell_command.command == "generatepassword":
+            password_length = 10
+            if len(shell_command.arguments) == 2:
+                try:
+                    password_length = int(shell_command.arguments[1])
+                except Exception as e:
+                    print("Error: " + str(e))
+            print("Password: " + password_generator.get_password(password_length))
             continue
 
         if shell_command.command == "help":
