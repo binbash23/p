@@ -720,7 +720,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "add":
-            p.add(p_database)
+            new_account_name = ""
+            if len(shell_command.arguments) == 2:
+                new_account_name = shell_command.arguments[1].strip()
+            p.add(p_database, account_name = new_account_name)
             continue
 
         if shell_command.command == "alias":

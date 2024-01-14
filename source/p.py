@@ -16,7 +16,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.01.13"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.01.14"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -33,13 +33,17 @@ P_UPDATER_FILENAME_LINUX = "updater"
 GIT_FULL_DOCUMENTATION_FILENAME = "Full-help-documentation.md"
 
 
-def add(p_database: PDatabase):
+def add(p_database: PDatabase, account_name=""):
     print("Add account")
     account = Account()
     try:
         account.uuid = uuid.uuid4()
         print("UUID          : " + str(account.uuid))
-        account.name = input("Name          : ")
+        if account_name == "":
+            account.name = input("Name          : ")
+        else:
+            print("Name          : " + account_name)
+            account.name = account_name
         account.url = input("URL           : ")
         account.loginname = input("Loginname     : ")
         if p_database.shadow_passwords:

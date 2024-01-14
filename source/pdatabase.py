@@ -1203,8 +1203,17 @@ class PDatabase:
         if self.get_account_exists(delete_uuid) is False:
             print("Error: Account uuid " + delete_uuid + " does not exist.")
             return
-        account_name_to_be_deleted = self.get_account_by_uuid_and_decrypt(delete_uuid).name
-        answer = input("Delete account: " + account_name_to_be_deleted + " [" + delete_uuid + "] ([y]/n) : ")
+        account_to_be_deleted = self.get_account_by_uuid_and_decrypt(delete_uuid)
+        account_name_to_be_deleted = account_to_be_deleted.name
+        print()
+        self.print_formatted_account(account_to_be_deleted,
+                                     show_history_count=True)
+        print()
+        try:
+            answer = input("Delete account ([y]/n) : ")
+        except KeyboardInterrupt:
+            answer = "n"
+            print()
         if answer != "y" and answer != "":
             print("Canceled.")
             return
