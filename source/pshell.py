@@ -167,9 +167,8 @@ SHELL_COMMANDS = [
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
-    ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>", "Delete account with UUID. You can also invalidate " +
-                 "the account instead of deleting it. If you do not no the UUID, use a SEARCHSTRING and you " +
-                 "will be offered possible accounts to delete."),
+    ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>", "Delete account with UUID. If you do not know the UUID, use a SEARCHSTRING and you " +
+                 "will be offered possible accounts to delete.\nA deleted account can not be recovered! It is usually better to invalidate an account."),
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
                  "Delete orphaned account history entries."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
@@ -252,6 +251,7 @@ SHELL_COMMANDS = [
                  " appear in the command history. You can choose the index of the command in your history if" +
                  " you want.\nIf you choose no index, the latest command will be executed.\nIf you use redo ? you " +
                  "will see the current command history with the indices to choose from."),
+    ShellCommand("remove", "remove <UUID>|<SEARCHSTRING>", "The save as the delete command."),
     ShellCommand("revalidate", "revalidate <UUID>|<SEARCHSTRING>", "Revalidate account with UUID or use " +
                  "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
@@ -913,7 +913,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error counting orphaned history entries: " + str(e))
             continue
 
-        if shell_command.command == "delete":
+        if shell_command.command == "delete" or shell_command.command == "remove":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
