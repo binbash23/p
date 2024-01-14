@@ -11,8 +11,11 @@ def get_password(length=10) -> str:
     random.seed()
 
     base_list = list(string.ascii_lowercase)
+    random.shuffle(base_list)
     base_list.extend(list(string.ascii_uppercase))
+    random.shuffle(base_list)
     base_list.extend(list(string.digits))
+    random.shuffle(base_list)
     base_list.extend(list(string.punctuation))
 
     # print("Base list: " + str(base_list))

@@ -560,15 +560,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
-                    # user_input = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                     input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
-                    # user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
                 else:
-                    # user_input = input(prompt_string)
                     input_line = input(prompt_string)
-                    # user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
-                # if user_input.strip() != "":
-                #     current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
                 user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
             except KeyboardInterrupt:
                 print()
@@ -581,6 +575,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if user_input != "":
             current_shell_history_entry = ShellHistoryEntry(user_input=user_input)
+        else:
+            current_shell_history_entry = None
 
         now_date = datetime.datetime.now()
         time_diff = now_date - last_activity_date
@@ -650,8 +646,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         # check if the command is the "redo last command" command
         if shell_command.command == "redo":
-            # delete the redo command from hist
-            # shell_history_array.pop()
             shell_history_array = p_database.get_shell_history_entries_decrypted()
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
@@ -695,18 +689,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Unknown command '" + last_user_input + "'")
                 print("Enter 'help' for command help")
                 continue
-        else:
-            p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
+            else:
+                current_shell_history_entry = ShellHistoryEntry(user_input=last_user_input)
+        # else:
+        p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
         # and proceed parsing the command...:
 
         # check if the command is an alias. then the alias must be replaced with the stored command(s)
         if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
-            # Read storde command(s) from database and populate user_input_list
+            # Read stored command(s) from database and populate user_input_list
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             if alias_command == "":
                 print("Error: Alias " + shell_command.command + " is not set")
             else:
-                user_input_list = alias_command.split(PSHELL_COMMAND_DELIMITER)
+                user_input_list.extend(alias_command.split(PSHELL_COMMAND_DELIMITER))
             continue
 
         # continue with command processing
