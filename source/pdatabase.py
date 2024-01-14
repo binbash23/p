@@ -1207,7 +1207,8 @@ class PDatabase:
         account_name_to_be_deleted = account_to_be_deleted.name
         print()
         self.print_formatted_account(account_to_be_deleted,
-                                     show_history_count=True)
+                                     show_history_count=True,
+                                     show_account_details=True)
         print()
         try:
             answer = input("Delete account ([y]/n) : ")
@@ -2062,7 +2063,7 @@ class PDatabase:
             database_connection.close()
 
     def print_formatted_account_search_string_colored(self, account: Account, search_string: str = "",
-                                                      print_slowly: bool = True):
+                                                      print_slowly: bool = True, show_account_details: bool = False):
         account.uuid = color_search_string(account.uuid, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.name = color_search_string(account.name, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.url = color_search_string(account.url, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
@@ -2077,9 +2078,10 @@ class PDatabase:
                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.invalid_date = color_search_string(account.invalid_date, search_string,
                                                    self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        self.print_formatted_account(account, print_slowly=print_slowly)
+        self.print_formatted_account(account, print_slowly=print_slowly, show_account_details=show_account_details)
 
-    def print_formatted_account(self, account: Account, show_history_count: bool = True, print_slowly: bool = True):
+    def print_formatted_account(self, account: Account, show_history_count: bool = True, print_slowly: bool = True,
+                                show_account_details: bool = False):
         if print_slowly is False:
             print_delay = 0
         else:
@@ -2101,7 +2103,7 @@ class PDatabase:
         print_slow.print_slow(str(account.type), delay=print_delay)
         print("Connectortype   : ", end="")
         print_slow.print_slow(str(account.connector_type), delay=print_delay)
-        if self.show_account_details:
+        if self.show_account_details or show_account_details:
             print("Created         : ", end="")
             print_slow.print_slow(str(account.create_date), delay=print_delay)
             print("Changed         : ", end="")
