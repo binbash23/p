@@ -217,7 +217,7 @@ SHELL_COMMANDS = [
     ShellCommand("listconnectorfiles", "listconnectorfiles UUID", "List all files in the connector account with UUID."),
     # ShellCommand("listsshfiles", "listsshfiles [UUID]", "List all files in ssh folder."),
     # ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
-                 "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
+    #              "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
