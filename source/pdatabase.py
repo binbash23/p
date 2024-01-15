@@ -1682,7 +1682,7 @@ class PDatabase:
             database_connection.close()
         return uuids
 
-    def get_deleted_account_uuids_since(self, date_string: str) -> []:
+    def get_deleted_account_uuids_decrypted_since(self, date_string: str) -> []:
         uuids = []
         try:
             database_connection = sqlite3.connect(self.database_filename)
@@ -1729,7 +1729,7 @@ class PDatabase:
         print()
         print("Deleted account uuid's since last merge")
         print()
-        uuids = self.get_deleted_account_uuids_decrypted(last_merge_date)
+        uuids = self.get_deleted_account_uuids_decrypted_since(last_merge_date)
         if len(uuids) == 0:
             print("None")
         for current_uuid in uuids:
