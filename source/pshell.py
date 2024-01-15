@@ -1255,33 +1255,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error setting pshell max history size: " + str(e))
             continue
 
-        # if shell_command.command == "merge2dropbox":
-        #     dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-        #     if dropbox_connection_credentials is None:
-        #         continue
-        #     try:
-        #         dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-        #                                              dropbox_connection_credentials[1],
-        #                                              dropbox_connection_credentials[2])
-        #         print("Using connector: " + str(dropbox_connector))
-        #         p_database.merge_database_with_connector(dropbox_connector)
-        #     except Exception as e:
-        #         print("Error: " + str(e))
-        #     continue
-
         if shell_command.command == "merge2dropbox":
             if len(shell_command.arguments) == 1:
                 dropbox_account_uuid = None
             else:
-                if len(shell_command.arguments) == 2:
-                    dropbox_account_uuid = shell_command.arguments[1].strip()
-                else:
-                    print("too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
+                dropbox_account_uuid = shell_command.arguments[1].strip()
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
-                # print("Using connector: " + str(connector))
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
