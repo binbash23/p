@@ -77,7 +77,7 @@ def get_webdav_connector(p_database: pdatabase, account_uuid: str = None) -> web
     if account is None:
         raise Exception("Error: Account uuid " + account_uuid + " not found.")
 
-    if account.connector_type != "ssh":
+    if account.connector_type != "webdav":
         raise Exception("Error: expected connector type webdav but got: " + account.connector_type)
 
     dav_url = account.url.strip()

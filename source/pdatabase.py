@@ -445,7 +445,7 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
 CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
-CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE = "DEFAULT_MERGE_TARGET_FILE"
+# CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE = "DEFAULT_MERGE_TARGET_FILE"
 TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 
 
@@ -548,18 +548,20 @@ def set_attribute_value_in_configuration_table(_database_filename, _attribute_na
         database_connection = sqlite3.connect(_database_filename)
         cursor = database_connection.cursor()
         # First check if the attribute exists and create it if not
+        # print("-> hey")
         if not is_attribute_in_configuration_table(_database_filename, _attribute_name):
+            # print("-> inserting")
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
-            cursor.execute(sqlstring, [_attribute_name, ""])
+            cursor.execute(sqlstring, [_attribute_name, _value])
             database_connection.commit()
+            return
         sqlstring = "update configuration set value=? where attribute=?"
         cursor.execute(sqlstring, [_value, _attribute_name])
         database_connection.commit()
     except Exception:
         raise
     finally:
-        if database_connection is not None:
-            database_connection.close()
+        database_connection.close()
 
 
 def is_attribute_in_configuration_table(_database_filename, _attribute_name):
@@ -579,8 +581,7 @@ def is_attribute_in_configuration_table(_database_filename, _attribute_name):
     except Exception as e:
         raise
     finally:
-        if database_connection is not None:
-            database_connection.close()
+        database_connection.close()
     return True
 
 
@@ -602,8 +603,7 @@ def get_attribute_value_from_configuration_table(_database_filename, _attribute_
     except Exception:
         raise
     finally:
-        if database_connection is not None:
-            database_connection.close()
+        database_connection.close()
     return value
 
 
@@ -955,9 +955,9 @@ def print_database_statistics(database_filename):
     webdav_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-    default_merge_target_file = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+    # default_merge_target_file = \
+    #     get_attribute_value_from_configuration_table(database_filename,
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
@@ -1004,16 +1004,14 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(unmerged_changes)
         print("Merge destination DROPBOX           : ", end="")
         print_slow.print_slow(str(dropbox_account_uuid))
-        # print("Dropbox application account uuid    : ", end="")
-        # print_slow.print_slow(str(dropbox_application_account_uuid))
         print("Merge destination SSH               : ", end="")
         print_slow.print_slow(str(ssh_account_uuid))
         print("Merge destination WEBDAV            : ", end="")
-        print_slow.print_slow(str(file_account_uuid))
-        print("Merge destination FILE              : ", end="")
         print_slow.print_slow(str(webdav_account_uuid))
-        print("Merge destination local file        : ", end="")
-        print_slow.print_slow(str(default_merge_target_file))
+        print("Merge destination FILE              : ", end="")
+        print_slow.print_slow(str(file_account_uuid))
+        # print("Merge destination local file        : ", end="")
+        # print_slow.print_slow(str(default_merge_target_file))
     except KeyboardInterrupt as ke:
         print()
 
@@ -2458,7 +2456,6 @@ class PDatabase:
                 return
                 # sys.exit(1)
         finally:
-            if database_connection is not None:
                 database_connection.close()
         # Something went wrong opening the sqlite db. Now try to create one with default schema
         try:
@@ -2501,8 +2498,7 @@ class PDatabase:
         except Exception as e:
             raise
         finally:
-            if database_connection is not None:
-                database_connection.close()
+            database_connection.close()
 
     def create_add_statements(self):
         results_found = 0
@@ -2546,15 +2542,15 @@ class PDatabase:
         # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
-    def merge_database_with_default_merge_target_file(self):
-        default_target_file = \
-            get_attribute_value_from_configuration_table(self.database_filename,
-                                                         CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
-        if default_target_file is not None and default_target_file != "":
-            self.merge_database(default_target_file)
-        else:
-            print(colored("Error: There is no default merge target file configured in configuration table.",
-                          "red"))
+    # def merge_database_with_default_merge_target_file(self):
+    #     default_target_file = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+    #     if default_target_file is not None and default_target_file != "":
+    #         self.merge_database(default_target_file)
+    #     else:
+    #         print(colored("Error: There is no default merge target file configured in configuration table.",
+    #                       "red"))
 
     def get_database_password_as_string(self) -> str:
         if self.database_password == "":
@@ -2567,7 +2563,7 @@ class PDatabase:
         else:
             return None
 
-    def merge_database(self, merge_database_filename: str) -> int:
+    def _merge_database(self, merge_database_filename: str) -> int:
         """ returns -1 in error case, 0 when no error and no changes where made,
         1 when changes where made locally and 2 when changes where made in remote db
         and 3 when changes where made locally and remote """
@@ -2784,7 +2780,7 @@ class PDatabase:
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
         if connector.get_type() == "file":
-            self.merge_database(
+            self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             return
         if not connector.exists(self.get_database_filename_without_path()):
@@ -2796,7 +2792,7 @@ class PDatabase:
                                                        CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                                                        "Cloud Database")
             print("Merging local database into initial remote database...")
-            self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+            self._merge_database(TEMP_MERGE_DATABASE_FILENAME)
             print("Uploading initial database: '" +
                   TEMP_MERGE_DATABASE_FILENAME + "' as '" +
                   self.get_database_filename_without_path() + "' to connector...")
@@ -2818,7 +2814,7 @@ class PDatabase:
         connector.download_file(self.get_database_filename_without_path(),
                                 TEMP_MERGE_DATABASE_FILENAME)
         print("Merging databases...")
-        return_code = self.merge_database(TEMP_MERGE_DATABASE_FILENAME)
+        return_code = self._merge_database(TEMP_MERGE_DATABASE_FILENAME)
         if return_code > 1:
             print("Uploading merged database...")
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),

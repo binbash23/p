@@ -213,9 +213,10 @@ SHELL_COMMANDS = [
                  " If you search something, invalidated accounts are not visible unless you change the settings (" +
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
-    ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
-    ShellCommand("listsshfiles", "listsshfiles [UUID]", "List all files in ssh folder."),
-    ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
+    # ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
+    ShellCommand("listconnectorfiles", "listconnectorfiles UUID", "List all files in the connector account with UUID."),
+    # ShellCommand("listsshfiles", "listsshfiles [UUID]", "List all files in ssh folder."),
+    # ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
                  "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
@@ -273,9 +274,9 @@ SHELL_COMMANDS = [
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
-    ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile FILENAME",
-                 "Set a default merge target file in the configuration table. " +
-                 "This filename will be used when merge2file is called without a target filename."),
+    # ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile FILENAME",
+    #              "Set a default merge target file in the configuration table. " +
+    #              "This filename will be used when merge2file is called without a target filename."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
                  "If one or more account(s) match the SEARCHSTRING, the password of the first account will be copied " +
                  "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
@@ -1148,94 +1149,113 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_accounts("")
             continue
 
-        if shell_command.command == "listdropboxfiles":
-            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-            if dropbox_connection_credentials is None:
+        if shell_command.command == "listconnectorfiles":
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
+            try:
+                connector = connector_manager.get_connector(p_database, account_uuid)
+                files = connector.list_files("")
+                if len(files) > 0:
+                    print("Files found in the connector:")
+                    for f in files:
+                        print(f)
+                else:
+                    print("No files found in connector.")
                 continue
-            connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
-                                                           dropbox_connection_credentials[1],
-                                                           dropbox_connection_credentials[2])
-            dropbox_files = connector.list_files("")
-            if len(dropbox_files) > 0:
-                print("Files found in the dropbox folder:")
-                for f in dropbox_files:
-                    print(f)
-            else:
-                print("No files found in dropbox folder.")
+            except Exception as e:
+                print("Error: " + str(e))
             continue
+
+        # if shell_command.command == "listdropboxfiles":
+        #     connector = connector_manager.get_dropbox_connector()
+        #     # dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+        #     # if dropbox_connection_credentials is None:
+        #     #     continue
+        #     # connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
+        #     #                                                dropbox_connection_credentials[1],
+        #     #                                                dropbox_connection_credentials[2])
+        #     dropbox_files = connector.list_files("")
+        #     if len(dropbox_files) > 0:
+        #         print("Files found in the dropbox folder:")
+        #         for f in dropbox_files:
+        #             print(f)
+        #     else:
+        #         print("No files found in dropbox folder.")
+        #     continue
 
         if shell_command.command == "listinvalidated":
             p_database.search_invalidated_accounts("")
             continue
 
-        if shell_command.command == "listsshfiles":
-            if len(shell_command.arguments) == 1:
-                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-                if ssh_account_uuid == "":
-                    print("No default ssh account UUID found in configuration table.")
-                    continue
-                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            else:
-                if len(shell_command.arguments) == 2:
-                    ssh_account_uuid = shell_command.arguments[1].strip()
-                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-                else:
-                    print("too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
-            if ssh_account is None:
-                print("SSH account could not be found: " + str(ssh_account_uuid))
-                continue
-            connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
-            try:
-                ssh_files = connector.list_files()
-                if len(ssh_files) > 0:
-                    print("Files found in the ssh folder:")
-                    for f in ssh_files:
-                        print(f)
-                else:
-                    print("No files found in ssh folder.")
-
-            except Exception as e:
-                print("Error: " + str(e))
-            continue
-
-        if shell_command.command == "listwebdavfiles":
-            if len(shell_command.arguments) == 1:
-                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-                if webdav_account_uuid == "":
-                    print("No default webdav account UUID found in configuration table.")
-                    continue
-                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            else:
-                if len(shell_command.arguments) == 2:
-                    webdav_account_uuid = shell_command.arguments[1].strip()
-                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-                else:
-                    print("too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
-            if webdav_account is None:
-                print("Webdav account could not be found: " + str(webdav_account_uuid))
-                continue
-            connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-                                                         webdav_account.password)
-            try:
-                webdav_files = connector.list_files("/")
-                if len(webdav_files) > 0:
-                    print("Files found in the webdav folder:")
-                    for f in webdav_files:
-                        print(f)
-                else:
-                    print("No files found in webdav folder.")
-
-            except Exception as e:
-                print("Error: " + str(e))
-            continue
+        # if shell_command.command == "listsshfiles":
+        #     if len(shell_command.arguments) == 1:
+        #         ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+        #             p_database.database_filename,
+        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
+        #         if ssh_account_uuid == "":
+        #             print("No default ssh account UUID found in configuration table.")
+        #             continue
+        #         ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+        #     else:
+        #         if len(shell_command.arguments) == 2:
+        #             ssh_account_uuid = shell_command.arguments[1].strip()
+        #             ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
+        #         else:
+        #             print("too many arguments.")
+        #             print(shell_command.synopsis)
+        #             continue
+        #     if ssh_account is None:
+        #         print("SSH account could not be found: " + str(ssh_account_uuid))
+        #         continue
+        #     connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
+        #     try:
+        #         ssh_files = connector.list_files()
+        #         if len(ssh_files) > 0:
+        #             print("Files found in the ssh folder:")
+        #             for f in ssh_files:
+        #                 print(f)
+        #         else:
+        #             print("No files found in ssh folder.")
+        #
+        #     except Exception as e:
+        #         print("Error: " + str(e))
+        #     continue
+        #
+        # if shell_command.command == "listwebdavfiles":
+        #     if len(shell_command.arguments) == 1:
+        #         webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
+        #             p_database.database_filename,
+        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
+        #         if webdav_account_uuid == "":
+        #             print("No default webdav account UUID found in configuration table.")
+        #             continue
+        #         webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+        #     else:
+        #         if len(shell_command.arguments) == 2:
+        #             webdav_account_uuid = shell_command.arguments[1].strip()
+        #             webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
+        #         else:
+        #             print("too many arguments.")
+        #             print(shell_command.synopsis)
+        #             continue
+        #     if webdav_account is None:
+        #         print("Webdav account could not be found: " + str(webdav_account_uuid))
+        #         continue
+        #     connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
+        #                                                  webdav_account.password)
+        #     try:
+        #         webdav_files = connector.list_files("/")
+        #         if len(webdav_files) > 0:
+        #             print("Files found in the webdav folder:")
+        #             for f in webdav_files:
+        #                 print(f)
+        #         else:
+        #             print("No files found in webdav folder.")
+        #
+        #     except Exception as e:
+        #         print("Error: " + str(e))
+        #     continue
 
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
@@ -1466,19 +1486,19 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 latest_found_account = account_array[len(account_array) - 1]
             continue
 
-        if shell_command.command == "setdefaultmergetargetfile":
-            if len(shell_command.arguments) == 1:
-                print("Default target filename is missing.")
-                print(shell_command.synopsis)
-                continue
-            new_default_merge_target_file = shell_command.arguments[1].strip()
-            if new_default_merge_target_file == "-":
-                new_default_merge_target_file = ""
-            p.set_attribute_value_in_configuration_table(
-                p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
-                new_default_merge_target_file)
-            continue
+        # if shell_command.command == "setdefaultmergetargetfile":
+        #     if len(shell_command.arguments) == 1:
+        #         print("Default target filename is missing.")
+        #         print(shell_command.synopsis)
+        #         continue
+        #     new_default_merge_target_file = shell_command.arguments[1].strip()
+        #     if new_default_merge_target_file == "-":
+        #         new_default_merge_target_file = ""
+        #     p.set_attribute_value_in_configuration_table(
+        #         p_database.database_filename,
+        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
+        #         new_default_merge_target_file)
+        #     continue
 
         if shell_command.command == "setfileaccountuuid":
             if len(shell_command.arguments) == 1:

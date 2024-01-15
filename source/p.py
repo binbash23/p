@@ -196,34 +196,23 @@ def start_dropbox_configuration():
     print()
     print("The generated refresh token is: " + refresh_access_token)
     print()
-    print("Now add two new accounts to your p database (in pshell use the command: 'add'):")
+    print("Now add a new accounts to your p database (in pshell use the command: 'add'):")
     print()
-    print("Account #1:")
-    print("A new account with any name (i.e: 'Dropbox app') the application_key (" + application_key + ")" +
-          " as the loginname and the application_secret (" + application_secret + ") as the password. All other " +
-          "fields can be left empty.")
-    print()
-    print("Account #2:")
-    print("A new account with any name (i.e.: 'Dropbox Refresh Token') and the long refresh token as the" +
-          " password (" + refresh_access_token + "). All other fields can be left empty.")
+    print("Add a new account with any name (i.e: 'Dropbox Connector') the application_key (" + application_key + ")" +
+          " as the url and the application_secret (" + application_secret + ") as the login name and the long refresh token as the" +
+          " password (" + refresh_access_token + "). The type field can be filled with 'Connector' and the connector type field must be filled with 'dropbox'.")
     print("")
-    print("Now you have to tell p which 2 account UUID's must be used to access the dropbox.")
-    print("One account (#1) is for the dropbox app information, the other (#2) is for the refresh token information.")
-    print("P stores the dropbox account infos in the configuration and you can query the config in the pshell " +
-          "with the command 'status'.")
+    print("You can set this dropbox account as the default dropbox merge account with this command (in pshell):")
+    print("> setdropboxaccountuuid UUID_OF_THE_ACCOUNT_THAT_YOU_HAVE_JUST_CREATED")
     print()
-    print("Configure the #1 account uuid with the -z option (or set it in the pshell with the command" +
-          " 'setdropboxapplicationuuid <UUID>' where you set UUID to the UUID of the just created account #1.)")
-    print("Example:")
-    print("> p.exe -z 'c0f98849-0677-4f12-80ff-c22cb6578d1a'")
+    print("You  might verify if the dropbox uuid is set in the configuration by executing:")
+    print("> status")
     print()
-    print("Configure the #2 account uuid with the -y option (or set it in the pshell with the command " +
-          "'setdropboxtokenuuid <UUID>' where you set UUID to the UUID of the just created account #2.)")
-    print("Example:")
-    print("> p.exe -y '123ab849-7395-1672-987f-442cbafb8d1a'")
+    print("You should see that the dropbox uuid is stored there.")
     print()
-    print("Now you should be able to synchronize your p database with the -Y option.")
-    print("It might be helpful to run p in a powershell with '.\\p.exe' to be able to see error messages.")
+    print("When you execute")
+    print("> merge2dropbox")
+    print("then you local database will be synchronized to the dropbox version of the database.")
     print()
 
 
@@ -255,11 +244,11 @@ def main():
     parser.add_option("-I", "--search-uuid", action="store", dest="search_uuid", help="Search account by UUID")
     parser.add_option("-l", "--list", action="store_true", dest="list", default=False,
                       help="List all accounts")
-    parser.add_option("-m", "--merge-last-known", action="store_true", dest="merge_last_known",
-                      help="Merge with last known remote database.")
-    parser.add_option("-M", "--merge-database", action="store", dest="merge_database",
-                      help="Merge two databases and synchronize them. Both databases will be synchronized " +
-                           "to an equal state. Both passwords must be the same!")
+    # parser.add_option("-m", "--merge-last-known", action="store_true", dest="merge_last_known",
+    #                   help="Merge with last known remote database.")
+    # parser.add_option("-M", "--merge-database", action="store", dest="merge_database",
+    #                   help="Merge two databases and synchronize them. Both databases will be synchronized " +
+    #                        "to an equal state. Both passwords must be the same!")
     parser.add_option("-p", "--database-password", action="store", dest="database_password",
                       help="Set database password. If you want to use an empty password use -E")
     parser.add_option("-q", "--query", action="store_true", dest="query", default=False,
@@ -276,13 +265,13 @@ def main():
                       help="Show p version info")
     parser.add_option("-x", "--show_invalidated", action="store_true", dest="show_invalidated", default=False,
                       help="Show also invalidated accounts (default=False)")
-    parser.add_option("-y", "--set-dropbox-token-uuid", action="store", dest="dropbox_token_uuid",
-                      help="Set dropbox-access-token account uuid to sync your database into dropbox.")
-    parser.add_option("-Y", "--merge-with-dropbox", action="store_true", dest="merge_with_dropbox", default=False,
-                      help="Merge your local database with dropbox.")
-    parser.add_option("-z", "--set-dropbox-application-uuid", action="store", dest="dropbox_application_uuid",
-                      help="Set dropbox application account uuid. The username must be the application key and " +
-                           "the password the application secret.")
+    # parser.add_option("-y", "--set-dropbox-token-uuid", action="store", dest="dropbox_token_uuid",
+    #                   help="Set dropbox-access-token account uuid to sync your database into dropbox.")
+    # parser.add_option("-Y", "--merge-with-dropbox", action="store_true", dest="merge_with_dropbox", default=False,
+    #                   help="Merge your local database with dropbox.")
+    # parser.add_option("-z", "--set-dropbox-application-uuid", action="store", dest="dropbox_application_uuid",
+    #                   help="Set dropbox application account uuid. The username must be the application key and " +
+    #                        "the password the application secret.")
     parser.add_option("-Z", "--start-dropbox-configuration", action="store_true", dest="start_dropbox_configuration",
                       default=False, help="Start the dropbox configuration. You need the dropbox application key" +
                                           " and the dropbox application secret for this.")
@@ -336,21 +325,21 @@ def main():
         print_database_statistics(database_filename)
         sys.exit(0)
 
-    # check here if a dropbox account uuid stuff should be set in the configuration table (can be done without password)
-    # #1 check for dropbox token uuid
-    if options.dropbox_token_uuid is not None:
-        set_attribute_value_in_configuration_table(
-            database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
-            options.dropbox_token_uuid)
-        print("Dropbox access token account uuid registered in configuration (use -S to view config).")
-        sys.exit(0)
-    # #2 check for dropbox application uuid
-    if options.dropbox_application_uuid is not None:
-        set_attribute_value_in_configuration_table(
-            database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
-            options.dropbox_application_uuid)
-        print("Dropbox application account uuid registered in configuration (use -S to view config).")
-        sys.exit(0)
+    # # check here if a dropbox account uuid stuff should be set in the configuration table (can be done without password)
+    # # #1 check for dropbox token uuid
+    # if options.dropbox_token_uuid is not None:
+    #     set_attribute_value_in_configuration_table(
+    #         database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
+    #         options.dropbox_token_uuid)
+    #     print("Dropbox access token account uuid registered in configuration (use -S to view config).")
+    #     sys.exit(0)
+    # # #2 check for dropbox application uuid
+    # if options.dropbox_application_uuid is not None:
+    #     set_attribute_value_in_configuration_table(
+    #         database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
+    #         options.dropbox_application_uuid)
+    #     print("Dropbox application account uuid registered in configuration (use -S to view config).")
+    #     sys.exit(0)
 
     # second fetch password:
     database_password = None
@@ -415,16 +404,16 @@ def main():
         start_pshell(p_database)
         sys.exit(0)
 
-    # check here if a dropbox database merge should be done
-    if options.merge_with_dropbox:
-        dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-        if dropbox_connection_credentials is None:
-            sys.exit(1)
-        dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                             dropbox_connection_credentials[1],
-                                             dropbox_connection_credentials[2])
-        p_database.merge_database_with_connector(dropbox_connector)
-        sys.exit(0)
+    # # check here if a dropbox database merge should be done
+    # if options.merge_with_dropbox:
+    #     dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+    #     if dropbox_connection_credentials is None:
+    #         sys.exit(1)
+    #     dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+    #                                          dropbox_connection_credentials[1],
+    #                                          dropbox_connection_credentials[2])
+    #     p_database.merge_database_with_connector(dropbox_connector)
+    #     sys.exit(0)
 
     if options.add_account_cli:
         new_account = Account(uuid=options.NEW_ACCOUNT_UUID or "",
@@ -462,12 +451,12 @@ def main():
     if options.list:
         p_database.search_accounts("")
         sys.exit(0)
-    if options.merge_last_known:
-        p_database.merge_database_with_default_merge_target_file()
-        sys.exit(0)
-    if options.merge_database is not None:
-        p_database.merge_database(options.merge_database)
-        sys.exit(0)
+    # if options.merge_last_known:
+    #     p_database.merge_database_with_default_merge_target_file()
+    #     sys.exit(0)
+    # if options.merge_database is not None:
+    #     p_database.merge_database(options.merge_database)
+    #     sys.exit(0)
     if options.add:
         add(p_database)
         sys.exit(0)
