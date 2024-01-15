@@ -22,10 +22,12 @@ import pdatabase
 import print_slow
 import webdav_connector
 import ssh_connector
-from dropbox_connector import DropboxConnector
+# from dropbox_connector import DropboxConnector
+import dropbox_connector
 import file_connector
 from pdatabase import ShellHistoryEntry
 import password_generator
+import connector_manager
 
 
 class ShellCommand:
@@ -167,7 +169,8 @@ SHELL_COMMANDS = [
     ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
-    ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>", "Delete account with UUID. If you do not know the UUID, use a SEARCHSTRING and you " +
+    ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
+                 "Delete account with UUID. If you do not know the UUID, use a SEARCHSTRING and you " +
                  "will be offered possible accounts to delete.\nA deleted account can not be recovered! It is usually better to invalidate an account."),
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
                  "Delete orphaned account history entries."),
@@ -220,7 +223,8 @@ SHELL_COMMANDS = [
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
-    ShellCommand("merge2dropbox", "merge2dropbox", "Merge local database with dropbox database copy."),
+    ShellCommand("merge2dropbox", "merge2dropbox [DROPBOX_ACCOUNT_UUID]",
+                 "Merge local database with dropbox database copy. If DROPBOX_ACCOUNT_UUID is not given, the configuration will be searched for the default dropbox account uuid."),
     ShellCommand("merge2file", "merge2file [<FILENAME>]",
                  "Merge local database with another database identified by FILENAME. If FILENAME is not " +
                  "given, the configuration table will be searched for a default merget target file. " +
@@ -292,10 +296,12 @@ SHELL_COMMANDS = [
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database. To unset the database name, set it to '-'"),
-    ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
-                 "Set the dropbox application account uuid in configuration."),
-    ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
-                 "Set the dropbox token account uuid in configuration."),
+    # ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
+    #              "Set the dropbox application account uuid in configuration."),
+    # ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
+    #              "Set the dropbox token account uuid in configuration."),
+    ShellCommand("setdropboxaccountuuid", "setdropboxaccountuuid <UUID>",
+                 "Set the default dropbox account uuid in the configuration. Whenever you run merge2dropbox, this UUID will be used as the default dropbox account."),
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
@@ -325,7 +331,8 @@ SHELL_COMMANDS = [
                  "locking the pshell (0 = disable timeout). Without MINUTES the current timeout is shown."),
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
                  "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
-    ShellCommand("updatep", "updatep", "Update p program. This command will download the latest p exceutable from git."),
+    ShellCommand("updatep", "updatep",
+                 "Update p program. This command will download the latest p exceutable from git."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false.\nIf verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
@@ -429,13 +436,13 @@ def print_shell_command_history(shell_history_array: [ShellCommand], show_entry_
     if show_entry_count == 0:
         i = len(shell_history_array)
     else:
-        i = len(shell_history_array) - (len(shell_history_array)  - show_entry_count)
+        i = len(shell_history_array) - (len(shell_history_array) - show_entry_count)
         if i > len(shell_history_array):
             i = len(shell_history_array)
     while i > 0:
         print(" [" + str(i).rjust(3) + "] - " +
-              str(shell_history_array[i-1].execution_date) +
-              " - " + shell_history_array[i-1].user_input)
+              str(shell_history_array[i - 1].execution_date) +
+              " - " + shell_history_array[i - 1].user_input)
         i -= 1
 
 
@@ -719,7 +726,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_account_name = ""
             if len(shell_command.arguments) == 2:
                 new_account_name = shell_command.arguments[1].strip()
-            p.add(p_database, account_name = new_account_name)
+            p.add(p_database, account_name=new_account_name)
             continue
 
         if shell_command.command == "alias":
@@ -757,20 +764,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
                 continue
-            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                 dropbox_connection_credentials[1],
-                                                 dropbox_connection_credentials[2])
-            p_database.change_database_password_from_connector(dropbox_connector)
+            connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
+                                                           dropbox_connection_credentials[1],
+                                                           dropbox_connection_credentials[2])
+            p_database.change_database_password_from_connector(connector)
             continue
 
         if shell_command.command == "changedropboxdbname":
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
                 continue
-            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                 dropbox_connection_credentials[1],
-                                                 dropbox_connection_credentials[2])
-            p_database.change_database_name_from_connector(dropbox_connector)
+            connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
+                                                           dropbox_connection_credentials[1],
+                                                           dropbox_connection_credentials[2])
+            p_database.change_database_name_from_connector(connector)
             continue
 
         if shell_command.command == "changesshdbname":
@@ -928,10 +935,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
                 continue
-            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                 dropbox_connection_credentials[1],
-                                                 dropbox_connection_credentials[2])
-            p_database.delete_database_in_connector(dropbox_connector)
+            connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
+                                                           dropbox_connection_credentials[1],
+                                                           dropbox_connection_credentials[2])
+            p_database.delete_database_in_connector(connector)
             continue
 
         if shell_command.command == "duplicate":
@@ -1142,10 +1149,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
             if dropbox_connection_credentials is None:
                 continue
-            dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                 dropbox_connection_credentials[1],
-                                                 dropbox_connection_credentials[2])
-            dropbox_files = dropbox_connector.list_files("")
+            connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
+                                                           dropbox_connection_credentials[1],
+                                                           dropbox_connection_credentials[2])
+            dropbox_files = connector.list_files("")
             if len(dropbox_files) > 0:
                 print("Files found in the dropbox folder:")
                 for f in dropbox_files:
@@ -1248,16 +1255,37 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error setting pshell max history size: " + str(e))
             continue
 
+        # if shell_command.command == "merge2dropbox":
+        #     dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
+        #     if dropbox_connection_credentials is None:
+        #         continue
+        #     try:
+        #         dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
+        #                                              dropbox_connection_credentials[1],
+        #                                              dropbox_connection_credentials[2])
+        #         print("Using connector: " + str(dropbox_connector))
+        #         p_database.merge_database_with_connector(dropbox_connector)
+        #     except Exception as e:
+        #         print("Error: " + str(e))
+        #     continue
+
         if shell_command.command == "merge2dropbox":
-            dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-            if dropbox_connection_credentials is None:
-                continue
+            if len(shell_command.arguments) == 1:
+                dropbox_account_uuid = None
+                # connector = connector_manager.get_dropbox_connector(p_database)
+            else:
+                if len(shell_command.arguments) == 2:
+                    dropbox_account_uuid = shell_command.arguments[1].strip()
+                    # dropbox_account = p_database.get_account_by_uuid_and_decrypt(dropbox_account_uuid)
+                    # connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
+                else:
+                    print("too many arguments.")
+                    print(shell_command.synopsis)
+                    continue
             try:
-                dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-                                                     dropbox_connection_credentials[1],
-                                                     dropbox_connection_credentials[2])
-                print("Using connector: " + str(dropbox_connector))
-                p_database.merge_database_with_connector(dropbox_connector)
+                connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
+                print("Using connector: " + str(connector))
+                p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
             continue
@@ -1726,25 +1754,36 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_database_name)
             continue
 
-        if shell_command.command == "setdropboxapplicationuuid":
-            if len(shell_command.arguments) == 1:
-                print("UUID is missing.")
-                print(shell_command.synopsis)
-                continue
-            p.set_attribute_value_in_configuration_table(
-                p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
-                shell_command.arguments[1].strip())
-            continue
+        # if shell_command.command == "setdropboxapplicationuuid":
+        #     if len(shell_command.arguments) == 1:
+        #         print("UUID is missing.")
+        #         print(shell_command.synopsis)
+        #         continue
+        #     p.set_attribute_value_in_configuration_table(
+        #         p_database.database_filename,
+        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
+        #         shell_command.arguments[1].strip())
+        #     continue
+        #
+        # if shell_command.command == "setdropboxtokenuuid":
+        #     if len(shell_command.arguments) == 1:
+        #         print("UUID is missing.")
+        #         print(shell_command.synopsis)
+        #         continue
+        #     p.set_attribute_value_in_configuration_table(
+        #         p_database.database_filename,
+        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
+        #         shell_command.arguments[1].strip())
+        #     continue
 
-        if shell_command.command == "setdropboxtokenuuid":
+        if shell_command.command == "setdropboxaccountuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
                 print(shell_command.synopsis)
                 continue
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID,
                 shell_command.arguments[1].strip())
             continue
 

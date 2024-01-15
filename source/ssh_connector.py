@@ -8,7 +8,6 @@ import os.path
 
 import pysftp
 
-# from informal_connector_interface import InformalConnectorInterface
 from connector_interface import ConnectorInterface
 
 

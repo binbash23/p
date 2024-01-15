@@ -429,8 +429,9 @@ CONFIGURATION_TABLE_ATTRIBUTE_UUID = "DATABASE_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATABASE = "LAST_MERGE_DATABASE_FILENAME"
 CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE = "LAST_MERGE_DATE"
 CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION = "SCHEMA_VERSION"
-CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
-CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
+# CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
+# CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID = "DROPBOX_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID = "WEBDAV_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID = "SSH_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "PSHELL_MAX_IDLE_TIMEOUT_MIN"
@@ -940,10 +941,10 @@ def print_database_statistics(database_filename):
                                                                   CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION)
     dropbox_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
-    dropbox_application_account_uuid = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID)
+    # dropbox_application_account_uuid = \
+    #     get_attribute_value_from_configuration_table(database_filename,
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
     ssh_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
@@ -997,10 +998,10 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(last_merge_date))
         print("Database has unmerged changes       : ", end="")
         print_slow.print_slow(unmerged_changes)
-        print("Dropbox refresh token account uuid  : ", end="")
+        print("Dropbox account uuid                : ", end="")
         print_slow.print_slow(str(dropbox_account_uuid))
-        print("Dropbox application account uuid    : ", end="")
-        print_slow.print_slow(str(dropbox_application_account_uuid))
+        # print("Dropbox application account uuid    : ", end="")
+        # print_slow.print_slow(str(dropbox_application_account_uuid))
         print("Merge destination SSH               : ", end="")
         print_slow.print_slow(str(ssh_account_uuid))
         print("Merge destination WEBDAV            : ", end="")
@@ -2829,59 +2830,91 @@ class PDatabase:
                              )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
-    def get_dropbox_connection_credentials(self) -> []:
-        # This method will try to get the 3 strings you need to open a dropbox api connection as a list
-        # [dropbox_application_key, dropbox_application_secret, access_token]
-        # #1 retrieve dropbox token account uuid...
-        dropbox_account_uuid = \
-            get_attribute_value_from_configuration_table(self.database_filename,
-                                                         CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
-        if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
-            print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
-            print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
-            return None
-        else:
-            print("Using Dropbox Account Token uuid from config : " +
-                  colored(dropbox_account_uuid, "green"))
-        # print("Token uuid : " + dropbox_account_uuid)
-        access_token = self.get_password_from_account_and_decrypt(dropbox_account_uuid)
-        # print("Token      : " + access_token)
-        if access_token is None or str(access_token).strip() == "":
-            print(colored("Error: Dropbox Account Token is empty. Make sure the token is set in the password field.",
-                          "red"))
-            return None
-        else:
-            print("Dropbox Account Token found.")
+    # def get_dropbox_connection_credentials(self) -> []:
+    #     # This method will try to get the 3 strings you need to open a dropbox api connection as a list
+    #     # [dropbox_application_key, dropbox_application_secret, access_token]
+    #     # #1 retrieve dropbox token account uuid...
+    #     dropbox_account_uuid = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID)
+    #     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
+    #         # print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
+    #         # print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
+    #         # print("Error: no default dropbox account uuid in configuration found.")
+    #         raise Exception("Error: no default dropbox account uuid in configuration found.")
+    #     else:
+    #         print("Using Dropbox Account Token uuid from config : " +
+    #               colored(dropbox_account_uuid, "green"))
+    #     dropbox_account = self.get_account_by_uuid_and_decrypt(dropbox_account_uuid)
+    #     if dropbox_account is None:
+    #         # print("Error: Account uuid " + dropbox_account_uuid + " not found.")
+    #         raise Exception("Error: Account uuid " + dropbox_account_uuid + " not found.")
+    #
+    #     dropbox_application_key = dropbox_account.url.strip()
+    #     if dropbox_application_key == "":
+    #         raise Exception("Dropbox application key not found in dropbox account in column URL.")
+    #     dropbox_application_secret = dropbox_account.loginname.strip()
+    #     if dropbox_application_secret == "":
+    #         raise Exception("Dropbox application secret not found in dropbox account in column LOGIN.")
+    #     access_token = dropbox_account.password.strip()
+    #     if access_token == "":
+    #         raise Exception("Dropbox access token not found in dropbox account in column PASSWORD.")
+    #     return [dropbox_application_key, dropbox_application_secret, access_token]
 
-        # #2 retrieve dropbox application account uuid...
-        dropbox_application_account_uuid = \
-            get_attribute_value_from_configuration_table(self.database_filename,
-                                                         CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
-        if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
-            print(
-                colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
-            print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
-            return None
-        else:
-            print("Using Dropbox Application Account uuid from config : " +
-                  colored(dropbox_application_account_uuid, "green"))
 
-        # #3 retrieve dropbox_application_key and dropbox_application_secret...
-        dropbox_application_key = self.get_loginname_from_account_and_decrypt(dropbox_application_account_uuid)
-        dropbox_application_secret = \
-            self.get_password_from_account_and_decrypt(dropbox_application_account_uuid)
-        if dropbox_application_key is None or str(dropbox_application_key).strip() == "":
-            print(colored("Error: Dropbox application_key is empty. Make sure the application_key is set in the " +
-                          "loginname field.", "red"))
-            return None
-        if dropbox_application_secret is None or str(dropbox_application_secret).strip() == "":
-            print(
-                colored("Error: Dropbox application_secret is empty. Make sure the application_secret is set in the " +
-                        "password field.", "red"))
-            return None
-        print("Dropbox application_key and application_secret found.")
-
-        return [dropbox_application_key, dropbox_application_secret, access_token]
+    # def get_dropbox_connection_credentials(self) -> []:
+    #     # This method will try to get the 3 strings you need to open a dropbox api connection as a list
+    #     # [dropbox_application_key, dropbox_application_secret, access_token]
+    #     # #1 retrieve dropbox token account uuid...
+    #     dropbox_account_uuid = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
+    #     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
+    #         print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
+    #         print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
+    #         return None
+    #     else:
+    #         print("Using Dropbox Account Token uuid from config : " +
+    #               colored(dropbox_account_uuid, "green"))
+    #     # print("Token uuid : " + dropbox_account_uuid)
+    #     access_token = self.get_password_from_account_and_decrypt(dropbox_account_uuid)
+    #     # print("Token      : " + access_token)
+    #     if access_token is None or str(access_token).strip() == "":
+    #         print(colored("Error: Dropbox Account Token is empty. Make sure the token is set in the password field.",
+    #                       "red"))
+    #         return None
+    #     else:
+    #         print("Dropbox Account Token found.")
+    #
+    #     # #2 retrieve dropbox application account uuid...
+    #     dropbox_application_account_uuid = \
+    #         get_attribute_value_from_configuration_table(self.database_filename,
+    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
+    #     if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
+    #         print(
+    #             colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
+    #         print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
+    #         return None
+    #     else:
+    #         print("Using Dropbox Application Account uuid from config : " +
+    #               colored(dropbox_application_account_uuid, "green"))
+    #
+    #     # #3 retrieve dropbox_application_key and dropbox_application_secret...
+    #     dropbox_application_key = self.get_loginname_from_account_and_decrypt(dropbox_application_account_uuid)
+    #     dropbox_application_secret = \
+    #         self.get_password_from_account_and_decrypt(dropbox_application_account_uuid)
+    #     if dropbox_application_key is None or str(dropbox_application_key).strip() == "":
+    #         print(colored("Error: Dropbox application_key is empty. Make sure the application_key is set in the " +
+    #                       "loginname field.", "red"))
+    #         return None
+    #     if dropbox_application_secret is None or str(dropbox_application_secret).strip() == "":
+    #         print(
+    #             colored("Error: Dropbox application_secret is empty. Make sure the application_secret is set in the " +
+    #                     "password field.", "red"))
+    #         return None
+    #     print("Dropbox application_key and application_secret found.")
+    #
+    #     return [dropbox_application_key, dropbox_application_secret, access_token]
 
     def change_database_name_from_connector(self, connector: ConnectorInterface) -> bool:
         print("Change remote database name")
