@@ -998,7 +998,7 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(last_merge_date))
         print("Database has unmerged changes       : ", end="")
         print_slow.print_slow(unmerged_changes)
-        print("Dropbox account uuid                : ", end="")
+        print("Merge destination DROPBOX           : ", end="")
         print_slow.print_slow(str(dropbox_account_uuid))
         # print("Dropbox application account uuid    : ", end="")
         # print_slow.print_slow(str(dropbox_application_account_uuid))

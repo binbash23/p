@@ -1272,19 +1272,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2dropbox":
             if len(shell_command.arguments) == 1:
                 dropbox_account_uuid = None
-                # connector = connector_manager.get_dropbox_connector(p_database)
             else:
                 if len(shell_command.arguments) == 2:
                     dropbox_account_uuid = shell_command.arguments[1].strip()
-                    # dropbox_account = p_database.get_account_by_uuid_and_decrypt(dropbox_account_uuid)
-                    # connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
                 else:
                     print("too many arguments.")
                     print(shell_command.synopsis)
                     continue
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
-                print("Using connector: " + str(connector))
+                # print("Using connector: " + str(connector))
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))

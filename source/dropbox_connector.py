@@ -35,6 +35,9 @@ class DropboxConnector(ConnectorInterface):
     def get_type(self) -> str:
         return "dropbox"
 
+    def __str__(self):
+        return "Dropbox Application: " + self._app_key
+
     def list_files(self, remote_path) -> []:
         #  a Pandas dataframe of files in a given Dropbox folder path in the Apps directory.
         # dropbox_connection = dropbox_connect(access_token)
