@@ -1671,7 +1671,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            sqlstring = "select uuid from account where change_date >= '" + "" + date_string + "'"
+            sqlstring = "select uuid from account where create_date <> change_date and change_date >= '" + "" + date_string + "'"
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             for row in result:
@@ -1707,7 +1707,7 @@ class PDatabase:
         print("Last change date : " + last_change_date)
 
         print()
-        print("New accounts since last merge")
+        print("<New accounts since last merge>")
         print()
         uuids = self.get_new_account_uuids_since(last_merge_date)
         if len(uuids) == 0:
@@ -1715,9 +1715,10 @@ class PDatabase:
         for current_uuid in uuids:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
+            print()
 
         print()
-        print("Changed accounts since last merge")
+        print("<Changed accounts since last merge>")
         print()
         uuids = self.get_changed_account_uuids_since(last_merge_date)
         if len(uuids) == 0:
@@ -1725,9 +1726,10 @@ class PDatabase:
         for current_uuid in uuids:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
+            print()
 
         print()
-        print("Deleted account uuid's since last merge")
+        print("<Deleted account uuid's since last merge>")
         print()
         uuids = self.get_deleted_account_uuids_decrypted_since(last_merge_date)
         if len(uuids) == 0:
@@ -2109,7 +2111,10 @@ class PDatabase:
             print("Changed         : ", end="")
             print_slow.print_slow(str(account.change_date), delay=print_delay)
             print("Invalidated     : ", end="")
-            print_slow.print_slow(colored(str(account.invalid_date), "red"), delay=print_delay)
+            if account.invalid_date != "None":
+                print_slow.print_slow(colored(str(account.invalid_date), "red"), delay=print_delay)
+            else:
+                print_slow.print_slow(colored(str(account.invalid_date), "green"), delay=print_delay)
             if show_history_count:
                 print("Old Versions    : ", end="")
                 print_slow.print_slow(str(get_account_history_count(self.database_filename, account.uuid)),
