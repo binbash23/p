@@ -431,9 +431,10 @@ CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE = "LAST_MERGE_DATE"
 CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION = "SCHEMA_VERSION"
 # CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID = "DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID"
 # CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID = "DROPBOX_APPLICATION_ACCOUNT_UUID"
-CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID = "DROPBOX_ACCOUNT_UUID"
-CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID = "WEBDAV_ACCOUNT_UUID"
-CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID = "SSH_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID = "CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID = "CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID = "CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID"
+CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID = "CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_IDLE_TIMEOUT_MIN = "PSHELL_MAX_IDLE_TIMEOUT_MIN"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_MAX_HISTORY_SIZE = "PSHELL_MAX_HISTORY_SIZE"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS = "PSHELL_SHADOW_PASSWORDS"
@@ -941,16 +942,19 @@ def print_database_statistics(database_filename):
                                                                   CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION)
     dropbox_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID)
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID)
     # dropbox_application_account_uuid = \
     #     get_attribute_value_from_configuration_table(database_filename,
     #                                                  CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
     ssh_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
+    file_account_uuid = \
+        get_attribute_value_from_configuration_table(database_filename,
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID)
     webdav_account_uuid = \
         get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
     default_merge_target_file = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
@@ -1005,6 +1009,8 @@ def print_database_statistics(database_filename):
         print("Merge destination SSH               : ", end="")
         print_slow.print_slow(str(ssh_account_uuid))
         print("Merge destination WEBDAV            : ", end="")
+        print_slow.print_slow(str(file_account_uuid))
+        print("Merge destination FILE              : ", end="")
         print_slow.print_slow(str(webdav_account_uuid))
         print("Merge destination local file        : ", end="")
         print_slow.print_slow(str(default_merge_target_file))

@@ -264,6 +264,9 @@ SHELL_COMMANDS = [
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
+    ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>",
+                 "Set a default account in the configuration table to connect to a file target." +
+                 "This account will be used if the command merge2file is called without an account UUID."),
     ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a ssh target." +
                  "This account will be used if the command merge2ssh is called without an account UUID."),
@@ -784,7 +787,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
                 if ssh_account_uuid == "":
                     print("No default ssh account UUID found in configuration table.")
                     continue
@@ -808,7 +811,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
                 if ssh_account_uuid == "":
                     print("No default ssh account UUID found in configuration table.")
                     continue
@@ -832,7 +835,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -857,7 +860,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -972,7 +975,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
                 if ssh_account_uuid == "":
                     print("No default ssh account UUID found in configuration table.")
                     continue
@@ -996,7 +999,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -1169,7 +1172,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
                 if ssh_account_uuid == "":
                     print("No default ssh account UUID found in configuration table.")
                     continue
@@ -1203,7 +1206,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) == 1:
                 webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
+                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
                 if webdav_account_uuid == "":
                     print("No default webdav account UUID found in configuration table.")
                     continue
@@ -1256,140 +1259,79 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "merge2dropbox":
-            if len(shell_command.arguments) == 1:
-                dropbox_account_uuid = None
-            else:
-                dropbox_account_uuid = shell_command.arguments[1].strip()
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
             try:
-                connector = connector_manager.get_dropbox_connector(p_database, dropbox_account_uuid)
+                connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
             continue
 
         if shell_command.command == "merge2file":
-            if len(shell_command.arguments) == 1:
-                merge_target_file = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
-                if merge_target_file == "":
-                    print("No default merge target file found in configuration table.")
-                    continue
-            else:
-                if len(shell_command.arguments) == 2:
-                    merge_target_file = shell_command.arguments[1].strip()
-                else:
-                    print("Too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
             try:
-                p_database.merge_database(merge_target_file)
+                connector = connector_manager.get_file_connector(p_database, account_uuid)
+                p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
             continue
 
+        # if shell_command.command == "merge2file":
+        #     if len(shell_command.arguments) == 1:
+        #         merge_target_file = pdatabase.get_attribute_value_from_configuration_table(
+        #             p_database.database_filename,
+        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+        #         if merge_target_file == "":
+        #             print("No default merge target file found in configuration table.")
+        #             continue
+        #     else:
+        #         if len(shell_command.arguments) == 2:
+        #             merge_target_file = shell_command.arguments[1].strip()
+        #         else:
+        #             print("Too many arguments.")
+        #             print(shell_command.synopsis)
+        #             continue
+        #     try:
+        #         p_database.merge_database(merge_target_file)
+        #     except Exception as e:
+        #         print("Error: " + str(e))
+        #     continue
+
         if shell_command.command == "merge2ssh":
-            if len(shell_command.arguments) == 1:
-                ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID)
-                if ssh_account_uuid == "":
-                    print("No default ssh account UUID found in configuration table.")
-                    continue
-                ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            else:
-                if len(shell_command.arguments) == 2:
-                    ssh_account_uuid = shell_command.arguments[1].strip()
-                    ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-                else:
-                    print("too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
-            if ssh_account is None:
-                print("SSH account could not be found: " + str(ssh_account_uuid))
-                continue
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
             try:
-                connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname,
-                                                       ssh_account.password)
-                print("Using connector: " + str(connector))
+                connector = connector_manager.get_ssh_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
             continue
 
         if shell_command.command == "merge2webdav":
-            if len(shell_command.arguments) == 1:
-                webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-                    p_database.database_filename,
-                    pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID)
-                if webdav_account_uuid == "":
-                    print("No default webdav account UUID found in configuration table.")
-                    continue
-                webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            else:
-                if len(shell_command.arguments) == 2:
-                    webdav_account_uuid = shell_command.arguments[1].strip()
-                    webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-                else:
-                    print("too many arguments.")
-                    print(shell_command.synopsis)
-                    continue
-            if webdav_account is None:
-                print("Webdav account could not be found: " + str(webdav_account_uuid))
-                continue
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
             try:
-                connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-                                                             webdav_account.password)
-                print("Using connector: " + str(connector))
+                connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
             continue
 
         if shell_command.command == "mergewith":
-            if len(shell_command.arguments) == 1:
-                print("UUID or SEARCHSTRING is missing.")
-                print(shell_command.synopsis)
-                continue
-            search_string = shell_command.arguments[1].strip()
-            uuid_to_mergewith = find_uuid_for_searchstring_interactive(search_string, p_database)
-            if uuid_to_mergewith is None:
-                print("SEARCHSTRING or UUID not found.")
-                continue
-            target_account = p_database.get_account_by_uuid_and_decrypt(uuid_to_mergewith)
-            connector_type = target_account.connector_type
-            if connector_type == "":
-                print("Can not merge with target account because connector type of account is not set.")
-                continue
-            if connector_type == "ssh":
-                try:
-                    connector = ssh_connector.SshConnector(target_account.url, target_account.loginname,
-                                                           target_account.password)
-                    print("Using connector: " + str(connector))
-                    p_database.merge_database_with_connector(connector)
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
-            if connector_type == "webdav":
-                try:
-                    connector = webdav_connector.WebdavConnector(target_account.url, target_account.loginname,
-                                                                 target_account.password)
-                    print("Using connector: " + str(connector))
-                    p_database.merge_database_with_connector(connector)
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
-            if connector_type == "file":
-                try:
-                    # print("target_account.url-> " + target_account.url)
-                    connector = file_connector.FileConnector(target_account.url)
-                    print("Using connector: " + str(connector))
-                    p_database.merge_database_with_connector(connector)
-                except Exception as e:
-                    print("Error: " + str(e))
-                continue
-            # when we are here, the connector_type is unknown
-            print("Unknown connector type: " + connector_type)
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = shell_command.arguments[1].strip()
+            try:
+                connector = connector_manager.get_connector(p_database, account_uuid)
+                p_database.merge_database_with_connector(connector)
+            except Exception as e:
+                print("Error: " + str(e))
             continue
 
         if shell_command.command == "opendatabase":
@@ -1538,6 +1480,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_default_merge_target_file)
             continue
 
+        if shell_command.command == "setfileaccountuuid":
+            if len(shell_command.arguments) == 1:
+                print("UUID of file account is missing.")
+                print(shell_command.synopsis)
+                continue
+            new_file_account_uuid = shell_command.arguments[1].strip()
+            if new_file_account_uuid == "-":
+                new_file_account_uuid = ""
+            # print("Writing: " + pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID + "/" + new_file_account_uuid)
+            p.set_attribute_value_in_configuration_table(
+                p_database.database_filename,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID,
+                new_file_account_uuid)
+            continue
+
         if shell_command.command == "setsshaccountuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID of ssh account is missing.")
@@ -1548,7 +1505,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_ssh_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_SSH_ACCOUNT_UUID,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID,
                 new_ssh_account_uuid)
             continue
 
@@ -1562,7 +1519,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_webdav_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_WEBDAV_ACCOUNT_UUID,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID,
                 new_webdav_account_uuid)
             continue
 
@@ -1731,28 +1688,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_database_name)
             continue
 
-        # if shell_command.command == "setdropboxapplicationuuid":
-        #     if len(shell_command.arguments) == 1:
-        #         print("UUID is missing.")
-        #         print(shell_command.synopsis)
-        #         continue
-        #     p.set_attribute_value_in_configuration_table(
-        #         p_database.database_filename,
-        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
-        #         shell_command.arguments[1].strip())
-        #     continue
-        #
-        # if shell_command.command == "setdropboxtokenuuid":
-        #     if len(shell_command.arguments) == 1:
-        #         print("UUID is missing.")
-        #         print(shell_command.synopsis)
-        #         continue
-        #     p.set_attribute_value_in_configuration_table(
-        #         p_database.database_filename,
-        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
-        #         shell_command.arguments[1].strip())
-        #     continue
-
         if shell_command.command == "setdropboxaccountuuid":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
@@ -1760,7 +1695,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
-                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID,
+                pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID,
                 shell_command.arguments[1].strip())
             continue
 
