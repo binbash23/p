@@ -267,7 +267,7 @@ SHELL_COMMANDS = [
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>",
-                 "Set a default account in the configuration table to connect to a file target." +
+                 "Set a default account in the configuration table to connect to a file target. " +
                  "This account will be used if the command merge2file is called without an account UUID."),
     ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a ssh target." +
