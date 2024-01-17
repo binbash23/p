@@ -225,12 +225,31 @@ SHELL_COMMANDS = [
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
-    ShellCommand("merge2dropbox", "merge2dropbox [DROPBOX_ACCOUNT_UUID]",
-                 "Merge local database with dropbox database copy. If DROPBOX_ACCOUNT_UUID is not given, the configuration will be searched for the default dropbox account uuid."),
-    ShellCommand("merge2file", "merge2file [<FILENAME>]",
-                 "Merge local database with another database identified by FILENAME. If FILENAME is not " +
-                 "given, the configuration table will be searched for a default merget target file. " +
-                 "This can be set with: setdefaultmergetargetfile."),
+    ShellCommand("merge2dropbox", "merge2dropbox [<UUID>]",
+                 "Merge local database with dropbox database copy. If UUID is not given, the configuration " +
+                 "will be searched for the default dropbox account uuid. The account has to have connector type = 'dropbox'.\n" +
+                 "Example account for a dropbox connector:\n" +
+                 "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
+                 "Name            : <FREE_TEXT>\n" +
+                 "URL             : <dropbox application key>\n" +
+                 "Loginname       : <dropbox application secret>\n" +
+                 "Password        : <dropbox refresh token>\n" +
+                 "Type            : <FREE_TEXT>\n" +
+                 "Connectortype   : dropbox\n" +
+                 " "),
+    ShellCommand("merge2file", "merge2file [<UUID>]",
+                 "Merge local database with the default file connector database. If UUID is given the account" +
+                 " with the UUID will be used to merge with. This account must have the connector type = 'file'." +
+                 "This can be set with: setdefaultmergetargetfile.\n" +
+                 "Example account for a file connector:\n" +
+                 "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
+                 "Name            : <FREE_TEXT>\n" +
+                 "URL             : /home/bert/p/\n" +
+                 "Loginname       : <FREE_TEXT>\n" +
+                 "Password        : <FREE_TEXT>\n" +
+                 "Type            : <FREE_TEXT>\n" +
+                 "Connectortype   : file\n" +
+                 " "),
     # ShellCommand("merge2lastknownfile", "merge2lastknownfile",
     #              "Merge local database with the last known merge database. The last know database can be seen " +
     #              "with the status command"),
@@ -238,17 +257,35 @@ SHELL_COMMANDS = [
                  "Merge local database with a ssh target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
                  "and, if one is found, it will be used to connect to the ssh target. You can use the " +
-                 "command 'setsshaccountuuid' to set the default ssh account UUID."),
+                 "command 'setsshaccountuuid' to set the default ssh account UUID. The account has to have a connector type = 'ssh'.\n" +
+                 "Example account for a ssh connector:\n" +
+                 "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
+                 "Name            : <FREE_TEXT>\n" +
+                 "URL             : <hostname>:/home/bert/p/\n" +
+                 "Loginname       : <USERNAME>\n" +
+                 "Password        : <PASSWORD>\n" +
+                 "Type            : <FREE_TEXT>\n" +
+                 "Connectortype   : ssh\n" +
+                 " "),
     ShellCommand("merge2webdav", "merge2webdav [<UUID>]",
                  "Merge local database with a webdav target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
                  "and, if one is found, it will be used to connect to the webdav target. You can use the " +
-                 "command 'setwebdavaccountuuid' to set the default webdav account UUID."),
+                 "command 'setwebdavaccountuuid' to set the default webdav account UUID. The account has to have connector type set to 'webdav'.\n" +
+                 "Example account for a webdav connector:\n" +
+                 "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
+                 "Name            : <FREE_TEXT>\n" +
+                 "URL             : https://<hostname>/p/\n" +
+                 "Loginname       : <USERNAME>\n" +
+                 "Password        : <PASSWORD>\n" +
+                 "Type            : <FREE_TEXT>\n" +
+                 "Connectortype   : webdav\n" +
+                 " "),
     ShellCommand("mergewith", "mergewith <UUID>|SEARCHSTRING",
                  "Merge with with the account with UUID or the account that matches SEARCHSTRING.\n" +
                  "If SEARCHSTRING is not a unique account you will be asked, which account should be used.\n" +
                  "The target account has to have the attribute connector_type set to one of these values:\n" +
-                 "file, ssh, webdav\n"),
+                 "file, ssh, webdav, dropbox depending on the kind of protocol that has to be used to connect to the account.\n"),
     ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
                  " be created.\nWith this command you can switch between multiple p databases."),
