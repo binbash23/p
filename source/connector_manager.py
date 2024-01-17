@@ -13,6 +13,7 @@ import webdav_connector
 import file_connector
 # from termcolor import colored
 import connector_interface
+import os
 
 
 def get_dropbox_connector(p_database: pdatabase, account_uuid: str = None) -> dropbox_connector.DropboxConnector:
@@ -148,3 +149,65 @@ def delete_database_in_connector(p_database: pdatabase, connector: connector_int
     else:
         print("Canceled")
         return False
+
+
+def change_database_name_from_connector(p_database: pdatabase,
+                                        connector: connector_interface.ConnectorInterface) -> bool:
+    print("Change remote database name")
+    print("Searching for remote database: " + str(p_database.get_database_filename_without_path()))
+    if not connector.exists(p_database.get_database_filename_without_path()):
+        print("Remote database does not exist.")
+        return False
+    print("Downloading remote database...")
+    connector.download_file(p_database.get_database_filename_without_path(),
+                            pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+    try:
+        old_database_name = p_database.get_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+        print("Current database name   : " + old_database_name)
+        new_database_name = input("Enter new database name : ")
+        p_database.set_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME, new_database_name)
+        if old_database_name == new_database_name:
+            print("Database names are equal. Skipping upload.")
+            return True
+        print("Uploading changed database...")
+        connector.upload_file(pdatabase.TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_filename_without_path())
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
+        return False
+    except Exception as e:
+        print(str(e))
+    finally:
+        os.remove(pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+    return True
+
+
+def change_database_password_from_connector(p_database: pdatabase,
+                                            connector: connector_interface.ConnectorInterface) -> bool:
+    print("Change remote database password")
+    print("Searching for remote database: " + str(p_database.get_database_filename_without_path()))
+    if not connector.exists(p_database.get_database_filename_without_path()):
+        print("Remote database does not exist.")
+        return False
+    print("Downloading remote database...")
+    connector.download_file(p_database.get_database_filename_without_path(),
+                            pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+    try:
+        remote_password = pdatabase.getpass("Enter current remote database password: ")
+        temp_remote_p_database = pdatabase.PDatabase(p_database.TEMP_MERGE_DATABASE_FILENAME, remote_password)
+        new_password = pdatabase.read_confirmed_database_password_from_user()
+        result = p_database.change_database_password(new_password)
+        if not result:
+            print("Error changing remote database password.")
+            return False
+        print("Uploading changed database...")
+        connector.upload_file(pdatabase.TEMP_MERGE_DATABASE_FILENAME, p_database.get_database_filename_without_path())
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
+        return False
+    except Exception as e:
+        print(str(e))
+    finally:
+        os.remove(pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+    return True
