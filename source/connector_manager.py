@@ -162,10 +162,10 @@ def change_database_name_from_connector(p_database: pdatabase,
     connector.download_file(p_database.get_database_filename_without_path(),
                             pdatabase.TEMP_MERGE_DATABASE_FILENAME)
     try:
-        old_database_name = p_database.get_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME)
+        old_database_name = pdatabase.get_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME)
         print("Current database name   : " + old_database_name)
         new_database_name = input("Enter new database name : ")
-        p_database.set_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME, new_database_name)
+        pdatabase.set_database_name(pdatabase.TEMP_MERGE_DATABASE_FILENAME, new_database_name)
         if old_database_name == new_database_name:
             print("Database names are equal. Skipping upload.")
             return True
@@ -196,7 +196,7 @@ def change_database_password_from_connector(p_database: pdatabase,
         remote_password = pdatabase.getpass("Enter current remote database password: ")
         temp_remote_p_database = pdatabase.PDatabase(p_database.TEMP_MERGE_DATABASE_FILENAME, remote_password)
         new_password = pdatabase.read_confirmed_database_password_from_user()
-        result = p_database.change_database_password(new_password)
+        result = temp_remote_p_database.change_database_password(new_password)
         if not result:
             print("Error changing remote database password.")
             return False
