@@ -2976,18 +2976,18 @@ class PDatabase:
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
         return True
 
-    def delete_database_in_connector(self, connector: ConnectorInterface) -> bool:
-        print("Deleting remote database: " + self.get_database_filename_without_path())
-        try:
-            answer = input("Are you sure ([y]/n) : ")
-        except KeyboardInterrupt:
-            print()
-            print("Canceled")
-            return False
-        if answer == "y" or answer == "":
-            connector.delete_file(self.get_database_filename_without_path())
-        else:
-            print("Canceled")
+    # def delete_database_in_connector(self, connector: ConnectorInterface) -> bool:
+    #     print("Deleting remote database: " + self.get_database_filename_without_path())
+    #     try:
+    #         answer = input("Are you sure ([y]/n) : ")
+    #     except KeyboardInterrupt:
+    #         print()
+    #         print("Canceled")
+    #         return False
+    #     if answer == "y" or answer == "":
+    #         connector.delete_file(self.get_database_filename_without_path())
+    #     else:
+    #         print("Canceled")
 
 
 def main():

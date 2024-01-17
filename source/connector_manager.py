@@ -128,3 +128,23 @@ def get_connector(p_database: pdatabase, account_uuid: str = None) -> connector_
     if account.connector_type == "file":
         return get_file_connector(p_database, account_uuid)
     raise Exception("Error: unknown connector type: " + account.connector_type)
+
+
+def delete_database_in_connector(p_database: pdatabase, connector: connector_interface.ConnectorInterface) -> bool:
+    print("Deleting remote database: " + p_database.get_database_filename_without_path())
+    try:
+        answer = input("Are you sure ([y]/n) : ")
+    except KeyboardInterrupt:
+        print()
+        print("Canceled")
+        return False
+    if answer == "y" or answer == "":
+        try:
+            connector.delete_file(p_database.get_database_filename_without_path())
+        except Exception as e:
+            print("Error: " + str(e))
+            return False
+        return True
+    else:
+        print("Canceled")
+        return False
