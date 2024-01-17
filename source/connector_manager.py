@@ -194,7 +194,7 @@ def change_database_password_from_connector(p_database: pdatabase,
                             pdatabase.TEMP_MERGE_DATABASE_FILENAME)
     try:
         remote_password = pdatabase.getpass("Enter current remote database password: ")
-        temp_remote_p_database = pdatabase.PDatabase(p_database.TEMP_MERGE_DATABASE_FILENAME, remote_password)
+        temp_remote_p_database = pdatabase.PDatabase(pdatabase.TEMP_MERGE_DATABASE_FILENAME, remote_password)
         new_password = pdatabase.read_confirmed_database_password_from_user()
         result = temp_remote_p_database.change_database_password(new_password)
         if not result:
