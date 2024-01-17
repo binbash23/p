@@ -56,7 +56,7 @@ def add(p_database: PDatabase, account_name=""):
                 print("Error: Passwords do not match. Please try again.")
         else:
             account.password = input("Password      : ")
-        account.type =           input("Type          : ")
+        account.type = input("Type          : ")
         account.connector_type = input("Connectortype : ")
         answer = input("Correct ([y]/n) : ")
     except KeyboardInterrupt:

@@ -132,11 +132,11 @@ SHELL_COMMANDS = [
     ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
                  "be re-encrypted but also account history, aliases, command history and so on."),
-    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword", "Change password of the dropbox " +
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>]", "Change password of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
-    ShellCommand("changedropboxdbname", "changedropboxdbname", "Change database name of the dropbox " +
+    ShellCommand("changedropboxdbname", "changedropboxdbname [<UUID>]", "Change database name of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again."),
