@@ -488,15 +488,15 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-            ", Name=" + self.name + \
-            ", URL=" + self.url + \
-            ", Loginname=" + self.loginname + \
-            ", Password=" + self.password + \
-            ", Type=" + self.type + \
-            ", Connectortype=" + self.connector_type + \
-            ", Createdate=" + self.create_date + \
-            ", Changedate=" + self.change_date + \
-            ", Invaliddate=" + self.invalid_date
+               ", Name=" + self.name + \
+               ", URL=" + self.url + \
+               ", Loginname=" + self.loginname + \
+               ", Password=" + self.password + \
+               ", Type=" + self.type + \
+               ", Connectortype=" + self.connector_type + \
+               ", Createdate=" + self.create_date + \
+               ", Changedate=" + self.change_date + \
+               ", Invaliddate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -2456,7 +2456,7 @@ class PDatabase:
                 return
                 # sys.exit(1)
         finally:
-                database_connection.close()
+            database_connection.close()
         # Something went wrong opening the sqlite db. Now try to create one with default schema
         try:
             database_connection = None
@@ -2541,16 +2541,6 @@ class PDatabase:
         print()
         # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
-
-    # def merge_database_with_default_merge_target_file(self):
-    #     default_target_file = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
-    #     if default_target_file is not None and default_target_file != "":
-    #         self.merge_database(default_target_file)
-    #     else:
-    #         print(colored("Error: There is no default merge target file configured in configuration table.",
-    #                       "red"))
 
     def get_database_password_as_string(self) -> str:
         if self.database_password == "":
@@ -2778,19 +2768,33 @@ class PDatabase:
         finally:
             database_connection.close()
 
+    def _create_initial_connector_database_interactive(self, database_filename: str):
+        print("Creating initial database...")
+        if os.path.isfile(database_filename):
+            os.remove(database_filename)
+        new_database_name = input("Enter logical database name : ")
+        PDatabase(database_filename, self.get_database_password_as_string())
+        set_attribute_value_in_configuration_table(database_filename,
+                                                   CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+                                                   new_database_name)
+
     def merge_database_with_connector(self, connector: ConnectorInterface):
         if connector.get_type() == "file":
+            if not connector.exists(self.database_filename):
+                self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
+                                                                                 os.path.basename(self.database_filename)))
             self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             return
         if not connector.exists(self.get_database_filename_without_path()):
-            print("Creating initial remote database...")
-            if os.path.isfile(TEMP_MERGE_DATABASE_FILENAME):
-                os.remove(TEMP_MERGE_DATABASE_FILENAME)
-            PDatabase(TEMP_MERGE_DATABASE_FILENAME, self.get_database_password_as_string())
-            set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
-                                                       CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
-                                                       "Cloud Database")
+            # print("Creating initial remote database...")
+            # if os.path.isfile(TEMP_MERGE_DATABASE_FILENAME):
+            #     os.remove(TEMP_MERGE_DATABASE_FILENAME)
+            # PDatabase(TEMP_MERGE_DATABASE_FILENAME, self.get_database_password_as_string())
+            # set_attribute_value_in_configuration_table(TEMP_MERGE_DATABASE_FILENAME,
+            #                                            CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
+            #                                            "Cloud Database")
+            self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME)
             print("Merging local database into initial remote database...")
             self._merge_database(TEMP_MERGE_DATABASE_FILENAME)
             print("Uploading initial database: '" +
@@ -2831,150 +2835,6 @@ class PDatabase:
                              connector_type=connector.get_type()
                              )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
-
-    # def get_dropbox_connection_credentials(self) -> []:
-    #     # This method will try to get the 3 strings you need to open a dropbox api connection as a list
-    #     # [dropbox_application_key, dropbox_application_secret, access_token]
-    #     # #1 retrieve dropbox token account uuid...
-    #     dropbox_account_uuid = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCOUNT_UUID)
-    #     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
-    #         # print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
-    #         # print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
-    #         # print("Error: no default dropbox account uuid in configuration found.")
-    #         raise Exception("Error: no default dropbox account uuid in configuration found.")
-    #     else:
-    #         print("Using Dropbox Account Token uuid from config : " +
-    #               colored(dropbox_account_uuid, "green"))
-    #     dropbox_account = self.get_account_by_uuid_and_decrypt(dropbox_account_uuid)
-    #     if dropbox_account is None:
-    #         # print("Error: Account uuid " + dropbox_account_uuid + " not found.")
-    #         raise Exception("Error: Account uuid " + dropbox_account_uuid + " not found.")
-    #
-    #     dropbox_application_key = dropbox_account.url.strip()
-    #     if dropbox_application_key == "":
-    #         raise Exception("Dropbox application key not found in dropbox account in column URL.")
-    #     dropbox_application_secret = dropbox_account.loginname.strip()
-    #     if dropbox_application_secret == "":
-    #         raise Exception("Dropbox application secret not found in dropbox account in column LOGIN.")
-    #     access_token = dropbox_account.password.strip()
-    #     if access_token == "":
-    #         raise Exception("Dropbox access token not found in dropbox account in column PASSWORD.")
-    #     return [dropbox_application_key, dropbox_application_secret, access_token]
-
-
-    # def get_dropbox_connection_credentials(self) -> []:
-    #     # This method will try to get the 3 strings you need to open a dropbox api connection as a list
-    #     # [dropbox_application_key, dropbox_application_secret, access_token]
-    #     # #1 retrieve dropbox token account uuid...
-    #     dropbox_account_uuid = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID)
-    #     if dropbox_account_uuid is None or str(dropbox_account_uuid).strip() == "":
-    #         print(colored("Error: Dropbox Account Token uuid not found in configuration. Use -y to set it.", "red"))
-    #         print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
-    #         return None
-    #     else:
-    #         print("Using Dropbox Account Token uuid from config : " +
-    #               colored(dropbox_account_uuid, "green"))
-    #     # print("Token uuid : " + dropbox_account_uuid)
-    #     access_token = self.get_password_from_account_and_decrypt(dropbox_account_uuid)
-    #     # print("Token      : " + access_token)
-    #     if access_token is None or str(access_token).strip() == "":
-    #         print(colored("Error: Dropbox Account Token is empty. Make sure the token is set in the password field.",
-    #                       "red"))
-    #         return None
-    #     else:
-    #         print("Dropbox Account Token found.")
-    #
-    #     # #2 retrieve dropbox application account uuid...
-    #     dropbox_application_account_uuid = \
-    #         get_attribute_value_from_configuration_table(self.database_filename,
-    #                                                      CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
-    #     if dropbox_application_account_uuid is None or str(dropbox_application_account_uuid).strip() == "":
-    #         print(
-    #             colored("Error: Dropbox Application Account uuid not found in configuration. Use -z to set it.", "red"))
-    #         print(colored("If you are in pshell mode, use 'searchhelp setdrop' for help.", "red"))
-    #         return None
-    #     else:
-    #         print("Using Dropbox Application Account uuid from config : " +
-    #               colored(dropbox_application_account_uuid, "green"))
-    #
-    #     # #3 retrieve dropbox_application_key and dropbox_application_secret...
-    #     dropbox_application_key = self.get_loginname_from_account_and_decrypt(dropbox_application_account_uuid)
-    #     dropbox_application_secret = \
-    #         self.get_password_from_account_and_decrypt(dropbox_application_account_uuid)
-    #     if dropbox_application_key is None or str(dropbox_application_key).strip() == "":
-    #         print(colored("Error: Dropbox application_key is empty. Make sure the application_key is set in the " +
-    #                       "loginname field.", "red"))
-    #         return None
-    #     if dropbox_application_secret is None or str(dropbox_application_secret).strip() == "":
-    #         print(
-    #             colored("Error: Dropbox application_secret is empty. Make sure the application_secret is set in the " +
-    #                     "password field.", "red"))
-    #         return None
-    #     print("Dropbox application_key and application_secret found.")
-    #
-    #     return [dropbox_application_key, dropbox_application_secret, access_token]
-
-    # def change_database_name_from_connector(self, connector: ConnectorInterface) -> bool:
-    #     print("Change remote database name")
-    #     print("Searching for remote database: " + str(self.get_database_filename_without_path()))
-    #     if not connector.exists(self.get_database_filename_without_path()):
-    #         print("Remote database does not exist.")
-    #         return False
-    #     print("Downloading remote database...")
-    #     connector.download_file(self.get_database_filename_without_path(),
-    #                             TEMP_MERGE_DATABASE_FILENAME)
-    #     try:
-    #         old_database_name = get_database_name(TEMP_MERGE_DATABASE_FILENAME)
-    #         print("Current database name   : " + old_database_name)
-    #         new_database_name = input("Enter new database name : ")
-    #         set_database_name(TEMP_MERGE_DATABASE_FILENAME, new_database_name)
-    #         if old_database_name == new_database_name:
-    #             print("Database names are equal. Skipping upload.")
-    #             return True
-    #         print("Uploading changed database...")
-    #         connector.upload_file(TEMP_MERGE_DATABASE_FILENAME, self.get_database_filename_without_path())
-    #     except KeyboardInterrupt:
-    #         print()
-    #         print("Canceled")
-    #         return False
-    #     except Exception as e:
-    #         print(str(e))
-    #     finally:
-    #         os.remove(TEMP_MERGE_DATABASE_FILENAME)
-    #     return True
-
-    # def change_database_password_from_connector(self, connector: ConnectorInterface) -> bool:
-    #     print("Change remote database password")
-    #     print("Searching for remote database: " + str(self.get_database_filename_without_path()))
-    #     if not connector.exists(self.get_database_filename_without_path()):
-    #         print("Remote database does not exist.")
-    #         return False
-    #     print("Downloading remote database...")
-    #     connector.download_file(self.get_database_filename_without_path(),
-    #                             TEMP_MERGE_DATABASE_FILENAME)
-    #     try:
-    #         remote_password = getpass("Enter current remote database password: ")
-    #         temp_remote_p_database = PDatabase(TEMP_MERGE_DATABASE_FILENAME, remote_password)
-    #         new_password = read_confirmed_database_password_from_user()
-    #         result = self.change_database_password(new_password)
-    #         if not result:
-    #             print("Error changing remote database password.")
-    #             return False
-    #         print("Uploading changed database...")
-    #         connector.upload_file(TEMP_MERGE_DATABASE_FILENAME, self.get_database_filename_without_path())
-    #     except KeyboardInterrupt:
-    #         print()
-    #         print("Canceled")
-    #         return False
-    #     except Exception as e:
-    #         print(str(e))
-    #     finally:
-    #         os.remove(TEMP_MERGE_DATABASE_FILENAME)
-    #     return True
 
 
 def main():
