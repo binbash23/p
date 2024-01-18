@@ -905,29 +905,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changewebdavdbpassword":
-            # if len(shell_command.arguments) == 1:
-            #     webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-            #         p_database.database_filename,
-            #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-            #     if webdav_account_uuid == "":
-            #         print("No default webdav account UUID found in configuration table.")
-            #         continue
-            #     webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            # else:
-            #     if len(shell_command.arguments) == 2:
-            #         webdav_account_uuid = shell_command.arguments[1].strip()
-            #         webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            #     else:
-            #         print("Too many arguments.")
-            #         print(shell_command.synopsis)
-            #         continue
-            # if webdav_account is None:
-            #     print("Webdav account could not be found: " + str(webdav_account_uuid))
-            #     continue
-            # connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-            #                                              webdav_account.password)
-            # p_database.change_database_password_from_connector(connector)
-
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -939,29 +916,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changewebdavdbname":
-            # if len(shell_command.arguments) == 1:
-            #     webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-            #         p_database.database_filename,
-            #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-            #     if webdav_account_uuid == "":
-            #         print("No default webdav account UUID found in configuration table.")
-            #         continue
-            #     webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            # else:
-            #     if len(shell_command.arguments) == 2:
-            #         webdav_account_uuid = shell_command.arguments[1].strip()
-            #         webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-            #     else:
-            #         print("Too many arguments.")
-            #         print(shell_command.synopsis)
-            #         continue
-            # if webdav_account is None:
-            #     print("Webdav account could not be found: " + str(webdav_account_uuid))
-            #     continue
-            # connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-            #                                              webdav_account.password)
-            # p_database.change_database_name_from_connector(connector)
-
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -994,7 +948,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command.synopsis)
                 continue
-            # password = p_database.get_password_from_account_and_decrypt(shell_command.arguments[1])
             account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
             try:
                 # pyperclip3.copy(password)
@@ -1025,16 +978,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.delete_account(uuid_to_delete)
             continue
 
-        # if shell_command.command == "deletedropboxdatabase":
-        #     dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-        #     if dropbox_connection_credentials is None:
-        #         continue
-        #     connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
-        #                                                    dropbox_connection_credentials[1],
-        #                                                    dropbox_connection_credentials[2])
-        #     p_database.delete_database_in_connector(connector)
-        #     continue
-
         if shell_command.command == "duplicate":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
@@ -1059,7 +1002,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 p_database.delete_orphaned_account_history_entries()
             except Exception as e:
                 print("Error deleting orphaned history entries: " + str(e))
-                # e.with_traceback()
             continue
 
         if shell_command.command == "deleteconnectordb":
@@ -1072,56 +1014,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error: " + str(e))
             continue
-        #
-        # if shell_command.command == "deletesshdatabase":
-        #     if len(shell_command.arguments) == 1:
-        #         ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-        #             p_database.database_filename,
-        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-        #         if ssh_account_uuid == "":
-        #             print("No default ssh account UUID found in configuration table.")
-        #             continue
-        #         ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-        #     else:
-        #         if len(shell_command.arguments) == 2:
-        #             ssh_account_uuid = shell_command.arguments[1].strip()
-        #             ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-        #         else:
-        #             print("Too many arguments.")
-        #             print(shell_command.synopsis)
-        #             continue
-        #     if ssh_account is None:
-        #         print("SSH account could not be found: " + str(ssh_account_uuid))
-        #         continue
-        #     connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
-        #     p_database.delete_database_in_connector(connector)
-        #     continue
-
-        # if shell_command.command == "deletewebdavdatabase":
-        #     if len(shell_command.arguments) == 1:
-        #         webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-        #             p_database.database_filename,
-        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-        #         if webdav_account_uuid == "":
-        #             print("No default webdav account UUID found in configuration table.")
-        #             continue
-        #         webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-        #     else:
-        #         if len(shell_command.arguments) == 2:
-        #             webdav_account_uuid = shell_command.arguments[1].strip()
-        #             webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-        #         else:
-        #             print("Too many arguments.")
-        #             print(shell_command.synopsis)
-        #             continue
-        #     if webdav_account is None:
-        #         print("Webdav account could not be found: " + str(webdav_account_uuid))
-        #         continue
-        #     connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-        #                                                  webdav_account.password)
-        #     # connector.delete_file(p_database.get_database_filename_without_path())
-        #     p_database.delete_database_in_connector(connector)
-        #     continue
 
         if shell_command.command == "forgetdeletedaccounts":
             try:
@@ -1268,95 +1160,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: " + str(e))
             continue
 
-        # if shell_command.command == "listdropboxfiles":
-        #     connector = connector_manager.get_dropbox_connector()
-        #     # dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-        #     # if dropbox_connection_credentials is None:
-        #     #     continue
-        #     # connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
-        #     #                                                dropbox_connection_credentials[1],
-        #     #                                                dropbox_connection_credentials[2])
-        #     dropbox_files = connector.list_files("")
-        #     if len(dropbox_files) > 0:
-        #         print("Files found in the dropbox folder:")
-        #         for f in dropbox_files:
-        #             print(f)
-        #     else:
-        #         print("No files found in dropbox folder.")
-        #     continue
-
         if shell_command.command == "listinvalidated":
             p_database.search_invalidated_accounts("")
             continue
-
-        # if shell_command.command == "listsshfiles":
-        #     if len(shell_command.arguments) == 1:
-        #         ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-        #             p_database.database_filename,
-        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-        #         if ssh_account_uuid == "":
-        #             print("No default ssh account UUID found in configuration table.")
-        #             continue
-        #         ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-        #     else:
-        #         if len(shell_command.arguments) == 2:
-        #             ssh_account_uuid = shell_command.arguments[1].strip()
-        #             ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-        #         else:
-        #             print("too many arguments.")
-        #             print(shell_command.synopsis)
-        #             continue
-        #     if ssh_account is None:
-        #         print("SSH account could not be found: " + str(ssh_account_uuid))
-        #         continue
-        #     connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
-        #     try:
-        #         ssh_files = connector.list_files()
-        #         if len(ssh_files) > 0:
-        #             print("Files found in the ssh folder:")
-        #             for f in ssh_files:
-        #                 print(f)
-        #         else:
-        #             print("No files found in ssh folder.")
-        #
-        #     except Exception as e:
-        #         print("Error: " + str(e))
-        #     continue
-        #
-        # if shell_command.command == "listwebdavfiles":
-        #     if len(shell_command.arguments) == 1:
-        #         webdav_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-        #             p_database.database_filename,
-        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-        #         if webdav_account_uuid == "":
-        #             print("No default webdav account UUID found in configuration table.")
-        #             continue
-        #         webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-        #     else:
-        #         if len(shell_command.arguments) == 2:
-        #             webdav_account_uuid = shell_command.arguments[1].strip()
-        #             webdav_account = p_database.get_account_by_uuid_and_decrypt(webdav_account_uuid)
-        #         else:
-        #             print("too many arguments.")
-        #             print(shell_command.synopsis)
-        #             continue
-        #     if webdav_account is None:
-        #         print("Webdav account could not be found: " + str(webdav_account_uuid))
-        #         continue
-        #     connector = webdav_connector.WebdavConnector(webdav_account.url, webdav_account.loginname,
-        #                                                  webdav_account.password)
-        #     try:
-        #         webdav_files = connector.list_files("/")
-        #         if len(webdav_files) > 0:
-        #             print("Files found in the webdav folder:")
-        #             for f in webdav_files:
-        #                 print(f)
-        #         else:
-        #             print("No files found in webdav folder.")
-        #
-        #     except Exception as e:
-        #         print("Error: " + str(e))
-        #     continue
 
         if shell_command.command == "lock" or shell_command.command == "#":
             manual_locked = True
@@ -1400,27 +1206,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error: " + str(e))
             continue
-
-        # if shell_command.command == "merge2file":
-        #     if len(shell_command.arguments) == 1:
-        #         merge_target_file = pdatabase.get_attribute_value_from_configuration_table(
-        #             p_database.database_filename,
-        #             pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
-        #         if merge_target_file == "":
-        #             print("No default merge target file found in configuration table.")
-        #             continue
-        #     else:
-        #         if len(shell_command.arguments) == 2:
-        #             merge_target_file = shell_command.arguments[1].strip()
-        #         else:
-        #             print("Too many arguments.")
-        #             print(shell_command.synopsis)
-        #             continue
-        #     try:
-        #         p_database.merge_database(merge_target_file)
-        #     except Exception as e:
-        #         print("Error: " + str(e))
-        #     continue
 
         if shell_command.command == "merge2ssh":
             account_uuid = None
@@ -1592,20 +1377,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 latest_found_account = account_array[len(account_array) - 1]
             continue
-
-        # if shell_command.command == "setdefaultmergetargetfile":
-        #     if len(shell_command.arguments) == 1:
-        #         print("Default target filename is missing.")
-        #         print(shell_command.synopsis)
-        #         continue
-        #     new_default_merge_target_file = shell_command.arguments[1].strip()
-        #     if new_default_merge_target_file == "-":
-        #         new_default_merge_target_file = ""
-        #     p.set_attribute_value_in_configuration_table(
-        #         p_database.database_filename,
-        #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE,
-        #         new_default_merge_target_file)
-        #     continue
 
         if shell_command.command == "setfileaccountuuid":
             if len(shell_command.arguments) == 1:
