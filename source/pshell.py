@@ -180,15 +180,7 @@ SHELL_COMMANDS = [
                  "UUID's which have existed in this database.\nYou should empty this table on all databases. " +
                  "Otherwise the table will be filled again after the next merge with a database which has entries " +
                  "in the deleted_accounts table."),
-    # ShellCommand("deletedropboxdatabase", "deletedropboxdatabase", "Delete dropbox database file in the " +
-    #              "configured dropbox account."),
     ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>", "Delete the database that is located in the connector account UUID."),
-    # ShellCommand("deletesshdatabase", "deletesshdatabase [<UUID>]", "Delete database file in the ssh " +
-    #              " remote folder with the same name as the database that is currently opened. If no UUID " +
-    #              "is given, the configuration table will be searched for the default ssh account."),
-    # ShellCommand("deletewebdavdatabase", "deletewebdavdatabase [<UUID>]", "Delete database file in the webdav " +
-    #              " remote folder with the same name as the database that is currently opened. If no UUID " +
-    #              "is given, the configuration table will be searched for the default webdav account."),
     ShellCommand("edit", "edit <SEARCHSTRING>>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
@@ -204,7 +196,7 @@ SHELL_COMMANDS = [
                  "random password with LENGHT characters. When LENGTH is not set, a 10 char password will be generated."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
-    ShellCommand("helpverbose", "helpverbose", "Show help for all pshell commands in one line."),
+    ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
     ShellCommand("history", "history [MAX_ENTRIES]", "Show history of all user inputs in the the pshell.\n" +
                  "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
@@ -214,11 +206,7 @@ SHELL_COMMANDS = [
                  " If you search something, invalidated accounts are not visible unless you change the settings (" +
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
-    # ShellCommand("listdropboxfiles", "listdropboxfiles", "List all files in configured dropbox folder."),
     ShellCommand("listconnectorfiles", "listconnectorfiles UUID", "List all files in the connector account with UUID."),
-    # ShellCommand("listsshfiles", "listsshfiles [UUID]", "List all files in ssh folder."),
-    # ShellCommand("listwebdavfiles", "listwebdavfiles [UUID]", "List all files from the webdav account with UUID. " +
-    #              "If no is given, the default webdav UUID from the configuration table will be taken if exists."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
@@ -250,9 +238,6 @@ SHELL_COMMANDS = [
                  "Type            : <FREE_TEXT>\n" +
                  "Connectortype   : file\n" +
                  " "),
-    # ShellCommand("merge2lastknownfile", "merge2lastknownfile",
-    #              "Merge local database with the last known merge database. The last know database can be seen " +
-    #              "with the status command"),
     ShellCommand("merge2ssh", "merge2ssh [<UUID>]",
                  "Merge local database with a ssh target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
@@ -312,9 +297,6 @@ SHELL_COMMANDS = [
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
-    # ShellCommand("setdefaultmergetargetfile", "setdefaultmergetargetfile FILENAME",
-    #              "Set a default merge target file in the configuration table. " +
-    #              "This filename will be used when merge2file is called without a target filename."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
                  "If one or more account(s) match the SEARCHSTRING, the password of the first account will be copied " +
                  "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
@@ -338,10 +320,6 @@ SHELL_COMMANDS = [
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database. To unset the database name, set it to '-'"),
-    # ShellCommand("setdropboxapplicationuuid", "setdropboxapplicationuuid <UUID>",
-    #              "Set the dropbox application account uuid in configuration."),
-    # ShellCommand("setdropboxtokenuuid", "setdropboxtokenuuid <UUID>",
-    #              "Set the dropbox token account uuid in configuration."),
     ShellCommand("setdropboxaccountuuid", "setdropboxaccountuuid <UUID>",
                  "Set the default dropbox account uuid in the configuration. Whenever you run merge2dropbox, this UUID will be used as the default dropbox account."),
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
