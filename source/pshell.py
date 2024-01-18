@@ -1438,7 +1438,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
             try:
-                connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
+                connector = connector_manager.get_webdav_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
