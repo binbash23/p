@@ -944,6 +944,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "edit":
+            if len(shell_command.arguments) == 1:
+                print("UUID or SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
+                continue
             uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if uuid_to_edit is not None:
                 p.edit(p_database, uuid_to_edit)
@@ -1662,6 +1666,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "showmergedetail":
             if len(shell_command.arguments) == 1:
                 print("Error: Merge history UUID is missing.")
+                print(shell_command.synopsis)
                 continue
             pdatabase.print_merge_history_detail(p_database.database_filename, shell_command.arguments[1].strip())
 
