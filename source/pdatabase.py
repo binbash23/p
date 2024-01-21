@@ -1236,7 +1236,7 @@ class PDatabase:
     # DEFAULT_ITERATION_COUNT = 500000
 
     database_filename = "unset_database_name.db"
-    DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
+    DATABASE_PASSWORD_TEST_VALUE_LENGTH = 64  # how long should the dummy encrypted string be
     fernet = None
     salt = None
     iteration_count: int = -1
