@@ -3011,11 +3011,16 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def _create_initial_connector_database_interactive(self, database_filename: str):
+    def _create_initial_connector_database_interactive(self, database_filename: str) -> bool:
         print("Creating initial database...")
         if os.path.isfile(database_filename):
             os.remove(database_filename)
-        new_database_name = input("Enter logical database name : ")
+        try:
+            new_database_name = input("Enter logical database name : ")
+        except KeyboardInterrupt:
+            print()
+            print("Canceled")
+            return False
         PDatabase(database_filename, self.get_database_password_as_string())
         set_attribute_value_in_configuration_table(database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
@@ -3026,9 +3031,10 @@ class PDatabase:
 
         if connector.get_type() == "file":
             if not connector.exists(self.get_database_filename_without_path()):
-                self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
+                if not self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
                                                                                  os.path.basename(
-                                                                                     self.database_filename)))
+                                                                                     self.database_filename))):
+                    return
             return_code = self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)),
                 merge_history_uuid)
@@ -3049,7 +3055,8 @@ class PDatabase:
             return
 
         if not connector.exists(self.get_database_filename_without_path()):
-            self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME)
+            if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
+                return
             # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
