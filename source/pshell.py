@@ -802,7 +802,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
-                connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
+                connector = connector_manager.get_connector(p_database, account_uuid)
                 connector_manager.change_database_name_from_connector(p_database, connector)
             except Exception as e:
                 print(str(e))
@@ -815,7 +815,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
-                connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
+                connector = connector_manager.get_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
             except Exception as e:
                 print(str(e))
@@ -1225,6 +1225,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 sys.exit(1)
 
             # Now try to open/create the database:
+            if not pdatabase.is_valid_database_password(new_database_filename, new_database_password.encode("UTF-8")):
+                print("Error: Password is wrong.")
+                continue
             new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
             sys.exit()

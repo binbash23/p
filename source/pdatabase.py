@@ -447,6 +447,8 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHO
 CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
 # CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE = "DEFAULT_MERGE_TARGET_FILE"
 TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
+DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
+DEFAULT_ITERATION_COUNT = 500000
 
 
 class ShellHistoryEntry:
@@ -488,15 +490,15 @@ class Account:
 
     def __str__(self):
         return "UUID=" + self.uuid + \
-               ", Name=" + self.name + \
-               ", URL=" + self.url + \
-               ", Loginname=" + self.loginname + \
-               ", Password=" + self.password + \
-               ", Type=" + self.type + \
-               ", Connectortype=" + self.connector_type + \
-               ", Createdate=" + self.create_date + \
-               ", Changedate=" + self.change_date + \
-               ", Invaliddate=" + self.invalid_date
+            ", Name=" + self.name + \
+            ", URL=" + self.url + \
+            ", Loginname=" + self.loginname + \
+            ", Password=" + self.password + \
+            ", Type=" + self.type + \
+            ", Connectortype=" + self.connector_type + \
+            ", Createdate=" + self.create_date + \
+            ", Changedate=" + self.change_date + \
+            ", Invaliddate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -1100,8 +1102,8 @@ def read_confirmed_database_password_from_user() -> str:
 
 
 class PDatabase:
-    DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
-    DEFAULT_ITERATION_COUNT = 500000
+    # DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
+    # DEFAULT_ITERATION_COUNT = 500000
 
     database_filename = "unset_database_name.db"
     DATABASE_PASSWORD_TEST_VALUE_LENGTH = 32  # how long should the dummy encrypted string be
@@ -1141,7 +1143,7 @@ class PDatabase:
         self.create_and_initialize_database(initial_database_name)
         self.update_database_schema(self.database_filename)
         self.set_default_values_in_configuration_table()
-        if not self.is_valid_database_password(self.database_filename, self.database_password):
+        if not is_valid_database_password(self.database_filename, self.database_password):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
@@ -2131,7 +2133,7 @@ class PDatabase:
         return string_encrypted_new
 
     def change_database_password(self, new_password: str) -> bool:
-        if not self.is_valid_database_password(self.database_filename, self.database_password):
+        if not is_valid_database_password(self.database_filename, self.database_password):
             print("Old database password is wrong.")
             return False
         try:
@@ -2354,16 +2356,18 @@ class PDatabase:
         else:
             return encrypted_text
 
-    def decrypt_string_if_password_is_present_with_custom_password(self, encrypted_text: str, _database_password):
-        if encrypted_text == "" or encrypted_text is None:
-            return ""
-        if _database_password != "":
-            # _fernet = self.create_fernet(self.DEFAULT_SALT, _database_password.encode("UTF-8"))
-            _fernet = create_fernet(self.salt, _database_password, self.iteration_count)
-            decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
-            return decrypted_string
-        else:
-            return encrypted_text
+    # def decrypt_string_if_password_is_present_with_custom_password(self, encrypted_text: str, _database_password):
+    #     if encrypted_text == "" or encrypted_text is None:
+    #         return ""
+    #     if _database_password != "":
+    #         _fernet = create_fernet(self.salt, _database_password, self.iteration_count)
+    #         decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
+    #         return decrypted_string
+    #     else:
+    #         return encrypted_text
+
+
+
 
     def add_account_and_encrypt(self, account: Account):
         account.name = self.encrypt_string_if_password_is_present(account.name)
@@ -2396,24 +2400,27 @@ class PDatabase:
             if database_connection:
                 database_connection.close()
 
-    def is_valid_database_password(self, _database_filename: str, _database_password: str) -> bool:
-        try:
-            value = get_attribute_value_from_configuration_table(_database_filename,
-                                                                 CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
-            if value is None or value == "":
-                print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
-                return False
-            if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password == "":
-                print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
-                return True
-            else:
-                if _database_password == "":
-                    return False
-                else:
-                    self.decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
-        except (InvalidSignature, InvalidToken) as e:
-            return False
-        return True
+    # def is_valid_database_password(self, _database_filename: str, _database_password: str) -> bool:
+    #     try:
+    #         value = get_attribute_value_from_configuration_table(_database_filename,
+    #                                                              CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
+    #         if value is None or value == "":
+    #             print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
+    #             return False
+    #         if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password == "":
+    #             print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
+    #             return True
+    #         else:
+    #             if _database_password == "":
+    #                 return False
+    #             else:
+    #                 self.decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
+    #     except (InvalidSignature, InvalidToken) as e:
+    #         return False
+    #     return True
+
+
+
 
     def set_database_pragmas_to_secure_mode(self, database_connection, cursor):
         logging.debug("Setting PRAGMA journal_mode = WAL for database.")
@@ -2564,7 +2571,7 @@ class PDatabase:
               get_database_identification_string(merge_database_filename))
         # Check remote db for password
         print("Checking merge database password...")
-        if not self.is_valid_database_password(merge_database_filename, self.database_password):
+        if not is_valid_database_password(merge_database_filename, self.database_password):
             print(colored("Error: because password for merge database: " + merge_database_filename +
                           " is not valid!", "red"))
             print("The database passwords must be the same in both databases.")
@@ -2782,8 +2789,9 @@ class PDatabase:
         if connector.get_type() == "file":
             if not connector.exists(self.get_database_filename_without_path()):
                 self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
-                                                                                 os.path.basename(self.database_filename)))
-            print("-> " + os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
+                                                                                 os.path.basename(
+                                                                                     self.database_filename)))
+            # print("-> " + os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             return
@@ -2838,6 +2846,39 @@ class PDatabase:
                              )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
 
+
+"""
+database_password must be a string.encode("UTF-8")
+"""
+def is_valid_database_password(_database_filename: str, _database_password:bytes) -> bool:
+    try:
+        value = get_attribute_value_from_configuration_table(_database_filename,
+                                                             CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
+        if value is None or value == "":
+            print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
+            return False
+        if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password == "":
+            print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
+            return True
+        else:
+            if _database_password == "":
+                return False
+            else:
+                decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
+    except (InvalidSignature, InvalidToken) as e:
+        return False
+    return True
+
+
+def decrypt_string_if_password_is_present_with_custom_password(encrypted_text: str, _database_password):
+    if encrypted_text == "" or encrypted_text is None:
+        return ""
+    if _database_password != "":
+        _fernet = create_fernet(DEFAULT_SALT, _database_password, DEFAULT_ITERATION_COUNT)
+        decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
+        return decrypted_string
+    else:
+        return encrypted_text
 
 def main():
     # print(colored("test", "red"))

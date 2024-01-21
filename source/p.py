@@ -394,7 +394,8 @@ def main():
     try:
         p_database = PDatabase(database_filename, database_password, show_account_details,
                                show_invalidated_accounts, initial_database_name=database_logical_name)
-    except:
+    except Exception as e:
+        print("Error: " + str(e))
         sys.exit(1)
 
     # from here we have a valid database ready to access
