@@ -185,7 +185,7 @@ SHELL_COMMANDS = [
                  "Otherwise the table will be filled again after the next merge with a database which has entries " +
                  "in the deleted_accounts table."),
     ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>", "Delete the database that is located in the connector account UUID."),
-    ShellCommand("edit", "edit <SEARCHSTRING>>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
+    ShellCommand("edit", "edit <SEARCHSTRING>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
                  "to execute the command without the space before the slash like '!dir' for example."),
