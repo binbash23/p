@@ -339,6 +339,8 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
+    ShellCommand("showmergedetail", "showmergehistory UUID", "Show the merge history detail for merge event with UUID."),
+    ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
     ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the " +
@@ -1653,6 +1655,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "showmergehistory":
             pdatabase.print_merge_history(p_database.database_filename)
+
+        if shell_command.command == "showlatestmerge":
+            pdatabase.print_latest_merge_history_detail(p_database.database_filename)
+
+        if shell_command.command == "showmergedetail":
+            if len(shell_command.arguments) == 1:
+                print("Error: Merge history UUID is missing.")
+                continue
+            pdatabase.print_merge_history_detail(p_database.database_filename, shell_command.arguments[1].strip())
 
         if shell_command.command == "showstatusonstartup":
             # print(shell_command.arguments)
