@@ -2780,12 +2780,14 @@ class PDatabase:
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
         if connector.get_type() == "file":
-            if not connector.exists(self.database_filename):
+            if not connector.exists(self.get_database_filename_without_path()):
                 self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
                                                                                  os.path.basename(self.database_filename)))
+            print("-> " + os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)))
             return
+
         if not connector.exists(self.get_database_filename_without_path()):
             # print("Creating initial remote database...")
             # if os.path.isfile(TEMP_MERGE_DATABASE_FILENAME):
