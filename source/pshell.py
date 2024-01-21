@@ -339,7 +339,7 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
-    ShellCommand("showmergedetail", "showmergehistory UUID", "Show the merge history detail for merge event with UUID."),
+    ShellCommand("showmergedetail", "showmergedetail UUID", "Show the merge history detail for merge event with UUID."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
