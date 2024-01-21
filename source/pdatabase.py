@@ -2366,9 +2366,6 @@ class PDatabase:
     #     else:
     #         return encrypted_text
 
-
-
-
     def add_account_and_encrypt(self, account: Account):
         account.name = self.encrypt_string_if_password_is_present(account.name)
         account.url = self.encrypt_string_if_password_is_present(account.url)
@@ -2418,9 +2415,6 @@ class PDatabase:
     #     except (InvalidSignature, InvalidToken) as e:
     #         return False
     #     return True
-
-
-
 
     def set_database_pragmas_to_secure_mode(self, database_connection, cursor):
         logging.debug("Setting PRAGMA journal_mode = WAL for database.")
@@ -2850,7 +2844,9 @@ class PDatabase:
 """
 database_password must be a string.encode("UTF-8")
 """
-def is_valid_database_password(_database_filename: str, _database_password:bytes) -> bool:
+
+
+def is_valid_database_password(_database_filename: str, _database_password: bytes) -> bool:
     try:
         value = get_attribute_value_from_configuration_table(_database_filename,
                                                              CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
@@ -2879,6 +2875,7 @@ def decrypt_string_if_password_is_present_with_custom_password(encrypted_text: s
         return decrypted_string
     else:
         return encrypted_text
+
 
 def main():
     # print(colored("test", "red"))

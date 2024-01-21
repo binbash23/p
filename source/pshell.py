@@ -1226,7 +1226,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
             # Now try to open/create the database:
             if not pdatabase.is_valid_database_password(new_database_filename, new_database_password.encode("UTF-8")):
-                print("Error: Password is wrong.")
+                print("Error opening database: Password is wrong.")
                 continue
             new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
