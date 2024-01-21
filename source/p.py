@@ -16,7 +16,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.01.18"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.01.21"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -394,7 +394,8 @@ def main():
     try:
         p_database = PDatabase(database_filename, database_password, show_account_details,
                                show_invalidated_accounts, initial_database_name=database_logical_name)
-    except:
+    except Exception as e:
+        print("Error: " + str(e))
         sys.exit(1)
 
     # from here we have a valid database ready to access

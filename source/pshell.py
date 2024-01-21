@@ -132,6 +132,10 @@ SHELL_COMMANDS = [
     ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
                  "be re-encrypted but also account history, aliases, command history and so on."),
+    ShellCommand("changeconnectordbname", "changeconnectordbname <UUID>|SEARCHSTRING",
+                 "Change the database name for the database from the connector identified by UUID or SEARCHSTRING."),
+    ShellCommand("changeconnectordbpassword", "changeconnectordbpassword <UUID>|SEARCHSTRING",
+                 "Change the database password for the database from the connector identified by UUID or SEARCHSTRING."),
     ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>]", "Change password of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
@@ -335,6 +339,8 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
+    ShellCommand("showmergedetail", "showmergehistory UUID", "Show the merge history detail for merge event with UUID."),
+    ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
     ShellCommand("showunmergedchanges", "showunmergedchanges", "Show all changes since the " +
@@ -781,13 +787,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changedropboxdbpassword":
-            # dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-            # if dropbox_connection_credentials is None:
-            #     continue
-            # connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
-            #                                                dropbox_connection_credentials[1],
-            #                                                dropbox_connection_credentials[2])
-
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -798,14 +797,33 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(str(e))
             continue
 
-        if shell_command.command == "changedropboxdbname":
-            # dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-            # if dropbox_connection_credentials is None:
-            #     continue
-            # connector = dropbox_connector.DropboxConnector(dropbox_connection_credentials[0],
-            #                                                dropbox_connection_credentials[1],
-            #                                                dropbox_connection_credentials[2])
+        if shell_command.command == "changeconnectordbname":
+            account_uuid = None
+            if len(shell_command.arguments) == 1:
+                print("Error: UUID or account name is missing.")
+                continue
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            try:
+                connector = connector_manager.get_connector(p_database, account_uuid)
+                connector_manager.change_database_name_from_connector(p_database, connector)
+            except Exception as e:
+                print(str(e))
+            continue
 
+        if shell_command.command == "changeconnectordbpassword":
+            account_uuid = None
+            if len(shell_command.arguments) == 1:
+                print("Error: UUID or account name is missing.")
+                continue
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            try:
+                connector = connector_manager.get_connector(p_database, account_uuid)
+                connector_manager.change_database_password_from_connector(p_database, connector)
+            except Exception as e:
+                print(str(e))
+            continue
+
+        if shell_command.command == "changedropboxdbname":
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -817,28 +835,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changesshdbname":
-            # if len(shell_command.arguments) == 1:
-            #     ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-            #         p_database.database_filename,
-            #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-            #     if ssh_account_uuid == "":
-            #         print("No default ssh account UUID found in configuration table.")
-            #         continue
-            #     ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            # else:
-            #     if len(shell_command.arguments) == 2:
-            #         ssh_account_uuid = shell_command.arguments[1].strip()
-            #         ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            #     else:
-            #         print("Too many arguments.")
-            #         print(shell_command.synopsis)
-            #         continue
-            # if ssh_account is None:
-            #     print("SSH account could not be found: " + str(ssh_account_uuid))
-            #     continue
-            # connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
-            # p_database.change_database_name_from_connector(connector)
-
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -850,28 +846,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changesshdbpassword":
-            # if len(shell_command.arguments) == 1:
-            #     ssh_account_uuid = pdatabase.get_attribute_value_from_configuration_table(
-            #         p_database.database_filename,
-            #         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-            #     if ssh_account_uuid == "":
-            #         print("No default ssh account UUID found in configuration table.")
-            #         continue
-            #     ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            # else:
-            #     if len(shell_command.arguments) == 2:
-            #         ssh_account_uuid = shell_command.arguments[1].strip()
-            #         ssh_account = p_database.get_account_by_uuid_and_decrypt(ssh_account_uuid)
-            #     else:
-            #         print("Too many arguments.")
-            #         print(shell_command.synopsis)
-            #         continue
-            # if ssh_account is None:
-            #     print("SSH account could not be found: " + str(ssh_account_uuid))
-            #     continue
-            # connector = ssh_connector.SshConnector(ssh_account.url, ssh_account.loginname, ssh_account.password)
-            # p_database.change_database_password_from_connector(connector)
-
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = shell_command.arguments[1].strip()
@@ -1253,6 +1227,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 sys.exit(1)
 
             # Now try to open/create the database:
+            if not pdatabase.is_valid_database_password(new_database_filename, new_database_password.encode("UTF-8")):
+                print("Error opening database: Password is wrong.")
+                continue
             new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
             sys.exit()
@@ -1678,6 +1655,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "showmergehistory":
             pdatabase.print_merge_history(p_database.database_filename)
+
+        if shell_command.command == "showlatestmerge":
+            pdatabase.print_latest_merge_history_detail(p_database.database_filename)
+
+        if shell_command.command == "showmergedetail":
+            if len(shell_command.arguments) == 1:
+                print("Error: Merge history UUID is missing.")
+                continue
+            pdatabase.print_merge_history_detail(p_database.database_filename, shell_command.arguments[1].strip())
 
         if shell_command.command == "showstatusonstartup":
             # print(shell_command.arguments)
