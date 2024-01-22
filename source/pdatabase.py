@@ -1169,9 +1169,9 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
     return last_change_date_later_than_last_merge_date
 
 
-def create_fernet(salt, password, iteration_count: int) -> Fernet:
+def _create_fernet(salt, password_bytes: bytes, iteration_count: int) -> Fernet:
     _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=iteration_count)
-    key = base64.urlsafe_b64encode(_hash.derive(password))
+    key = base64.urlsafe_b64encode(_hash.derive(password_bytes))
     f = Fernet(key)
     return f
 
@@ -1221,14 +1221,15 @@ class PDatabase:
     # DEFAULT_ITERATION_COUNT = 500000
 
     database_filename = "unset_database_name.db"
-    DATABASE_PASSWORD_TEST_VALUE_LENGTH = 64  # how long should the dummy encrypted string be
-    fernet = None
-    salt = None
-    iteration_count: int = -1
+    _database_password_bytes: bytes = b""
+    _DATABASE_PASSWORD_TEST_VALUE_LENGTH = 64  # how long should the dummy encrypted string be
+    _fernet = None
+    _salt = None
+    _iteration_count: int = -1
     show_account_details: bool = False
     show_invalidated_accounts: bool = False
     shadow_passwords: bool = False
-    SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
+    _SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
     track_account_history: bool = True
 
     def __init__(self, database_filename, database_password: str, show_account_details=False,
@@ -1246,18 +1247,22 @@ class PDatabase:
         self.show_invalidated_accounts = show_invalidated_accounts
         self.shadow_passwords = shadow_passwords
         self.track_account_history = track_account_history
-        self.salt = salt
-        self.iteration_count = iteration_count
+        self._salt = salt
+        self._iteration_count = iteration_count
         # store password as byte[]
         if database_password != "":
-            self.database_password = database_password.encode("UTF-8")
-            self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
+            # self.database_password = database_password.encode("UTF-8")
+            self._database_password_bytes = database_password.encode("UTF-8")
+            # self._fernet = _create_fernet(self._salt, self.database_password, self._iteration_count)
+            self._fernet = _create_fernet(self._salt, self._database_password_bytes, self._iteration_count)
         else:
-            self.database_password = ""
+            # self.database_password = ""
+            self._database_password_bytes = "".encode("UTF-8")
         self.create_and_initialize_database(initial_database_name)
         self.update_database_schema(self.database_filename)
         self.set_default_values_in_configuration_table()
-        if not is_valid_database_password(self.database_filename, self.database_password):
+        # if not is_valid_database_password(self.database_filename, self.database_password):
+        if not is_valid_database_password(self.database_filename, self._database_password_bytes):
             print(colored("Database password verification failed! Password is wrong!", 'red'))
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
@@ -1700,7 +1705,7 @@ class PDatabase:
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            print("Searching for *" + colored(search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR) +
                   "* in " + str(
                 get_account_count(self.database_filename, self.show_invalidated_accounts)) + " accounts:")
             if len(result) > 0:
@@ -1750,7 +1755,7 @@ class PDatabase:
             # print("executing: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            print("Searching for *" + colored(search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR) +
                   "* in " + str(get_account_count_invalid(self.database_filename)) + " invalidated accounts:")
             print()
             for row in result:
@@ -1893,7 +1898,7 @@ class PDatabase:
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            print("Searching for *" + colored(type_search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
+            print("Searching for *" + colored(type_search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR) +
                   "* in " + str(get_account_count(self.database_filename, self.show_invalidated_accounts)) +
                   " accounts:")
             print()
@@ -2210,20 +2215,20 @@ class PDatabase:
 
     def print_formatted_account_search_string_colored(self, account: Account, search_string: str = "",
                                                       print_slowly: bool = True, show_account_details: bool = False):
-        account.uuid = color_search_string(account.uuid, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.name = color_search_string(account.name, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.url = color_search_string(account.url, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.loginname = color_search_string(account.loginname, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.password = color_search_string(account.password, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.type = color_search_string(account.type, search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.uuid = color_search_string(account.uuid, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.name = color_search_string(account.name, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.url = color_search_string(account.url, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.loginname = color_search_string(account.loginname, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.password = color_search_string(account.password, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.type = color_search_string(account.type, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.connector_type = color_search_string(account.connector_type, search_string,
-                                                     self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+                                                     self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.create_date = color_search_string(account.create_date, search_string,
-                                                  self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+                                                  self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.change_date = color_search_string(account.change_date, search_string,
-                                                  self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+                                                  self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.invalid_date = color_search_string(account.invalid_date, search_string,
-                                                   self.SEARCH_STRING_HIGHLIGHTING_COLOR)
+                                                   self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         self.print_formatted_account(account, print_slowly=print_slowly, show_account_details=show_account_details)
 
     def print_formatted_account(self, account: Account, show_history_count: bool = True, print_slowly: bool = True,
@@ -2270,7 +2275,8 @@ class PDatabase:
         return string_encrypted_new
 
     def change_database_password(self, new_password: str) -> bool:
-        if not is_valid_database_password(self.database_filename, self.database_password):
+        # if not is_valid_database_password(self.database_filename, self.database_password):
+        if not is_valid_database_password(self.database_filename, self._database_password_bytes):
             print("Old database password is wrong.")
             return False
         database_connection = None
@@ -2282,7 +2288,7 @@ class PDatabase:
             print("Changing DATABASE_PASSWORD_TEST value in configuration table...")
             if new_password != "":
                 random_string = str(
-                    binascii.hexlify(os.urandom(self.DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
+                    binascii.hexlify(os.urandom(self._DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
                 encrypted_value = self.encrypt_string_with_custom_password(random_string, new_password)
             else:
                 encrypted_value = CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED
@@ -2460,17 +2466,22 @@ class PDatabase:
         # set encryption engine to new password
         # store password as byte[]
         if new_password != "":
-            self.database_password = new_password.encode("UTF-8")
-            self.fernet = create_fernet(self.salt, self.database_password, self.iteration_count)
+            # self.database_password = new_password.encode("UTF-8")
+            self._database_password_bytes = new_password.encode("UTF-8")
+            # self._fernet = create_fernet(self._salt, self.database_password, self._iteration_count)
+            self._fernet = _create_fernet(self._salt, self._database_password_bytes, self._iteration_count)
         else:
-            self.database_password = ""
-            self.fernet = None
+            # self.database_password = ""
+            self._database_password_bytes = "".encode("UTF-8")
+            self._fernet = None
         return True
 
     def encrypt_string_if_password_is_present(self, plain_text: str) -> str:
         if plain_text is not None and plain_text != "":
-            if self.database_password != "":
-                return self.fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
+            # if self.database_password != "":
+            #     return self._fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
+            if self._database_password_bytes != b"":
+                return self._fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
             else:
                 return plain_text
         else:
@@ -2479,7 +2490,7 @@ class PDatabase:
     def encrypt_string_with_custom_password(self, plain_text: str, password: str) -> str:
         if password == "":
             return plain_text
-        _fernet = create_fernet(self.salt, password.encode("UTF-8"), self.iteration_count)
+        _fernet = _create_fernet(self._salt, password.encode("UTF-8"), self._iteration_count)
         if plain_text is not None and plain_text != "":
             return _fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
         else:
@@ -2488,8 +2499,9 @@ class PDatabase:
     def decrypt_string_if_password_is_present(self, encrypted_text: str) -> str:
         if encrypted_text == "" or encrypted_text is None:
             return ""
-        if self.database_password != "":
-            decrypted_string = self.fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
+        if self._database_password_bytes != b"":
+        # if self.database_password != "":
+            decrypted_string = self._fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
             return decrypted_string
         else:
             return encrypted_text
@@ -2609,10 +2621,11 @@ class PDatabase:
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
             cursor.execute(sqlstring, ("DATABASE_UUID", str(new_database_uuid)))
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
-            if self.database_password != "":
+            if self._database_password_bytes != b"":
+            # if self.database_password != "":
                 # print(colored("Creating an encrypted database with your password! Do not forget it!", 'green'))
                 random_string = str(
-                    binascii.hexlify(os.urandom(self.DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
+                    binascii.hexlify(os.urandom(self._DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
                 encrypted_value = self.encrypt_string_if_password_is_present(random_string)
             else:
                 print(colored("Creating an UNENCRYPTED database without any password!", 'red'))
@@ -2650,10 +2663,11 @@ class PDatabase:
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print()
-            if self.database_password != "":
-                current_password = self.database_password.decode('UTF-8')
-            else:
-                current_password = ""
+            # if self.database_password != "":
+            #     current_password = self.database_password.decode('UTF-8')
+            # else:
+            #     current_password = ""
+            current_password = self.get_database_password_as_string()
             for row in result:
                 account = Account(uuid=row[0],
                                   name=row[1],
@@ -2681,10 +2695,15 @@ class PDatabase:
         print()
         print_found_n_results(results_found)
 
+    # def get_database_password_as_string(self) -> str:
+    #     if self.database_password == "":
+    #         return ""
+    #     return bytes(self.database_password).decode("UTF-8")
+
     def get_database_password_as_string(self) -> str:
-        if self.database_password == "":
+        if self._database_password_bytes == b"":
             return ""
-        return bytes(self.database_password).decode("UTF-8")
+        return self._database_password_bytes.decode("UTF-8")
 
     def get_database_filename_without_path(self) -> str | None:
         if self.database_filename is not None and self.database_filename != "":
@@ -2710,7 +2729,8 @@ class PDatabase:
         #       get_database_identification_string(merge_database_filename))
         # Check remote db for password
         # print("Checking merge database password...")
-        if not is_valid_database_password(merge_database_filename, self.database_password):
+        if not is_valid_database_password(merge_database_filename, self._database_password_bytes):
+        # if not is_valid_database_password(merge_database_filename, self.database_password):
             print(colored("Error: because password for merge database: " + merge_database_filename +
                           " is not valid!", "red"))
             print("The database passwords must be the same in both databases.")
@@ -3178,21 +3198,21 @@ database_password must be a string.encode("UTF-8")
 """
 
 
-def is_valid_database_password(_database_filename: str, _database_password: bytes) -> bool:
+def is_valid_database_password(_database_filename: str, _database_password_bytes: bytes) -> bool:
     try:
         value = get_attribute_value_from_configuration_table(_database_filename,
                                                              CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
         if value is None or value == "":
             print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
             return False
-        if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password == "":
+        if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password_bytes == b"":
             print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
             return True
         else:
-            if _database_password == "":
+            if _database_password_bytes == b"":
                 return False
             else:
-                decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
+                decrypt_string_if_password_is_present_with_custom_password(value, _database_password_bytes)
     except (InvalidSignature, InvalidToken):
         return False
     return True
@@ -3202,7 +3222,7 @@ def decrypt_string_if_password_is_present_with_custom_password(encrypted_text: s
     if encrypted_text == "" or encrypted_text is None:
         return ""
     if _database_password != "":
-        _fernet = create_fernet(DEFAULT_SALT, _database_password, DEFAULT_ITERATION_COUNT)
+        _fernet = _create_fernet(DEFAULT_SALT, _database_password, DEFAULT_ITERATION_COUNT)
         decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
         return decrypted_string
     else:
