@@ -3048,6 +3048,7 @@ class PDatabase:
             database_connection.close()
 
     def _create_initial_connector_database_interactive(self, database_filename: str) -> bool:
+        print("Connector database does not yet exist.")
         print("Creating initial database...")
         if os.path.isfile(database_filename):
             os.remove(database_filename)
