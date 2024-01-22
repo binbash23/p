@@ -186,7 +186,8 @@ SHELL_COMMANDS = [
                  "UUID's which have existed in this database.\nYou should empty this table on all databases. " +
                  "Otherwise the table will be filled again after the next merge with a database which has entries " +
                  "in the deleted_accounts table."),
-    ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>", "Delete the database that is located in the connector account UUID."),
+    ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>|<SEARCHSTRING>",
+                 "Delete the database that is located in the connector account identified by UUID or SEARCHSTRING."),
     ShellCommand("edit", "edit <SEARCHSTRING>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
@@ -294,13 +295,13 @@ SHELL_COMMANDS = [
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
-    ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>",
+    ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a file target. " +
                  "This account will be used if the command merge2file is called without an account UUID."),
-    ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>",
+    ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a ssh target." +
                  "This account will be used if the command merge2ssh is called without an account UUID."),
-    ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>",
+    ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a webdav target." +
                  "This account will be used if the command merge2webdav is called without an account UUID."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
