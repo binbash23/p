@@ -2219,7 +2219,8 @@ class PDatabase:
         account.uuid = color_search_string(account.uuid, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.name = color_search_string(account.name, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.url = color_search_string(account.url, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
-        account.loginname = color_search_string(account.loginname, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
+        account.loginname = color_search_string(account.loginname, search_string,
+                                                self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.password = color_search_string(account.password, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.type = color_search_string(account.type, search_string, self._SEARCH_STRING_HIGHLIGHTING_COLOR)
         account.connector_type = color_search_string(account.connector_type, search_string,
@@ -2501,7 +2502,7 @@ class PDatabase:
         if encrypted_text == "" or encrypted_text is None:
             return ""
         if self._database_password_bytes != b"":
-        # if self.database_password != "":
+            # if self.database_password != "":
             decrypted_string = self._fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
             return decrypted_string
         else:
@@ -2623,7 +2624,7 @@ class PDatabase:
             cursor.execute(sqlstring, ("DATABASE_UUID", str(new_database_uuid)))
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
             if self._database_password_bytes != b"":
-            # if self.database_password != "":
+                # if self.database_password != "":
                 # print(colored("Creating an encrypted database with your password! Do not forget it!", 'green'))
                 random_string = str(
                     binascii.hexlify(os.urandom(self._DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
@@ -2732,7 +2733,7 @@ class PDatabase:
         # Check remote db for password
         # print("Checking merge database password...")
         if not is_valid_database_password(merge_database_filename, self._database_password_bytes):
-        # if not is_valid_database_password(merge_database_filename, self.database_password):
+            # if not is_valid_database_password(merge_database_filename, self.database_password):
             print(colored("Error: because password for merge database: " + merge_database_filename +
                           " is not valid!", "red"))
             print("The database passwords must be the same in both databases.")
@@ -3073,8 +3074,9 @@ class PDatabase:
         try:
             if not connector.exists(self.get_database_filename_without_path()):
                 print()
-                if not self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
-                                                                           os.path.basename(self.database_filename))):
+                if not self._create_initial_connector_database_interactive(
+                        os.path.join(connector.get_remote_base_path(),
+                                     os.path.basename(self.database_filename))):
                     return
             file_merge_bar.update(1)
             return_code = self._merge_database(
@@ -3102,8 +3104,6 @@ class PDatabase:
         finally:
             file_merge_bar.finish()
 
-
-
     def merge_database_with_connector(self, connector: ConnectorInterface):
         merge_history_uuid = str(uuid.uuid4())
 
@@ -3111,14 +3111,17 @@ class PDatabase:
             self._merge_database_with_file_connector(connector, merge_history_uuid)
             return
 
+        bar = progressbar.ProgressBar(maxval=4)
+        bar.start()
         if not connector.exists(self.get_database_filename_without_path()):
+            print()
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
                 return
-            # print("--->yes")
             # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
             self._merge_database(TEMP_MERGE_DATABASE_FILENAME, merge_history_uuid)
+            bar.update(1)
             # print("Uploading initial database: '" +
             #       TEMP_MERGE_DATABASE_FILENAME + "' as '" +
             #       self.get_database_filename_without_path() + "' to connector...")
@@ -3129,6 +3132,7 @@ class PDatabase:
             local_path = os.path.dirname(TEMP_MERGE_DATABASE_FILENAME)
             connector.upload_file(os.path.join(local_path, TEMP_MERGE_DATABASE_FILENAME),
                                   self.get_database_filename_without_path())
+            bar.update(2)
             append_merge_history(merge_history_uuid=merge_history_uuid,
                                  database_filename=self.database_filename,
                                  database_uuid_local=get_database_uuid(self.database_filename),
@@ -3139,9 +3143,11 @@ class PDatabase:
                                  connector_type=connector.get_type()
                                  )
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
+            bar.update(3)
+            bar.finish()
             return
-        bar = progressbar.ProgressBar(maxval=4)
-        bar.start()
+        # bar = progressbar.ProgressBar(maxval=4)
+        # bar.start()
         bar.update(1)
         # print("Downloading database...")
         append_merge_history_detail(self.database_filename, merge_history_uuid, "Downloading database...")
@@ -3175,11 +3181,6 @@ class PDatabase:
                              )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
         bar.finish()
-
-
-"""
-database_password must be a string.encode("UTF-8")
-"""
 
 
 def is_valid_database_password(_database_filename: str, _database_password_bytes: bytes) -> bool:
