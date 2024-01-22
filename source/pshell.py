@@ -1348,7 +1348,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_file_account_uuid = shell_command.arguments[1].strip()
             if new_file_account_uuid == "-":
                 new_file_account_uuid = ""
-            # print("Writing: " + pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID + "/" + new_file_account_uuid)
+            else:
+                new_file_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip())
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID,
