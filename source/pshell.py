@@ -1349,7 +1349,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if new_file_account_uuid == "-":
                 new_file_account_uuid = ""
             else:
-                new_file_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip())
+                new_file_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
+                                                                               p_database)
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID,
@@ -1361,7 +1362,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID of ssh account is missing.")
                 print(shell_command.synopsis)
                 continue
+            # new_ssh_account_uuid = shell_command.arguments[1].strip()
+
             new_ssh_account_uuid = shell_command.arguments[1].strip()
+            if new_ssh_account_uuid == "-":
+                new_ssh_account_uuid = ""
+            else:
+                new_ssh_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
+                                                                               p_database)
+
             if new_ssh_account_uuid == "-":
                 new_ssh_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
@@ -1375,7 +1384,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID of webdav account is missing.")
                 print(shell_command.synopsis)
                 continue
+            # new_webdav_account_uuid = shell_command.arguments[1].strip()
+
             new_webdav_account_uuid = shell_command.arguments[1].strip()
+            if new_webdav_account_uuid == "-":
+                new_webdav_account_uuid = ""
+            else:
+                new_webdav_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
+                                                                               p_database)
+
             if new_webdav_account_uuid == "-":
                 new_webdav_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
