@@ -3072,6 +3072,7 @@ class PDatabase:
         file_merge_bar.start()
         try:
             if not connector.exists(self.get_database_filename_without_path()):
+                print()
                 if not self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
                                                                            os.path.basename(self.database_filename))):
                     return
@@ -3109,31 +3110,6 @@ class PDatabase:
         if connector.get_type() == "file":
             self._merge_database_with_file_connector(connector, merge_history_uuid)
             return
-            # file_merge_bar = progressbar.ProgressBar(maxval=4)
-            # if not connector.exists(self.get_database_filename_without_path()):
-            #     if not self._create_initial_connector_database_interactive(
-            #             os.path.join(connector.get_remote_base_path(),
-            #                          os.path.basename(
-            #                              self.database_filename))):
-            #         return
-            # return_code = self._merge_database(
-            #     os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)),
-            #     merge_history_uuid)
-            # append_merge_history(merge_history_uuid=merge_history_uuid,
-            #                      database_filename=self.database_filename,
-            #                      database_uuid_local=get_database_uuid(self.database_filename),
-            #                      database_name_local=get_database_name(self.database_filename),
-            #                      database_uuid_remote=get_database_uuid(os.path.join(connector.get_remote_base_path(),
-            #                                                                          os.path.basename(
-            #                                                                              self.database_filename))),
-            #                      database_name_remote=get_database_name(os.path.join(connector.get_remote_base_path(),
-            #                                                                          os.path.basename(
-            #                                                                              self.database_filename))),
-            #                      connector=str(connector),
-            #                      connector_type=connector.get_type(),
-            #                      return_code=str(return_code)
-            #                      )
-            # return
 
         if not connector.exists(self.get_database_filename_without_path()):
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
