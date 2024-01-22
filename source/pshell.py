@@ -963,7 +963,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "deleteconnectordb":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
             try:
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 connector_manager.delete_database_in_connector(p_database, connector)
