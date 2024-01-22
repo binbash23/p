@@ -21,13 +21,13 @@ def get_dropbox_connector(p_database: pdatabase, account_uuid: str = None) -> dr
         account_uuid = pdatabase.get_attribute_value_from_configuration_table(p_database.database_filename,
                                                                               pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID)
     if account_uuid is None or str(account_uuid).strip() == "":
-        raise Exception("Error: no default dropbox account uuid in configuration found.")
+        raise Exception("No default dropbox account uuid in configuration found.")
     account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
     if account is None:
-        raise Exception("Error: Account uuid " + account_uuid + " not found.")
+        raise Exception("Account uuid " + account_uuid + " not found.")
 
     if account.connector_type != "dropbox":
-        raise Exception("Error: expected connector type dropbox but got: " + account.connector_type)
+        raise Exception("Expected connector type dropbox but got: " + account.connector_type)
 
     dropbox_application_key = account.url.strip()
     if dropbox_application_key == "":
