@@ -3036,18 +3036,22 @@ class PDatabase:
                                                    CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                                                    new_database_name)
 
-    def merge_database_with_connector(self, connector: ConnectorInterface):
-        merge_history_uuid = str(uuid.uuid4())
+    def _merge_database_with_file_connector(self, connector: ConnectorInterface, merge_history_uuid: str):
+        if connector.get_type() != "file":
+            raise Exception("Connector type is not 'file'")
 
-        if connector.get_type() == "file":
+        file_merge_bar = progressbar.ProgressBar(maxval=3)
+        file_merge_bar.start()
+        try:
             if not connector.exists(self.get_database_filename_without_path()):
                 if not self._create_initial_connector_database_interactive(os.path.join(connector.get_remote_base_path(),
-                                                                                 os.path.basename(
-                                                                                     self.database_filename))):
+                                                                           os.path.basename(self.database_filename))):
                     return
+            file_merge_bar.update(1)
             return_code = self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)),
                 merge_history_uuid)
+            file_merge_bar.update(2)
             append_merge_history(merge_history_uuid=merge_history_uuid,
                                  database_filename=self.database_filename,
                                  database_uuid_local=get_database_uuid(self.database_filename),
@@ -3062,7 +3066,46 @@ class PDatabase:
                                  connector_type=connector.get_type(),
                                  return_code=str(return_code)
                                  )
+            file_merge_bar.update(3)
             return
+        except Exception:
+            raise
+        finally:
+            file_merge_bar.finish()
+
+
+
+    def merge_database_with_connector(self, connector: ConnectorInterface):
+        merge_history_uuid = str(uuid.uuid4())
+
+        if connector.get_type() == "file":
+            self._merge_database_with_file_connector(connector, merge_history_uuid)
+            return
+            # file_merge_bar = progressbar.ProgressBar(maxval=4)
+            # if not connector.exists(self.get_database_filename_without_path()):
+            #     if not self._create_initial_connector_database_interactive(
+            #             os.path.join(connector.get_remote_base_path(),
+            #                          os.path.basename(
+            #                              self.database_filename))):
+            #         return
+            # return_code = self._merge_database(
+            #     os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)),
+            #     merge_history_uuid)
+            # append_merge_history(merge_history_uuid=merge_history_uuid,
+            #                      database_filename=self.database_filename,
+            #                      database_uuid_local=get_database_uuid(self.database_filename),
+            #                      database_name_local=get_database_name(self.database_filename),
+            #                      database_uuid_remote=get_database_uuid(os.path.join(connector.get_remote_base_path(),
+            #                                                                          os.path.basename(
+            #                                                                              self.database_filename))),
+            #                      database_name_remote=get_database_name(os.path.join(connector.get_remote_base_path(),
+            #                                                                          os.path.basename(
+            #                                                                              self.database_filename))),
+            #                      connector=str(connector),
+            #                      connector_type=connector.get_type(),
+            #                      return_code=str(return_code)
+            #                      )
+            # return
 
         if not connector.exists(self.get_database_filename_without_path()):
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
