@@ -3062,6 +3062,7 @@ class PDatabase:
         set_attribute_value_in_configuration_table(database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                                                    new_database_name)
+        return True
 
     def _merge_database_with_file_connector(self, connector: ConnectorInterface, merge_history_uuid: str):
         if connector.get_type() != "file":
@@ -3137,6 +3138,7 @@ class PDatabase:
         if not connector.exists(self.get_database_filename_without_path()):
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
                 return
+            # print("--->yes")
             # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
