@@ -138,30 +138,30 @@ SHELL_COMMANDS = [
                  "Change the database name for the database from the connector identified by UUID or SEARCHSTRING."),
     ShellCommand("changeconnectordbpassword", "changeconnectordbpassword <UUID>|SEARCHSTRING",
                  "Change the database password for the database from the connector identified by UUID or SEARCHSTRING."),
-    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>]", "Change password of the dropbox " +
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>|<SEARCHSTRING>]", "Change password of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
-    ShellCommand("changedropboxdbname", "changedropboxdbname [<UUID>]", "Change database name of the dropbox " +
+    ShellCommand("changedropboxdbname", "changedropboxdbname [<UUID>|<SEARCHSTRING>]", "Change database name of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again."),
-    ShellCommand("changesshdbpassword", "changesshdbpassword [<UUID>]", "Change password of the ssh " +
+    ShellCommand("changesshdbpassword", "changesshdbpassword [<UUID>|<SEARCHSTRING>]", "Change password of the ssh " +
                  "database.\nThe database will be downloaded from the ssh account and you can enter a new " +
                  "password. After re-encrypting the ssh version of the database, the database will be " +
                  "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
                  " ssh UUID from the configuration table will be taken."),
-    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword [<UUID>]", "Change password of the webdav " +
+    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword [<UUID>|<SEARCHSTRING>]", "Change password of the webdav " +
                  "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
                  "password. After re-encrypting the webdav version of the database, the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
                  " webdav UUID from the configuration table will be taken."),
-    ShellCommand("changesshdbname", "changesshdbname [<UUID>]", "Change the database name of the ssh " +
+    ShellCommand("changesshdbname", "changesshdbname [<UUID>|<SEARCHSTRING>]", "Change the database name of the ssh " +
                  "database.\nThe database will be downloaded from the ssh account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
                  " ssh UUID from the configuration table will be taken."),
-    ShellCommand("changewebdavdbname", "changewebdavdbname [<UUID>]", "Change the database name of the webdav " +
+    ShellCommand("changewebdavdbname", "changewebdavdbname [<UUID>|<SEARCHSTRING>]", "Change the database name of the webdav " +
                  "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
@@ -172,7 +172,7 @@ SHELL_COMMANDS = [
     ShellCommand("duplicate", "duplicate <UUID>|<SEARCHSTRING>",
                  "Duplicate account with UUID into a new account. You can also use a SEARCHSTRING to " +
                  "identify the account to be duplicated."),
-    ShellCommand("copypassword", "copypassword <UUID>", "Copy password from UUID to the clipboard."),
+    ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
@@ -213,14 +213,15 @@ SHELL_COMMANDS = [
                  " If you search something, invalidated accounts are not visible unless you change the settings (" +
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
-    ShellCommand("listconnectorfiles", "listconnectorfiles UUID", "List all files in the connector account with UUID."),
+    ShellCommand("listconnectorfiles", "listconnectorfiles <UUID>|<SEARCHSTRING>",
+                 "List all files in the connector account with <UUID>."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
-    ShellCommand("merge2dropbox", "merge2dropbox [<UUID>]",
+    ShellCommand("merge2dropbox", "merge2dropbox [<UUID>|<SEARCHSTRING>]",
                  "Merge local database with dropbox database copy. If UUID is not given, the configuration " +
                  "will be searched for the default dropbox account uuid. The account has to have connector type = 'dropbox'.\n" +
                  "Example account for a dropbox connector:\n" +
@@ -232,7 +233,7 @@ SHELL_COMMANDS = [
                  "Type            : <FREE_TEXT>\n" +
                  "Connectortype   : dropbox\n" +
                  " "),
-    ShellCommand("merge2file", "merge2file [<UUID>]",
+    ShellCommand("merge2file", "merge2file [<UUID>|<SEARCHSTRING>]",
                  "Merge local database with the default file connector database. If UUID is given the account" +
                  " with the UUID will be used to merge with. This account must have the connector type = 'file'." +
                  "This can be set with: setdefaultmergetargetfile.\n" +
@@ -245,7 +246,7 @@ SHELL_COMMANDS = [
                  "Type            : <FREE_TEXT>\n" +
                  "Connectortype   : file\n" +
                  " "),
-    ShellCommand("merge2ssh", "merge2ssh [<UUID>]",
+    ShellCommand("merge2ssh", "merge2ssh [<UUID>|<SEARCHSTRING>]",
                  "Merge local database with a ssh target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
                  "and, if one is found, it will be used to connect to the ssh target. You can use the " +
@@ -259,7 +260,7 @@ SHELL_COMMANDS = [
                  "Type            : <FREE_TEXT>\n" +
                  "Connectortype   : ssh\n" +
                  " "),
-    ShellCommand("merge2webdav", "merge2webdav [<UUID>]",
+    ShellCommand("merge2webdav", "merge2webdav [<UUID>|<SEARCHSTRING>]",
                  "Merge local database with a webdav target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
                  "and, if one is found, it will be used to connect to the webdav target. You can use the " +
@@ -273,7 +274,7 @@ SHELL_COMMANDS = [
                  "Type            : <FREE_TEXT>\n" +
                  "Connectortype   : webdav\n" +
                  " "),
-    ShellCommand("mergewith", "mergewith <UUID>|SEARCHSTRING",
+    ShellCommand("mergewith", "mergewith <UUID>|<SEARCHSTRING>",
                  "Merge with with the account with UUID or the account that matches SEARCHSTRING.\n" +
                  "If SEARCHSTRING is not a unique account you will be asked, which account should be used.\n" +
                  "The target account has to have the attribute connector_type set to one of these values:\n" +
@@ -322,7 +323,7 @@ SHELL_COMMANDS = [
                  " which looks kinda cool :) But if you think it's annoying, disable it (created for ben)."),
     ShellCommand("sp", "sp <UUID>|<SEARCHSTRING>", "Set password for account with UUID or SEARCHSTRING. If" +
                  " shadow passwords is on, the password will be read hidden so that none can gather it from " +
-                 "your screen. If you do not no the UUID, use a SEARCHSTRING and you will be offered possible " +
+                 "your screen. If you do not no the <UUID>, use a <SEARCHSTRING> and you will be offered possible " +
                  "accounts the change the password for."),
     ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
@@ -334,8 +335,8 @@ SHELL_COMMANDS = [
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
-                 " account with UUID. If you do not know the uuid, use a SEARCHSTRING and you can choose from " +
-                 "possible existing accounts which include your SEARCHSTRING."),
+                 " account with <UUID>. If you do not know the uuid, use a <SEARCHSTRING> and you can choose from " +
+                 "possible existing accounts which include your <SEARCHSTRING>."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showlinks", "showlinks", "Show links to github homepage, binary " +
@@ -343,7 +344,7 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
-    ShellCommand("showmergedetail", "showmergedetail UUID", "Show the merge history detail for merge event with UUID."),
+    ShellCommand("showmergedetail", "showmergedetail <UUID>", "Show the merge history detail for merge event with UUID."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
@@ -792,7 +793,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changedropboxdbpassword":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            # if not account_uuid:
+            #     continue
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
@@ -805,6 +808,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: UUID or account name is missing.")
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
             try:
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 connector_manager.change_database_name_from_connector(p_database, connector)
@@ -818,6 +823,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: UUID or account name is missing.")
                 continue
             account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
             try:
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
@@ -828,7 +835,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changedropboxdbname":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 connector_manager.change_database_name_from_connector(p_database, connector)
@@ -839,7 +846,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changesshdbname":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_ssh_connector(p_database, account_uuid)
                 connector_manager.change_database_name_from_connector(p_database, connector)
@@ -850,7 +857,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changesshdbpassword":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_ssh_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
@@ -861,7 +868,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changewebdavdbpassword":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_webdav_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
@@ -872,7 +879,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "changewebdavdbname":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_webdav_connector(p_database, account_uuid)
                 connector_manager.change_database_name_from_connector(p_database, connector)
@@ -901,7 +908,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command.synopsis)
                 continue
-            account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
+            # account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
+            account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
             try:
                 # pyperclip3.copy(password)
                 print("Account   : " + account.name)
@@ -1058,7 +1069,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "helpverbose":
             print()
             for sc in SHELL_COMMANDS:
-                # print(sc)
                 sc.print_manual()
                 print()
             continue
@@ -1091,10 +1101,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             search_string = shell_command.arguments[1].strip()
             uuid_to_invalidate = find_uuid_for_searchstring_interactive(search_string, p_database)
+            if not uuid_to_invalidate:
+                continue
             if p_database.invalidate_account(uuid_to_invalidate):
                 print("Account with UUID: " + uuid_to_invalidate + " has been invalidated.")
-            else:
-                print("UUID is empty.")
+            # else:
+            #     print("UUID is empty.")
             continue
 
         if shell_command.command == "list":
@@ -1104,7 +1116,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "listconnectorfiles":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
             try:
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 files = connector.list_files("")
@@ -1147,7 +1161,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2dropbox":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
@@ -1158,7 +1172,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2file":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_file_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
@@ -1169,7 +1183,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2ssh":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_ssh_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
@@ -1180,7 +1194,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "merge2webdav":
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                account_uuid = shell_command.arguments[1].strip()
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             try:
                 connector = connector_manager.get_webdav_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
@@ -1198,6 +1212,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 # account_uuid = shell_command.arguments[1].strip()
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
                                                                       p_database)
+            if not account_uuid:
+                continue
             try:
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 p_database.merge_database_with_connector(connector)
@@ -1365,17 +1381,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID of ssh account is missing.")
                 print(shell_command.synopsis)
                 continue
-            # new_ssh_account_uuid = shell_command.arguments[1].strip()
-
             new_ssh_account_uuid = shell_command.arguments[1].strip()
             if new_ssh_account_uuid == "-":
                 new_ssh_account_uuid = ""
             else:
                 new_ssh_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
-                                                                               p_database)
-
-            if new_ssh_account_uuid == "-":
-                new_ssh_account_uuid = ""
+                                                                              p_database)
+            # if new_ssh_account_uuid == "-":
+            #     new_ssh_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID,
@@ -1387,17 +1400,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID of webdav account is missing.")
                 print(shell_command.synopsis)
                 continue
-            # new_webdav_account_uuid = shell_command.arguments[1].strip()
-
             new_webdav_account_uuid = shell_command.arguments[1].strip()
             if new_webdav_account_uuid == "-":
                 new_webdav_account_uuid = ""
             else:
                 new_webdav_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
-                                                                               p_database)
-
-            if new_webdav_account_uuid == "-":
-                new_webdav_account_uuid = ""
+                                                                                 p_database)
+            # if new_webdav_account_uuid == "-":
+            #     new_webdav_account_uuid = ""
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID,
@@ -1534,6 +1544,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print_slow.print_slow("URL")
             except Exception as e:
                 print("Error copying URL to the clipboard: " + str(e))
+
         if shell_command.command == "slowprintenabled":
             if len(shell_command.arguments) == 1:
                 print("Status: " + str(print_slow.DELAY_ENABLED))
@@ -1574,6 +1585,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("UUID is missing.")
                 print(shell_command.synopsis)
                 continue
+            new_dropbox_account_uuid = shell_command.arguments[1].strip()
+            if new_dropbox_account_uuid == "-":
+                new_dropbox_account_uuid = ""
+            else:
+                new_dropbox_account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
+                                                                                  p_database)
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID,
