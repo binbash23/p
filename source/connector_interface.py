@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 
 class ConnectorInterface(ABC):
-# class ConnectorInterface(metaclass=abc.ABCMeta):
+    # class ConnectorInterface(metaclass=abc.ABCMeta):
     # @classmethod
     # def __subclasshook__(cls, subclass):
     #     return (callable(subclass.list_files) and

@@ -551,7 +551,7 @@ class Account:
             ", Connectortype=" + self.connector_type + \
             ", Createdate=" + self.create_date + \
             ", Changedate=" + self.change_date + \
-            ", Invaliddate=" + self.invalid_date
+            ", Invalidate=" + self.invalid_date
 
 
 def accounts_are_equal(account1: Account, account2: Account) -> bool:
@@ -598,8 +598,8 @@ def set_attribute_value_in_configuration_table(_database_filename, _attribute_na
         raise ValueError("Database name must not be empty!")
     if _attribute_name is None or _attribute_name == "":
         raise ValueError("Attribute name must not be empty!")
+    database_connection = None
     try:
-        database_connection = None
         database_connection = sqlite3.connect(_database_filename)
         cursor = database_connection.cursor()
         # First check if the attribute exists and create it if not
@@ -624,8 +624,8 @@ def is_attribute_in_configuration_table(_database_filename, _attribute_name):
         raise ValueError("Database name must not be empty!")
     if _attribute_name is None or _attribute_name == "":
         raise ValueError("Attribute name must not be empty!")
+    database_connection = None
     try:
-        database_connection = None
         database_connection = sqlite3.connect(_database_filename)
         cursor = database_connection.cursor()
         sqlstring = "select value from configuration where attribute=?"
@@ -633,7 +633,7 @@ def is_attribute_in_configuration_table(_database_filename, _attribute_name):
         value = sqlresult.fetchone()
         if value is None or len(value) == 0:
             return False
-    except Exception as e:
+    except Exception:
         raise
     finally:
         database_connection.close()
@@ -645,8 +645,8 @@ def get_attribute_value_from_configuration_table(_database_filename, _attribute_
         raise ValueError("Database name must not be empty!")
     if _attribute_name is None or _attribute_name == "":
         raise ValueError("Attribute name must not be empty!")
+    database_connection = None
     try:
-        database_connection = None
         database_connection = sqlite3.connect(_database_filename)
         cursor = database_connection.cursor()
         sqlstring = "select value from configuration where attribute=?"
@@ -704,6 +704,7 @@ def set_database_name(database_filename, new_database_name: str):
 #         database_connection.close()
 
 def print_merge_history(database_filename, merge_history_uuid=None) -> int:
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -734,7 +735,7 @@ def print_merge_history(database_filename, merge_history_uuid=None) -> int:
 
 
 def get_latest_merge_history_uuid(database_filename: str) -> str:
-    latest_uuid = None
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -760,6 +761,7 @@ def print_merge_history_detail(database_filename, merge_history_uuid):
     if results == 0:
         return
     print()
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -783,6 +785,7 @@ def append_merge_history(merge_history_uuid: str,
                          connector: str = "",
                          connector_type: str = "",
                          return_code: str = ""):
+    database_connection = None
     try:
         if return_code == "0":
             return_code = "0 - No changes"
@@ -809,6 +812,7 @@ def append_merge_history(merge_history_uuid: str,
 
 
 def append_merge_history_detail(database_filename: str, merge_history_uuid: str, text: str):
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -839,6 +843,7 @@ def get_database_identification_string(database_filename) -> str:
 
 def get_account_count_valid(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -848,34 +853,15 @@ def get_account_count_valid(database_filename):
         if result is None:
             raise ValueError("Error: Could not count valid accounts.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
-# def add_merge_history_entry(database_filename, merge_date: str, master_database: str, slave_database: str,
-#                             connector_type="unknown"):
-#     try:
-#         database_connection = sqlite3.connect(database_filename)
-#         cursor = database_connection.cursor()
-#         sqlstring = "select value from configuration where attribute = 'DATABASE_CREATED'"
-#         sqlresult = cursor.execute(sqlstring)
-#         result = sqlresult.fetchone()
-#         if result is None:
-#             raise ValueError("Error: Could not get database creation date.")
-#         created_date = result[0]
-#     except Exception as e:
-#         raise
-#     finally:
-#         if database_connection:
-#             database_connection.close()
-#     return created_date
-
-
 def get_database_creation_date(database_filename):
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -885,16 +871,16 @@ def get_database_creation_date(database_filename):
         if result is None:
             raise ValueError("Error: Could not get database creation date.")
         created_date = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return created_date
 
 
 def get_last_change_date_in_database(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -904,16 +890,16 @@ def get_last_change_date_in_database(database_filename):
         if result is None:
             raise ValueError("Error: Could not get last change date in database.")
         created_date = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return created_date
 
 
 def get_account_count_invalid(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -926,13 +912,13 @@ def get_account_count_invalid(database_filename):
     except Exception as e:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_account_history_table_count(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -945,13 +931,13 @@ def get_account_history_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_deleted_account_table_count(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -964,13 +950,13 @@ def get_deleted_account_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_shell_history_table_count(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -983,13 +969,13 @@ def get_shell_history_table_count(database_filename):
     except Exception as e:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_alias_table_count(database_filename):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -999,16 +985,16 @@ def get_alias_table_count(database_filename):
         if result is None:
             raise ValueError("Error: Could not count alias entries.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -1018,16 +1004,16 @@ def get_account_history_count(database_filename: str, account_uuid: str) -> int:
         if result is None:
             raise ValueError("Error: Could not count account history entries for uuid: " + account_uuid)
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
 def get_account_count(database_filename, also_count_invalidated_accounts: bool = True):
     count = 0
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -1040,11 +1026,10 @@ def get_account_count(database_filename, also_count_invalidated_accounts: bool =
         if result is None:
             raise ValueError("Error: Could not count accounts.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return count
 
 
@@ -1144,12 +1129,13 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(file_account_uuid))
         # print("Merge destination local file        : ", end="")
         # print_slow.print_slow(str(default_merge_target_file))
-    except KeyboardInterrupt as ke:
+    except KeyboardInterrupt:
         print()
 
 
 def get_database_sqlite_version(database_filename: str) -> str:
     version = "unknown"
+    database_connection = None
     try:
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
@@ -1159,11 +1145,10 @@ def get_database_sqlite_version(database_filename: str) -> str:
         if result is None:
             raise ValueError("Error: Could not get sqlite version.")
         version = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
-        if database_connection:
-            database_connection.close()
+        database_connection.close()
     return version
 
 
@@ -1246,7 +1231,7 @@ class PDatabase:
     SEARCH_STRING_HIGHLIGHTING_COLOR = "green"
     track_account_history: bool = True
 
-    def __init__(self, database_filename, database_password, show_account_details=False,
+    def __init__(self, database_filename, database_password: str, show_account_details=False,
                  show_invalidated_accounts=False, shadow_passwords: bool = False,
                  salt=DEFAULT_SALT, iteration_count: int = DEFAULT_ITERATION_COUNT,
                  track_account_history: bool = True, initial_database_name: str = None):
@@ -1292,6 +1277,7 @@ class PDatabase:
                                                            "False")
 
     def update_database_schema(self, database_filename: str):
+        database_connection = None
         try:
             database_connection = sqlite3.connect(database_filename)
             cursor = database_connection.cursor()
@@ -1303,11 +1289,11 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def print_current_secure_delete_mode(self, database_connection, cursor):
+    def print_current_secure_delete_mode(self, cursor):
         sqlstring = "pragma secure_delete"
         try:
             print("SQLite secure_delete mode: " + str(cursor.execute(sqlstring).fetchall()[0][0]))
-        except Exception as e:
+        except Exception:
             raise
 
     def duplicate_account(self, copy_uuid):
@@ -1339,7 +1325,7 @@ class PDatabase:
             print("Error: Account uuid " + delete_uuid + " does not exist.")
             return
         account_to_be_deleted = self.get_account_by_uuid_and_decrypt(delete_uuid)
-        account_name_to_be_deleted = account_to_be_deleted.name
+        # account_name_to_be_deleted = account_to_be_deleted.name
         print()
         self.print_formatted_account(account_to_be_deleted,
                                      show_history_count=True,
@@ -1353,11 +1339,12 @@ class PDatabase:
         if answer != "y" and answer != "":
             print("Canceled.")
             return
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(cursor)
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
             # remember deleted uuid in deleted_account table for merge information
@@ -1374,6 +1361,7 @@ class PDatabase:
 
     def get_deleted_account_uuids_decrypted(self) -> []:
         result_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1393,6 +1381,7 @@ class PDatabase:
         return result_array
 
     def get_orphaned_account_history_entries_count(self) -> int:
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1405,12 +1394,13 @@ class PDatabase:
                 raise ValueError("Error: Could not count orphaned history entries.")
             count = result[0]
             return count
-        except Exception as e:
+        except Exception:
             print("Error counting orphaned history entries from database.")
         finally:
             database_connection.close()
 
     def delete_orphaned_account_history_entries(self):
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1425,6 +1415,7 @@ class PDatabase:
             database_connection.close()
 
     def delete_all_shell_history_entries(self):
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1432,13 +1423,14 @@ class PDatabase:
             sqlstring = "delete from shell_history"
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             print("Error deleting shell history entries from database.")
         finally:
             database_connection.close()
 
     def get_shell_history_entries_decrypted(self) -> [ShellHistoryEntry]:
         shell_history_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1453,7 +1445,7 @@ class PDatabase:
                 new_shell_history = ShellHistoryEntry(execution_date=current_execution_date_decrypted,
                                                       user_input=current_user_input_decrypted)
                 shell_history_array.append(new_shell_history)
-        except Exception as e:
+        except Exception:
             print("Error getting shell history entries from database.")
             return shell_history_array
         finally:
@@ -1463,6 +1455,7 @@ class PDatabase:
 
     def get_alias_commands_decrypted(self) -> [str]:
         alias_commands = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1474,7 +1467,7 @@ class PDatabase:
                 current_alias = row[0]
                 current_command = self.decrypt_string_if_password_is_present(row[1])
                 alias_commands.append(" [" + current_alias + "] - " + current_command)
-        except Exception as e:
+        except Exception:
             print("Error getting all alias from database.")
             return alias_commands
         finally:
@@ -1483,6 +1476,7 @@ class PDatabase:
 
     def get_alias_command_decrypted(self, alias: str) -> str:
         alias_command = ""
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1508,6 +1502,7 @@ class PDatabase:
     def set_alias_command_and_encrypt(self, alias: str, command: str):
         if alias == "" or alias is None:
             return
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1521,7 +1516,7 @@ class PDatabase:
                 sqlstring = "insert or replace into alias (alias, command) values (?, ?)"
                 cursor.execute(sqlstring, (alias, encrypted_command))
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             print("Error setting alias into database.")
         finally:
             database_connection.close()
@@ -1529,6 +1524,7 @@ class PDatabase:
     def add_shell_history_entry(self, shell_history_entry: ShellHistoryEntry, max_history_size: int):
         if int(max_history_size) < 1:
             return
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1547,12 +1543,13 @@ class PDatabase:
             database_connection.commit()
         except Exception as e:
             print("Error appending shell history entry to database: " + str(e))
-            return None
+            return
         finally:
             database_connection.close()
 
     def get_deleted_account_uuids_decrypted_from_merge_database(self, merge_database_filename: str) -> []:
         result_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1575,6 +1572,7 @@ class PDatabase:
 
     def execute_sql(self, sql_command):
         count = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1586,7 +1584,7 @@ class PDatabase:
                 print(str(row))
                 i += 1
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1600,6 +1598,7 @@ class PDatabase:
     def invalidate_account(self, invalidate_uuid: str) -> bool:
         if invalidate_uuid is None or invalidate_uuid == "":
             return False
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1607,7 +1606,7 @@ class PDatabase:
                         str(invalidate_uuid) + "'"
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1616,13 +1615,14 @@ class PDatabase:
     def revalidate_account(self, revalidate_uuid: str) -> bool:
         if revalidate_uuid is None or revalidate_uuid == "":
             return False
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = "update account set invalid_date = NULL where uuid = '" + str(revalidate_uuid) + "'"
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1643,6 +1643,7 @@ class PDatabase:
 
     def search_account_history(self, uuid_string: str):
         results_found = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1671,22 +1672,22 @@ class PDatabase:
                         self.print_formatted_account(decrypted_account, show_history_count=False, print_slowly=True)
                     else:
                         self.print_formatted_account(decrypted_account, show_history_count=False, print_slowly=False)
-                except KeyboardInterrupt as ke:
+                except KeyboardInterrupt:
                     print()
                     return
                 print()
             print(colored("Latest version of account:", 'green'))
             self.search_account_by_uuid(uuid_string)
             print()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
-        # print("Found " + str(results_found) + " result(s) in account history.")
         print_found_n_results(results_found)
 
     def search_accounts(self, search_string: str):
         results_found = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1727,11 +1728,11 @@ class PDatabase:
                         else:
                             self.print_formatted_account_search_string_colored(decrypted_account, search_string,
                                                                                print_slowly=False)
-                    except KeyboardInterrupt as ke:
+                    except KeyboardInterrupt:
                         print()
                         return
                     print()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1739,13 +1740,14 @@ class PDatabase:
 
     def search_invalidated_accounts(self, search_string: str):
         results_found = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
                          invalid_date, connector_type from account where invalid = 1 "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
-            # print("exceuting: " + sqlstring)
+            # print("executing: " + sqlstring)
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
             print("Searching for *" + colored(search_string, self.SEARCH_STRING_HIGHLIGHTING_COLOR) +
@@ -1775,11 +1777,11 @@ class PDatabase:
                             self.print_formatted_account_search_string_colored(decrypted_account, search_string,
                                                                                print_slowly=False)
                         print()
-                    except KeyboardInterrupt as ke:
+                    except KeyboardInterrupt:
                         print()
                         return
                     print()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1787,6 +1789,7 @@ class PDatabase:
 
     def get_new_account_uuids_since(self, date_string: str) -> []:
         uuids = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1795,7 +1798,7 @@ class PDatabase:
             result = sqlresult.fetchall()
             for row in result:
                 uuids.append(str(row[0]))
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1803,6 +1806,7 @@ class PDatabase:
 
     def get_changed_account_uuids_since(self, date_string: str) -> []:
         uuids = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1811,7 +1815,7 @@ class PDatabase:
             result = sqlresult.fetchall()
             for row in result:
                 uuids.append(str(row[0]))
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1819,6 +1823,7 @@ class PDatabase:
 
     def get_deleted_account_uuids_decrypted_since(self, date_string: str) -> []:
         uuids = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1828,7 +1833,7 @@ class PDatabase:
             for row in result:
                 decrypted_uuid = self.decrypt_string_if_password_is_present(str(row[0]))
                 uuids.append(decrypted_uuid)
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -1875,6 +1880,7 @@ class PDatabase:
 
     def search_accounts_by_type(self, type_search_string: str):
         results_found = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1914,19 +1920,19 @@ class PDatabase:
                         else:
                             self.print_formatted_account_search_string_colored(decrypted_account, type_search_string,
                                                                                print_slowly=False)
-                    except KeyboardInterrupt as ke:
+                    except KeyboardInterrupt:
                         print()
                         return
                     print()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
         print_found_n_results(results_found)
 
     def get_accounts_decrypted(self, search_string: str) -> []:
-        # results_found = 0
         account_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1957,15 +1963,15 @@ class PDatabase:
                     # results_found += 1
                     # self.print_formatted_account_search_string_colored(decrypted_account, search_string)
                     account_array.append(decrypted_account)
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
         return account_array
 
     def get_accounts_decrypted_from_invalid_accounts(self, search_string: str) -> []:
-        # results_found = 0
         account_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -1990,15 +1996,15 @@ class PDatabase:
                 if search_string == "" or \
                         search_string_matches_account(search_string, decrypted_account):
                     account_array.append(decrypted_account)
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
         return account_array
 
     def get_accounts_decrypted_search_types(self, type_search_string: str) -> []:
-        # results_found = 0
         account_array = []
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2027,13 +2033,14 @@ class PDatabase:
                 if type_search_string == "" or \
                         type_search_string.lower() in account.type.lower():
                     account_array.append(decrypted_account)
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
         return account_array
 
     def search_account_by_uuid(self, search_uuid) -> bool:
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2060,11 +2067,11 @@ class PDatabase:
                               )
             try:
                 self.print_formatted_account(self.decrypt_account(account))
-            except KeyboardInterrupt as ke:
+            except KeyboardInterrupt:
                 print()
-                return
+                return False
             return True
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -2076,7 +2083,7 @@ class PDatabase:
         else:
             return False
 
-    def get_password_from_account_and_decrypt(self, account_uuid: str) -> str:
+    def get_password_from_account_and_decrypt(self, account_uuid: str) -> str | None:
         if account_uuid is None or account_uuid.strip() == "":
             return None
         account = self.get_account_by_uuid_and_decrypt(account_uuid)
@@ -2085,7 +2092,7 @@ class PDatabase:
         else:
             return None
 
-    def get_loginname_from_account_and_decrypt(self, account_uuid: str) -> str:
+    def get_loginname_from_account_and_decrypt(self, account_uuid: str) -> str | None:
         if account_uuid is None or account_uuid.strip() == "":
             return None
         account = self.get_account_by_uuid_and_decrypt(account_uuid)
@@ -2094,7 +2101,7 @@ class PDatabase:
         else:
             return None
 
-    def get_connector_type_from_account_and_decrypt(self, account_uuid: str) -> str:
+    def get_connector_type_from_account_and_decrypt(self, account_uuid: str) -> str | None:
         if account_uuid is None or account_uuid.strip() == "":
             return None
         account = self.get_account_by_uuid_and_decrypt(account_uuid)
@@ -2103,9 +2110,10 @@ class PDatabase:
         else:
             return None
 
-    def get_account_by_uuid_and_decrypt(self, search_uuid: str) -> Account:
+    def get_account_by_uuid_and_decrypt(self, search_uuid: str) -> Account | None:
         if search_uuid is None or search_uuid == "":
             return None
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2133,7 +2141,7 @@ class PDatabase:
                                   invalid_date=str(row[8])
                                   )
                 return account
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -2163,11 +2171,12 @@ class PDatabase:
         password = self.encrypt_string_if_password_is_present(password)
         type = self.encrypt_string_if_password_is_present(type)
         connector_type = self.encrypt_string_if_password_is_present(connector_type)
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(cursor)
 
             # 1. First backup old version of the account
             if get_attribute_value_from_configuration_table(self.database_filename,
@@ -2194,7 +2203,7 @@ class PDatabase:
                         "where uuid = '" + str(account_uuid) + "'"
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -2264,6 +2273,7 @@ class PDatabase:
         if not is_valid_database_password(self.database_filename, self.database_password):
             print("Old database password is wrong.")
             return False
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2383,7 +2393,7 @@ class PDatabase:
             # results_found = 0
             for row in result:
                 results_found += 1
-                # get current account_history data (enrypted)
+                # get current account_history data (encrypted)
                 current_uuid = row[0]
                 current_create_date = row[1]
                 new_current_uuid = self.decrypt_and_encrypt_with_new_password(current_uuid, new_password)
@@ -2434,14 +2444,13 @@ class PDatabase:
             # ERST commit, wenn ALLES erledigt ist, sonst salat in der db!!!
             database_connection.commit()
             print("Changed entries: " + str(results_found))
-        except KeyboardInterrupt as k:
+        except KeyboardInterrupt:
             if bar:
                 bar.finish()
-            if database_connection:
-                database_connection.rollback()
+            database_connection.rollback()
             print("Process canceled by user.")
-            return
-        except Exception as e:
+            return False
+        except Exception:
             if database_connection:
                 database_connection.rollback()
             raise
@@ -2501,6 +2510,7 @@ class PDatabase:
         account.password = self.encrypt_string_if_password_is_present(account.password)
         account.type = self.encrypt_string_if_password_is_present(account.type)
         account.connector_type = self.encrypt_string_if_password_is_present(account.connector_type)
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2519,11 +2529,10 @@ class PDatabase:
             print("New account added: [UUID " + str(account.uuid) + "]")
         except sqlite3.IntegrityError:
             print("Error: UUID " + str(account.uuid) + " already exists in database!")
-        except Exception as e:
+        except Exception:
             raise
         finally:
-            if database_connection:
-                database_connection.close()
+            database_connection.close()
 
     # def is_valid_database_password(self, _database_filename: str, _database_password: str) -> bool:
     #     try:
@@ -2557,6 +2566,7 @@ class PDatabase:
         database_connection.commit()
 
     def create_and_initialize_database(self, initial_database_name: str = None):
+        database_connection = None
         try:
             database_connection = None
             database_connection = sqlite3.connect(self.database_filename)
@@ -2623,13 +2633,14 @@ class PDatabase:
                                                            initial_database_name)
 
             # print("DATABASE_PASSWORD test value created and inserted into configuration table.")
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
 
     def create_add_statements(self):
         results_found = 0
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2662,12 +2673,11 @@ class PDatabase:
                       "-L '" + decrypted_account.loginname + "' " +
                       "-P '" + decrypted_account.password + "' " +
                       "-T '" + decrypted_account.type + "' ")
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
         print()
-        # print("Found " + str(results_found) + " result(s).")
         print_found_n_results(results_found)
 
     def get_database_password_as_string(self) -> str:
@@ -2675,7 +2685,7 @@ class PDatabase:
             return ""
         return bytes(self.database_password).decode("UTF-8")
 
-    def get_database_filename_without_path(self) -> str:
+    def get_database_filename_without_path(self) -> str | None:
         if self.database_filename is not None and self.database_filename != "":
             return os.path.basename(self.database_filename)
         else:
@@ -2722,6 +2732,7 @@ class PDatabase:
                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE,
                                                    "")
         # Start merging
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
@@ -2783,9 +2794,9 @@ class PDatabase:
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
                 print("UUID " + delete_uuid + " added to local deleted_account table..")
                 # append_merge_history_detail(self.database_filename, merge_history_uuid,
-                #                             "UUID " + delete_uuid + " added to local deleted_account table..")
+                #                             "UUID " + delete_uuid + " added to local deleted_account table.")
                 merge_history_detail_string_list.extend(
-                    ["UUID " + delete_uuid + " added to local deleted_account table.."])
+                    ["UUID " + delete_uuid + " added to local deleted_account table."])
             if len(deleted_uuids_in_local_db_note_in_remote) > 0:
                 # print("Deleting " + colored(str(len(deleted_uuids_in_local_db_note_in_remote)), "red") +
                 #       " account(s) in remote db which have been deleted in local db...")
@@ -2972,7 +2983,7 @@ class PDatabase:
                     count_uuids_in_local_with_newer_update_date_than_in_remote + count_uuids_in_local_that_do_not_exist_in_remote > 0) or (
                     len(deleted_uuids_in_local_db_note_in_remote) > 0):
                 return_code += 2
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -2981,29 +2992,31 @@ class PDatabase:
         return return_code
 
     def delete_from_account_history_table(self):
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(cursor)
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
 
     def delete_from_deleted_account_table(self):
+        database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = SQL_DELETE_ALL_FROM_DELETED_ACCOUNT
             self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(database_connection, cursor)
+            self.print_current_secure_delete_mode(cursor)
             cursor.execute(sqlstring)
             database_connection.commit()
-        except Exception as e:
+        except Exception:
             raise
         finally:
             database_connection.close()
@@ -3047,7 +3060,7 @@ class PDatabase:
                                                                                          self.database_filename))),
                                  connector=str(connector),
                                  connector_type=connector.get_type(),
-                                 return_code=return_code
+                                 return_code=str(return_code)
                                  )
             return
 
@@ -3057,7 +3070,7 @@ class PDatabase:
             # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
-            self._merge_database(TEMP_MERGE_DATABASE_FILENAME)
+            self._merge_database(TEMP_MERGE_DATABASE_FILENAME, merge_history_uuid)
             # print("Uploading initial database: '" +
             #       TEMP_MERGE_DATABASE_FILENAME + "' as '" +
             #       self.get_database_filename_without_path() + "' to connector...")
@@ -3136,7 +3149,7 @@ def is_valid_database_password(_database_filename: str, _database_password: byte
                 return False
             else:
                 decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
-    except (InvalidSignature, InvalidToken) as e:
+    except (InvalidSignature, InvalidToken):
         return False
     return True
 

@@ -11,23 +11,18 @@ import sys
 import textwrap
 import time
 import uuid
-import wget
 
 import pyperclip3
+import wget
 from inputimeout import inputimeout, TimeoutOccurred
 from termcolor import colored
 
+import connector_manager
 import p
+import password_generator
 import pdatabase
 import print_slow
-import webdav_connector
-import ssh_connector
-# from dropbox_connector import DropboxConnector
-import dropbox_connector
-import file_connector
 from pdatabase import ShellHistoryEntry
-import password_generator
-import connector_manager
 
 
 class ShellCommand:
@@ -197,7 +192,7 @@ SHELL_COMMANDS = [
                  "to use it as a new instance. You might also set a new database name. This is just for identifying " +
                  "the different database files."),
     ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
-                 "random password with LENGHT characters. When LENGTH is not set, a 10 char password will be generated."),
+                 "random password with LENGTH characters. When LENGTH is not set, a 10 char password will be generated."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
@@ -316,7 +311,7 @@ SHELL_COMMANDS = [
                  "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
     ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
                  "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
-                 " which looks kinda cool :) But if you think it's anoying, disable it (created for ben)."),
+                 " which looks kinda cool :) But if you think it's annoying, disable it (created for ben)."),
     ShellCommand("sp", "sp <UUID>|<SEARCHSTRING>", "Set password for account with UUID or SEARCHSTRING. If" +
                  " shadow passwords is on, the password will be read hidden so that none can gather it from " +
                  "your screen. If you do not no the UUID, use a SEARCHSTRING and you will be offered possible " +
@@ -325,7 +320,8 @@ SHELL_COMMANDS = [
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database. To unset the database name, set it to '-'"),
     ShellCommand("setdropboxaccountuuid", "setdropboxaccountuuid <UUID>",
-                 "Set the default dropbox account uuid in the configuration. Whenever you run merge2dropbox, this UUID will be used as the default dropbox account."),
+                 "Set the default dropbox account uuid in the configuration. Whenever you run merge2dropbox, " +
+                 "this UUID will be used as the default dropbox account."),
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
@@ -350,7 +346,7 @@ SHELL_COMMANDS = [
                  "unmerged changes in local database compared to the latest known merge database.\nWith no " +
                  "arguments, the current status will be shown."),
     ShellCommand("sql", "sql <COMMAND>", "Execute COMMAND in database in native SQL language. The p database " +
-                 "is fully accessable with sql commands."),
+                 "is fully accessible with sql commands."),
     ShellCommand("status", "status", "Show configuration and database status.\nA short overview of the database " +
                  "will be shown including number of accounts, encryption status, database name..."),
     ShellCommand("timeout", "timeout [<MINUTES>]", "Set the maximum pshell inactivity timeout to MINUTES before " +
@@ -358,7 +354,7 @@ SHELL_COMMANDS = [
     ShellCommand("trackaccounthistory", "trackaccounthistory on|off", "Track the history of changed accounts. " +
                  "You may also want to use the command: 'forgetaccounthistory' to delete all archived accounts."),
     ShellCommand("updatep", "updatep",
-                 "Update p program. This command will download the latest p exceutable from git."),
+                 "Update p program. This command will download the latest p executable from git."),
     ShellCommand("verbose", "verbose on|off", "Show verbose account infos true or false.\nIf verbose is on " +
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
@@ -377,7 +373,7 @@ PSHELL_COMMAND_DELIMITER = ";"
 
 # Try to find the uuid for a given searchstring. If there are multiple accounts that match,
 # then ask the user which one to take.
-def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatabase) -> str:
+def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatabase) -> str | None:
     # matching_uuid = None
     searchstring = searchstring.strip()
     if searchstring == "" or searchstring is None:
@@ -426,7 +422,7 @@ def get_prompt_string(p_database: pdatabase.PDatabase) -> str:
     return prompt_string
 
 
-def expand_string_2_shell_command(string: str) -> ShellCommand:
+def expand_string_2_shell_command(string: str) -> ShellCommand | None:
     if string is None or string.strip() == "":
         return None
 
@@ -580,7 +576,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     manual_locked = False
     if pshell_max_history_size < 1:
         p_database.delete_all_shell_history_entries()
-    shell_history_array = p_database.get_shell_history_entries_decrypted()
+    # shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
         # while True:
@@ -683,10 +679,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if len(shell_history_array) == 0:
                 print("Shell history is empty.")
                 continue
-            redo_index = -1
+            # redo_index = -1
             # when there is no index of the command history array given, use the latest one
             if len(shell_command.arguments) == 1:
-                # redo_index = len(shell_history_array)
                 redo_index = 1
             else:
                 if shell_command.arguments[1].strip() == "?":
@@ -761,7 +756,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 for alias in aliases:
                     try:
                         print_slow.print_slow(alias)
-                    except KeyboardInterrupt as ke:
+                    except KeyboardInterrupt:
                         print()
                         continue
             else:  # 2 arguments
@@ -798,7 +793,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changeconnectordbname":
-            account_uuid = None
             if len(shell_command.arguments) == 1:
                 print("Error: UUID or account name is missing.")
                 continue
@@ -811,7 +805,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "changeconnectordbpassword":
-            account_uuid = None
+            # account_uuid = None
             if len(shell_command.arguments) == 1:
                 print("Error: UUID or account name is missing.")
                 continue
@@ -891,7 +885,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "clearhistory":
-            # shell_history_array = []
             p_database.delete_all_shell_history_entries()
             continue
 
@@ -1211,7 +1204,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             if os.path.exists(new_database_filename):
                 try:
                     new_database_password = getpass.getpass("Enter database password: ")
-                except KeyboardInterrupt as k:
+                except KeyboardInterrupt:
                     print()
                     continue
             else:
@@ -1219,7 +1212,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 try:
                     new_database_password = getpass.getpass("Enter password for new database    : ")
                     new_database_password_confirm = getpass.getpass("Confirm password for new database  : ")
-                except KeyboardInterrupt as k:
+                except KeyboardInterrupt:
                     print()
                     continue
                 if new_database_password != new_database_password_confirm:
@@ -1470,7 +1463,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
                 print("Clipboard : ", end='')
                 print_slow.print_slow("Password")
-            except KeyboardInterrupt as ke:
+            except KeyboardInterrupt:
                 print()
                 continue
             except Exception as e:
@@ -1836,7 +1829,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Your current directory is: " + os.getcwd())
             try:
                 input("Press enter to start or strg-c to cancel...")
-            except:
+            except KeyboardInterrupt:
                 print()
                 continue
             try:

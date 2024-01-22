@@ -166,7 +166,7 @@ def start_dropbox_configuration():
     print("With this process you will get the refresh access token from dropbox.")
 
     print("First register a new app in your dropbox account.")
-    input("Press enter and a webbrowser will open the dropbox developer site (login with your dropbox account)...")
+    input("Press enter and a browser will open the dropbox developer site (login with your dropbox account)...")
     webbrowser.open("https://www.dropbox.com/developers")
 
     print("Now you have to change the permissions for the app to read/write files and folders (permissions tab).")
@@ -193,7 +193,7 @@ def start_dropbox_configuration():
         print("Error: the application secret must not be empty.")
         input("Press enter to exit.")
         sys.exit(1)
-    print("Now a webbrowser will open and give you the dropbox access code...")
+    print("Now a browser will open and give you the dropbox access code...")
     get_generated_access_code(application_key)
     dropbox_access_code = input("Enter the dropbox access code        : ")
     if dropbox_access_code == "":
@@ -215,8 +215,10 @@ def start_dropbox_configuration():
     print("Now add a new accounts to your p database (in pshell use the command: 'add'):")
     print()
     print("Add a new account with any name (i.e: 'Dropbox Connector') the application_key (" + application_key + ")" +
-          " as the url and the application_secret (" + application_secret + ") as the login name and the long refresh token as the" +
-          " password (" + refresh_access_token + "). The type field can be filled with 'Connector' and the connector type field must be filled with 'dropbox'.")
+          " as the url and the application_secret (" + application_secret +
+          ") as the login name and the long refresh token as the" +
+          " password (" + refresh_access_token +
+          "). The type field can be filled with 'Connector' and the connector type field must be filled with 'dropbox'.")
     print("")
     print("You can set this dropbox account as the default dropbox merge account with this command (in pshell):")
     print("> setdropboxaccountuuid UUID_OF_THE_ACCOUNT_THAT_YOU_HAVE_JUST_CREATED")
@@ -359,7 +361,7 @@ def main():
                 else:
                     print("Logical database name     : " + current_database_name)
                 database_password = getpass.getpass("Enter database password   : ")
-            except KeyboardInterrupt as k:
+            except KeyboardInterrupt:
                 print()
                 return
         else:
@@ -373,7 +375,7 @@ def main():
                 database_password_confirm = getpass.getpass("Confirm database password : ")
                 print("If you want you can set an optional logical database name now.")
                 database_logical_name = input("Enter a database name     : ")
-            except KeyboardInterrupt as k:
+            except KeyboardInterrupt:
                 print()
                 return
             if database_password != database_password_confirm:

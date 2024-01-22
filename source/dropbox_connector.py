@@ -48,7 +48,7 @@ class DropboxConnector(ConnectorInterface):
                 if isinstance(file, dropbox.files.FileMetadata):
                     metadata = {
                         'name': file.name,
-                        #'path_display': file.path_display,
+                        # 'path_display': file.path_display,
                         'client_modified': file.client_modified,
                         'server_modified': file.server_modified
                     }
