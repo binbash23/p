@@ -135,7 +135,6 @@ def edit(p_database: PDatabase, edit_uuid: str):
         print()
         print("Canceled")
         return
-        # sys.exit(0)
 
     new_account = Account(edit_uuid, new_name.strip(), new_url.strip(), new_loginname.strip(), new_password,
                           new_type.strip(), new_connector_type.strip())
@@ -192,7 +191,12 @@ def start_dropbox_configuration():
     print()
     print("Now a new dropbox refresh token will be retrieved from dropbox...")
     print()
-    refresh_access_token = get_refresh_access_token(application_key, application_secret, dropbox_access_code)
+    try:
+        refresh_access_token = get_refresh_access_token(application_key, application_secret, dropbox_access_code)
+    except Exception as e:
+        print("Error parsing refresh access token from dropbox: " + str(e))
+        input("Press enter to exit.")
+        sys.exit(1)
     print()
     print("The generated refresh token is: " + refresh_access_token)
     print()
@@ -303,6 +307,7 @@ def main():
     # check if the users wants to start the dropbox configuration process
     if options.start_dropbox_configuration:
         start_dropbox_configuration()
+        input("Press enter to exit.")
         sys.exit(0)
 
     # Get password and database file name. then open/create database file
@@ -324,22 +329,6 @@ def main():
     if options.statistics:
         print_database_statistics(database_filename)
         sys.exit(0)
-
-    # # check here if a dropbox account uuid stuff should be set in the configuration table (can be done without password)
-    # # #1 check for dropbox token uuid
-    # if options.dropbox_token_uuid is not None:
-    #     set_attribute_value_in_configuration_table(
-    #         database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_ACCESS_TOKEN_ACCOUNT_UUID,
-    #         options.dropbox_token_uuid)
-    #     print("Dropbox access token account uuid registered in configuration (use -S to view config).")
-    #     sys.exit(0)
-    # # #2 check for dropbox application uuid
-    # if options.dropbox_application_uuid is not None:
-    #     set_attribute_value_in_configuration_table(
-    #         database_filename, CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID,
-    #         options.dropbox_application_uuid)
-    #     print("Dropbox application account uuid registered in configuration (use -S to view config).")
-    #     sys.exit(0)
 
     # second fetch password:
     database_password = None
@@ -377,9 +366,11 @@ def main():
                 return
             if database_password != database_password_confirm:
                 print(colored("Error: Passwords do not match.", "red"))
+                input("Press enter to exit.")
                 sys.exit(1)
     if database_password is None:
         print(colored("Database password is not set! Enter password on command line or use -p or -E option.", "red"))
+        input("Press enter to exit.")
         sys.exit(1)
 
     # check if the verbose switch is set:
@@ -396,6 +387,7 @@ def main():
                                show_invalidated_accounts, initial_database_name=database_logical_name)
     except Exception as e:
         print("Error: " + str(e))
+        input("Press enter to exit.")
         sys.exit(1)
 
     # from here we have a valid database ready to access
@@ -403,18 +395,8 @@ def main():
     # check if the interactive shell should be opened
     if options.query:
         start_pshell(p_database)
+        input("Press enter to exit.")
         sys.exit(0)
-
-    # # check here if a dropbox database merge should be done
-    # if options.merge_with_dropbox:
-    #     dropbox_connection_credentials = p_database.get_dropbox_connection_credentials()
-    #     if dropbox_connection_credentials is None:
-    #         sys.exit(1)
-    #     dropbox_connector = DropboxConnector(dropbox_connection_credentials[0],
-    #                                          dropbox_connection_credentials[1],
-    #                                          dropbox_connection_credentials[2])
-    #     p_database.merge_database_with_connector(dropbox_connector)
-    #     sys.exit(0)
 
     if options.add_account_cli:
         new_account = Account(uuid=options.NEW_ACCOUNT_UUID or "",
@@ -452,12 +434,6 @@ def main():
     if options.list:
         p_database.search_accounts("")
         sys.exit(0)
-    # if options.merge_last_known:
-    #     p_database.merge_database_with_default_merge_target_file()
-    #     sys.exit(0)
-    # if options.merge_database is not None:
-    #     p_database.merge_database(options.merge_database)
-    #     sys.exit(0)
     if options.add:
         add(p_database)
         sys.exit(0)

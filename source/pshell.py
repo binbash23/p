@@ -1224,10 +1224,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 if new_database_password != new_database_password_confirm:
                     print(colored("Error: Passwords do not match.", "red"))
+                    input("Press enter to exit.")
                     sys.exit(1)
             if new_database_password is None:
                 print(colored("Database password is not set! Enter password on command line or use -p or -E option.",
                               "red"))
+                input("Press enter to exit.")
                 sys.exit(1)
 
             # Now try to open/create the database:
@@ -1236,6 +1238,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
+            input("Press enter to exit.")
             sys.exit()
 
         if shell_command.command == "quit" or shell_command.command == "exit":
@@ -1893,6 +1896,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Making p binary executable...")
                     os.system("chmod +x " + p.P_FILENAME_LINUX)
                     print("Please start p again.")
+                    input("Press enter to exit.")
                     sys.exit(0)
             except Exception as ex:
                 print("Error updating: " + str(ex))

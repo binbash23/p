@@ -65,7 +65,7 @@ def main():
             or not os.path.exists(old_filename) \
             or not os.path.exists(new_filename):
         print("Error: old and new filename must be set and the files must exist!")
-        time.sleep(10)
+        input("Press enter to exit.")
         sys.exit(1)
 
     if os.path.exists(old_filename):

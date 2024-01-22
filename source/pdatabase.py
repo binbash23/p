@@ -1254,7 +1254,6 @@ class PDatabase:
                 or database_filename == "" \
                 or database_password is None:
             print(colored("Error: Database filename is empty or database password is not set!", "red"))
-            # sys.exit(1)
             raise ValueError("Database filename is not set or database password is not set!")
 
         self.database_filename = database_filename
@@ -1278,7 +1277,6 @@ class PDatabase:
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
             time.sleep(3)
-            # sys.exit(1)
             raise Exception("Database password is wrong.")
 
     def set_default_values_in_configuration_table(self):
@@ -2585,7 +2583,6 @@ class PDatabase:
             if str(e) == "database disk image is malformed":
                 print(colored("Error: " + str(e), "red"))
                 return
-                # sys.exit(1)
         finally:
             database_connection.close()
         # Something went wrong opening the sqlite db. Now try to create one with default schema
