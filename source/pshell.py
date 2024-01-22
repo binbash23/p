@@ -113,7 +113,14 @@ SHELL_COMMANDS = [
     ShellCommand("8", "8", "Alias. This alias can be set with the alias command."),
     ShellCommand("9", "9", "Alias. This alias can be set with the alias command."),
     ShellCommand("10", "10", "Alias. This alias can be set with the alias command."),
-    ShellCommand("add", "add", "Add a new account."),
+    ShellCommand("add", "add [ACCOUNT_NAME]", "Add a new account.\nExample:\n" +
+                 "UUID            : 51689195-4977-4c06-a19f-ac70823fbd4a \n-> The UUID is an unique identifier for the account\n" +
+                 "Name            : user@gmx.de GMX EMail Account        \n-> Choose a name for the new account\n" +
+                 "URL             : gmx.de                               \n-> If there is an url where the account is located, add it here\n" +
+                 "Loginname       : user123@gmx.de                       \n-> The login name for the account\n" +
+                 "Password        : 123secret                            \n-> The password for the account\n" +
+                 "Type            : Emailaccount                         \n-> Choose a name for the type of this account\n" +
+                 "Connectortype   :                                      \n-> If this is a connector account, put ssh/dropbox/file or webdav here\n"),
     ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
                  "programmable command. Possible alias names are the numbers from 0 to 9.\nTo set the " +
                  "command 'sc email' on the alias 1 you have to type: 'alias 1 sc Email'. After that you" +

@@ -2274,6 +2274,7 @@ class PDatabase:
             print("Old database password is wrong.")
             return False
         database_connection = None
+        bar = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
