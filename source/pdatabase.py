@@ -825,6 +825,7 @@ def append_merge_history_detail(database_filename: str, merge_history_uuid: str,
         sqlstring = ("insert into merge_history_detail (merge_history_uuid, execution_date, text) " +
                      "values (?, ?, ?)")
         cursor.execute(sqlstring, (merge_history_uuid, execution_date, text))
+        # print("---> executed: " + sqlstring + merge_history_uuid + execution_date + text)
         database_connection.commit()
     except Exception as e:
         print("Error writing merge history detail entry to database:\n" + text + "\n" + str(e))
@@ -2712,7 +2713,7 @@ class PDatabase:
             return None
 
     def _merge_database(self, merge_database_filename: str, merge_history_uuid: str) -> int:
-        """ returns -1 in error case, 0 when no error and no changes where made,
+        """ raises -1 in error case, 0 when no error and no changes where made,
         1 when changes where made locally and 2 when changes where made in remote db
         and 3 when changes where made locally and remote """
 
@@ -2720,10 +2721,11 @@ class PDatabase:
 
         if not os.path.exists(merge_database_filename):
             print("Error: merge database does not exist: '" + merge_database_filename + "'")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Error: merge database does not exist: '" + merge_database_filename + "'")
-            merge_history_detail_string_list.extend(
-                ["Error: merge database does not exist: '" + merge_database_filename + "'"])
+            append_merge_history_detail(self.database_filename, merge_history_uuid,
+                                        "Error: merge database does not exist: '" + merge_database_filename + "'")
+            # merge_history_detail_string_list.extend(
+            #     ["Error: merge database does not exist: '" + merge_database_filename + "'"])
+            # raise Exception("Error: merge database does not exist: '" + merge_database_filename + "'")
             return -1
         # print("Using merge database: " + merge_database_filename + ": " +
         #       get_database_identification_string(merge_database_filename))
@@ -2735,12 +2737,15 @@ class PDatabase:
                           " is not valid!", "red"))
             print("The database passwords must be the same in both databases.")
             print("")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Error: because password for merge database: " + merge_database_filename +
-            #                             " is not valid!")
-            merge_history_detail_string_list.extend(
-                ["Error: because password for merge database: " + merge_database_filename +
-                 " is not valid!"])
+            append_merge_history_detail(self.database_filename, merge_history_uuid,
+                                        "Error: because password for merge database: " + merge_database_filename +
+                                        " is not valid!")
+            # merge_history_detail_string_list.extend(
+            #     ["Error: because password for merge database: " + merge_database_filename +
+            #      " is not valid!"])
+            # print("---->")
+            # raise Exception("Error: because password for merge database: " + merge_database_filename +
+            #      " is not valid!")
             return -1
         # Set some attribute values in configuration table and create some attributes if not exist
         set_attribute_value_in_configuration_table(self.database_filename,
