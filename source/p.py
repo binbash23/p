@@ -184,10 +184,22 @@ def start_dropbox_configuration():
     print("You need the application key and the application secret from your just created dropbox app" +
           " for this procedure.")
     application_key = input("Enter the dropbox application key    : ")
+    if application_key == "":
+        print("Error: the application key must not be empty.")
+        input("Press enter to exit.")
+        sys.exit(1)
     application_secret = input("Enter the dropbox application secret : ")
+    if application_secret == "":
+        print("Error: the application secret must not be empty.")
+        input("Press enter to exit.")
+        sys.exit(1)
     print("Now a webbrowser will open and give you the dropbox access code...")
     get_generated_access_code(application_key)
     dropbox_access_code = input("Enter the dropbox access code        : ")
+    if dropbox_access_code == "":
+        print("Error: the dropbox access code must not be empty.")
+        input("Press enter to exit.")
+        sys.exit(1)
     print()
     print("Now a new dropbox refresh token will be retrieved from dropbox...")
     print()
