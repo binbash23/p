@@ -3070,14 +3070,15 @@ class PDatabase:
             raise Exception("Connector type is not 'file'")
 
         file_merge_bar = progressbar.ProgressBar(maxval=3)
-        file_merge_bar.start()
+        # file_merge_bar.start()
         try:
             if not connector.exists(self.get_database_filename_without_path()):
-                print()
+                # print()
                 if not self._create_initial_connector_database_interactive(
                         os.path.join(connector.get_remote_base_path(),
                                      os.path.basename(self.database_filename))):
                     return
+            file_merge_bar.start()
             file_merge_bar.update(1)
             return_code = self._merge_database(
                 os.path.join(connector.get_remote_base_path(), os.path.basename(self.database_filename)),
@@ -3112,15 +3113,16 @@ class PDatabase:
             return
 
         bar = progressbar.ProgressBar(maxval=4)
-        bar.start()
+        # bar.start()
         if not connector.exists(self.get_database_filename_without_path()):
-            print()
+            # print()
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
                 return
+            bar.start()
             # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
-            self._merge_database(TEMP_MERGE_DATABASE_FILENAME, merge_history_uuid)
+            return_code = self._merge_database(TEMP_MERGE_DATABASE_FILENAME, merge_history_uuid)
             bar.update(1)
             # print("Uploading initial database: '" +
             #       TEMP_MERGE_DATABASE_FILENAME + "' as '" +
@@ -3140,14 +3142,15 @@ class PDatabase:
                                  database_uuid_remote=get_database_uuid(TEMP_MERGE_DATABASE_FILENAME),
                                  database_name_remote=get_database_name(TEMP_MERGE_DATABASE_FILENAME),
                                  connector=str(connector),
-                                 connector_type=connector.get_type()
+                                 connector_type=connector.get_type(),
+                                 return_code=str(return_code)
                                  )
             os.remove(TEMP_MERGE_DATABASE_FILENAME)
             bar.update(3)
             bar.finish()
             return
         # bar = progressbar.ProgressBar(maxval=4)
-        # bar.start()
+        bar.start()
         bar.update(1)
         # print("Downloading database...")
         append_merge_history_detail(self.database_filename, merge_history_uuid, "Downloading database...")
