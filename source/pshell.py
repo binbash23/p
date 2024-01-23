@@ -187,11 +187,13 @@ SHELL_COMMANDS = [
     ShellCommand("executeonstart", "executeonstart [<COMMAND>]",
                  "You can set a command to be executed when the pshell starts. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on start.\n" +
-                 "To unset the startup command run 'executeonstart -'."),
+                 "To unset the startup command run 'executeonstart -'.\nTo see the current configuration run 'showconfig'.\n" +
+                 "Example: run merge command on start:\nexecuteonstart merge2webdav"),
     ShellCommand("executeonstop", "executeonstop [<COMMAND>]",
                  "You can set a command to be executed when the pshell exits. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on exiting.\n" +
-                 "To unset the startup command run 'executeonstop -'."),
+                 "To unset the startup command run 'executeonstop -'.\nTo see the current configuration run 'showconfig'.\n" +
+                 "Example run merge command on stop:\nexecuteonstop merge2webdav"),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
@@ -584,11 +586,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
     clear_console()
     user_input = ""
     user_input_list = []
+    exit_is_pending = False
 
     execute_on_start_command = p_database.get_execute_on_start_command()
     if execute_on_start_command:
         print("Execute on start command: " + execute_on_start_command)
-        user_input_list.extend([execute_on_start_command])
+        user_input_list.extend(execute_on_start_command.split(PSHELL_COMMAND_DELIMITER))
 
     latest_found_account = None
 
@@ -684,7 +687,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         # check if the (next) command is the alias command and there are more commands in the user_input_list.
-        # The alias command has to be used with 2 arguments for our special case here: alias NO CMD
+        # The alias command has to be used with 2 arguments for our special case here: alias Nr CMD
         # Then the rest of the user_input_list is used as the argument for the alias command.
         # This is necessary to enable i.e. : alias 1 c1;c2;c3
         if (shell_command.command == "alias"
@@ -1029,6 +1032,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if shell_command.arguments[1].strip() == "-":
                     execute_on_start_command = ""
                 else:
+                    # If the user wanted to execute multiple commands on start like : merge2d;merge2w
+                    # then we have to collect all remaining user_input_list elements together again:
+                    while len(user_input_list) > 0:
+                        shell_command.arguments[1] = (shell_command.arguments[1] + PSHELL_COMMAND_DELIMITER +
+                                                      user_input_list.pop(0))
                     execute_on_start_command = shell_command.arguments[1].strip()
                 p_database.set_execute_on_start_command(execute_on_start_command)
             except Exception as e:
@@ -1040,12 +1048,17 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 execute_on_stop_command = p_database.get_execute_on_stop_command()
                 if execute_on_stop_command == "":
                     execute_on_stop_command = "None"
-                print("Execute on start command : " + execute_on_stop_command)
+                print("Execute on stop command : " + execute_on_stop_command)
                 continue
             try:
                 if shell_command.arguments[1].strip() == "-":
                     execute_on_stop_command = ""
                 else:
+                    # If the user wanted to execute multiple commands on stop like : merge2d;merge2w
+                    # then we have to collect all remaining user_input_list elements together again:
+                    while len(user_input_list) > 0:
+                        shell_command.arguments[1] = (shell_command.arguments[1] + PSHELL_COMMAND_DELIMITER +
+                                                      user_input_list.pop(0))
                     execute_on_stop_command = shell_command.arguments[1].strip()
                 p_database.set_execute_on_stop_command(execute_on_stop_command)
             except Exception as e:
@@ -1315,12 +1328,14 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "quit" or shell_command.command == "exit":
             execute_on_stop_command = p_database.get_execute_on_stop_command()
-            if execute_on_stop_command != "":
+            if execute_on_stop_command != "" and not exit_is_pending:
+                clear_console()
                 print("Executing command on stop: " + execute_on_stop_command)
-                user_input_list.extend([execute_on_stop_command])
+                user_input_list.extend(execute_on_stop_command.split(PSHELL_COMMAND_DELIMITER))
                 user_input_list.extend(["quit"])
+                exit_is_pending = True
                 continue
-            clear_console()
+            # clear_console()
             break
 
         if shell_command.command == "generatenewdatabaseuuid":
