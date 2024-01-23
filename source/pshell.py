@@ -188,12 +188,12 @@ SHELL_COMMANDS = [
                  "You can set a command to be executed when the pshell starts. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on start.\n" +
                  "To unset the startup command run 'executeonstart -'.\nTo see the current configuration run 'showconfig'.\n" +
-                 "Example: run merge command on start:\nexecuteonstart merge2webdav"),
+                 "Example: run 2 merge command on start:\nexecuteonstart merge2webdav;merge2file"),
     ShellCommand("executeonstop", "executeonstop [<COMMAND>]",
                  "You can set a command to be executed when the pshell exits. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on exiting.\n" +
                  "To unset the startup command run 'executeonstop -'.\nTo see the current configuration run 'showconfig'.\n" +
-                 "Example run merge command on stop:\nexecuteonstop merge2webdav"),
+                 "Example run 2 merge commands on stop:\nexecuteonstop merge2webdav;merge2file"),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
