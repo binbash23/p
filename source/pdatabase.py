@@ -6,7 +6,7 @@
 import base64
 import binascii
 import datetime
-import logging
+# import logging
 import os
 import os.path
 import sqlite3
@@ -910,7 +910,7 @@ def get_account_count_invalid(database_filename):
         if result is None:
             raise ValueError("Error: Could not count invalid accounts.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
         database_connection.close()
@@ -929,7 +929,7 @@ def get_account_history_table_count(database_filename):
         if result is None:
             raise ValueError("Error: Could not count account history entries.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
         database_connection.close()
@@ -948,7 +948,7 @@ def get_deleted_account_table_count(database_filename):
         if result is None:
             raise ValueError("Error: Could not count deleted_account entries.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
         database_connection.close()
@@ -967,7 +967,7 @@ def get_shell_history_table_count(database_filename):
         if result is None:
             raise ValueError("Error: Could not count shell_history entries.")
         count = result[0]
-    except Exception as e:
+    except Exception:
         raise
     finally:
         database_connection.close()
@@ -1200,7 +1200,7 @@ def color_search_string(text_string, search_string, color):
     return colored_string
 
 
-def print_found_n_results(n_results: int):
+def _print_found_n_results(n_results: int):
     if n_results == 1:
         print("Found 1 result.")
     else:
@@ -1211,7 +1211,8 @@ def read_confirmed_database_password_from_user() -> str:
     new_password = getpass("Enter new database password   : ")
     new_password_confirm = getpass("Confirm new database password : ")
     while new_password != new_password_confirm:
-        logging.error("Passwords do not match.")
+        # logging.error("Passwords do not match.")
+        print("Passwords do not match.")
         new_password = getpass("Enter new database password   : ")
         new_password_confirm = getpass("Confirm new database password : ")
     return new_password
@@ -1705,7 +1706,7 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print_found_n_results(results_found)
+        _print_found_n_results(results_found)
 
     def search_accounts(self, search_string: str):
         results_found = 0
@@ -1758,7 +1759,7 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print_found_n_results(results_found)
+        _print_found_n_results(results_found)
 
     def search_invalidated_accounts(self, search_string: str):
         results_found = 0
@@ -1807,7 +1808,7 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print_found_n_results(results_found)
+        _print_found_n_results(results_found)
 
     def get_new_account_uuids_since(self, date_string: str) -> []:
         uuids = []
@@ -1950,7 +1951,7 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-        print_found_n_results(results_found)
+        _print_found_n_results(results_found)
 
     def get_accounts_decrypted(self, search_string: str) -> []:
         account_array = []
@@ -2585,14 +2586,14 @@ class PDatabase:
     #     return True
 
     def set_database_pragmas_to_secure_mode(self, database_connection, cursor):
-        logging.debug("Setting PRAGMA journal_mode = WAL for database.")
+        # logging.debug("Setting PRAGMA journal_mode = WAL for database.")
         cursor.execute("PRAGMA journal_mode = WAL")
         database_connection.commit()
-        logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
+        # logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
         cursor.execute("PRAGMA auto_vacuum = FULL")
         database_connection.commit()
         # Set secure_delete_mode
-        logging.debug("Setting PRAGMA secure_delete = True for database.")
+        # logging.debug("Setting PRAGMA secure_delete = True for database.")
         cursor.execute("PRAGMA secure_delete = True")
         database_connection.commit()
 
@@ -2711,7 +2712,7 @@ class PDatabase:
         finally:
             database_connection.close()
         print()
-        print_found_n_results(results_found)
+        _print_found_n_results(results_found)
 
     # def get_database_password_as_string(self) -> str:
     #     if self.database_password == "":
