@@ -184,6 +184,14 @@ SHELL_COMMANDS = [
                  "Delete all information about old merge events."),
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
                  "Delete orphaned account history entries."),
+    ShellCommand("executeonstart", "executeonstart [<COMMAND>]",
+                 "You can set a command to be executed when the pshell starts. Executing this command without an" +
+                 " argument shows the current command which is configured to be executed on start.\n" +
+                 "To unset the startup command run 'executeonstart -'."),
+    ShellCommand("executeonstop", "executeonstop [<COMMAND>]",
+                 "You can set a command to be executed when the pshell exits. Executing this command without an" +
+                 " argument shows the current command which is configured to be executed on exiting.\n" +
+                 "To unset the startup command run 'executeonstop -'."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
                  "table. This table is used and merged between databases to spread the information about which" +
                  " account with which UUID has been deleted. Emptying this table removes any traces of account " +
@@ -576,6 +584,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
     clear_console()
     user_input = ""
     user_input_list = []
+
+    execute_on_start_command = p_database.get_execute_on_start_command()
+    if execute_on_start_command:
+        print("Execute on start command: " + execute_on_start_command)
+        user_input_list.extend([execute_on_start_command])
+
     latest_found_account = None
 
     if show_status_on_startup is True:
@@ -1004,6 +1018,40 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Canceled")
             continue
 
+        if shell_command.command == "executeonstart":
+            if len(shell_command.arguments) == 1:
+                execute_on_start_command = p_database.get_execute_on_start_command()
+                if execute_on_start_command == "":
+                    execute_on_start_command = "None"
+                print("Execute on start command : " + execute_on_start_command)
+                continue
+            try:
+                if shell_command.arguments[1].strip() == "-":
+                    execute_on_start_command = ""
+                else:
+                    execute_on_start_command = shell_command.arguments[1].strip()
+                p_database.set_execute_on_start_command(execute_on_start_command)
+            except Exception as e:
+                print("Error setting execute on start command: " + str(e))
+            continue
+
+        if shell_command.command == "executeonstop":
+            if len(shell_command.arguments) == 1:
+                execute_on_stop_command = p_database.get_execute_on_stop_command()
+                if execute_on_stop_command == "":
+                    execute_on_stop_command = "None"
+                print("Execute on start command : " + execute_on_stop_command)
+                continue
+            try:
+                if shell_command.arguments[1].strip() == "-":
+                    execute_on_stop_command = ""
+                else:
+                    execute_on_stop_command = shell_command.arguments[1].strip()
+                p_database.set_execute_on_stop_command(execute_on_stop_command)
+            except Exception as e:
+                print("Error setting execute on stop command: " + str(e))
+            continue
+
         if shell_command.command == "forgetaccounthistory":
             try:
                 answer = input("Delete older versions of all accounts ([y]/n) : ")
@@ -1266,6 +1314,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
             sys.exit()
 
         if shell_command.command == "quit" or shell_command.command == "exit":
+            execute_on_stop_command = p_database.get_execute_on_stop_command()
+            if execute_on_stop_command != "":
+                print("Executing command on stop: " + execute_on_stop_command)
+                user_input_list.extend([execute_on_stop_command])
+                user_input_list.extend(["quit"])
+                continue
             clear_console()
             break
 
@@ -1659,6 +1713,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
             print("Slow print enabled                  : ", end="")
             print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
+            print("Execute on start                    : ", end="")
+            print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
+            print("Execute on stop                     : ", end="")
+            print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
             continue
 
         if shell_command.command == "showlinks":

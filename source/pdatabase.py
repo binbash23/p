@@ -498,6 +498,8 @@ CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_ACCOUNT_DETAILS = "PSHELL_SHOW_ACCOUNT
 CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME = "DATABASE_NAME"
 CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_UNMERGED_CHANGES_WARNING = "PSHELL_SHOW_UNMERGED_CHANGES_WARNING"
 CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY = "TRACK_ACCOUNT_HISTORY"
+CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_START_COMMAND = "EXECUTE_ON_START_COMMAND"
+CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND = "EXECUTE_ON_STOP_COMMAND"
 # CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE = "DEFAULT_MERGE_TARGET_FILE"
 TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
@@ -2497,8 +2499,6 @@ class PDatabase:
 
     def encrypt_string_if_password_is_present(self, plain_text: str) -> str:
         if plain_text is not None and plain_text != "":
-            # if self.database_password != "":
-            #     return self._fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
             if self._database_password_bytes != b"":
                 return self._fernet.encrypt(bytes(plain_text, 'UTF-8')).decode("UTF-8")
             else:
@@ -3201,6 +3201,48 @@ class PDatabase:
                              )
         os.remove(TEMP_MERGE_DATABASE_FILENAME)
         bar.finish()
+
+    def get_execute_on_start_command(self) -> str:
+        execute_on_start_command_decrypted = ""
+        try:
+            execute_on_start_command_encrypted = \
+                get_attribute_value_from_configuration_table(self.database_filename,
+                                                             CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_START_COMMAND)
+            execute_on_start_command_decrypted = (
+                self.decrypt_string_if_password_is_present(execute_on_start_command_encrypted))
+        except Exception as e:
+            print("Error getting execute on start command from configuration: " + str(e))
+        return execute_on_start_command_decrypted
+
+    def set_execute_on_start_command(self, execute_on_start_command: str = None):
+        if not execute_on_start_command:
+            execute_on_start_command_encrypted = ""
+        else:
+            execute_on_start_command_encrypted = self.encrypt_string_if_password_is_present(execute_on_start_command)
+        set_attribute_value_in_configuration_table(self.database_filename,
+                                                   CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_START_COMMAND,
+                                                   execute_on_start_command_encrypted)
+
+    def get_execute_on_stop_command(self) -> str:
+        execute_on_stop_command_decrypted = ""
+        try:
+            execute_on_stop_command_encrypted = \
+                get_attribute_value_from_configuration_table(self.database_filename,
+                                                             CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND)
+            execute_on_stop_command_decrypted = (
+                self.decrypt_string_if_password_is_present(execute_on_stop_command_encrypted))
+        except Exception as e:
+            print("Error getting execute on stop command from configuration: " + str(e))
+        return execute_on_stop_command_decrypted
+
+    def set_execute_on_stop_command(self, execute_on_stop_command: str = None):
+        if not execute_on_stop_command:
+            execute_on_stop_command_encrypted = ""
+        else:
+            execute_on_stop_command_encrypted = self.encrypt_string_if_password_is_present(execute_on_stop_command)
+        set_attribute_value_in_configuration_table(self.database_filename,
+                                                   CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND,
+                                                   execute_on_stop_command_encrypted)
 
 
 def is_valid_database_password(_database_filename: str, _database_password_bytes: bytes) -> bool:
