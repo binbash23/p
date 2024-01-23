@@ -178,6 +178,10 @@ SHELL_COMMANDS = [
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
                  "Delete account with UUID. If you do not know the UUID, use a SEARCHSTRING and you " +
                  "will be offered possible accounts to delete.\nA deleted account can not be recovered! It is usually better to invalidate an account."),
+    ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>|<SEARCHSTRING>",
+                 "Delete the database that is located in the connector account identified by UUID or SEARCHSTRING."),
+    ShellCommand("deletemergehistory", "deletemergehistory",
+                 "Delete all information about old merge events."),
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
                  "Delete orphaned account history entries."),
     ShellCommand("forgetdeletedaccounts", "forgetdeletedaccounts", "Delete all entries in deleted_accounts " +
@@ -186,8 +190,6 @@ SHELL_COMMANDS = [
                  "UUID's which have existed in this database.\nYou should empty this table on all databases. " +
                  "Otherwise the table will be filled again after the next merge with a database which has entries " +
                  "in the deleted_accounts table."),
-    ShellCommand("deleteconnectordb", "deleteconnectordb <UUID>|<SEARCHSTRING>",
-                 "Delete the database that is located in the connector account identified by UUID or SEARCHSTRING."),
     ShellCommand("edit", "edit <SEARCHSTRING>", "Edit account. If <SEARCHSTRING> matched multiple accounts, you " +
                  "can choose one of a list."),
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
@@ -984,6 +986,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except Exception as e:
                 print("Error: " + str(e))
             continue
+
+        if shell_command.command == "deletemergehistory":
+            p_database.delete_merge_history()
 
         if shell_command.command == "forgetdeletedaccounts":
             try:

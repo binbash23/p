@@ -1434,6 +1434,22 @@ class PDatabase:
         finally:
             database_connection.close()
 
+    def delete_merge_history(self):
+        database_connection = None
+        try:
+            database_connection = sqlite3.connect(self.database_filename)
+            cursor = database_connection.cursor()
+            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            sqlstring = "delete from merge_history"
+            cursor.execute(sqlstring)
+            sqlstring = "delete from merge_history_detail"
+            cursor.execute(sqlstring)
+            database_connection.commit()
+        except Exception:
+            print("Error deleting merge history entries from database.")
+        finally:
+            database_connection.close()
+
     def get_shell_history_entries_decrypted(self) -> [ShellHistoryEntry]:
         shell_history_array = []
         database_connection = None
