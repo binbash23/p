@@ -1060,24 +1060,18 @@ def print_database_statistics(database_filename):
                                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE)
     schema_version = get_attribute_value_from_configuration_table(database_filename,
                                                                   CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION)
-    dropbox_account_uuid = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID)
-    # dropbox_application_account_uuid = \
+    # dropbox_account_uuid = \
     #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_DROPBOX_APPLICATION_ACCOUNT_UUID)
-    ssh_account_uuid = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-    file_account_uuid = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID)
-    webdav_account_uuid = \
-        get_attribute_value_from_configuration_table(database_filename,
-                                                     CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
-    # default_merge_target_file = \
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID)
+    # ssh_account_uuid = \
     #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_DEFAULT_MERGE_TARGET_FILE)
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
+    # file_account_uuid = \
+    #     get_attribute_value_from_configuration_table(database_filename,
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID)
+    # webdav_account_uuid = \
+    #     get_attribute_value_from_configuration_table(database_filename,
+    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
@@ -1122,14 +1116,14 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(last_merge_date))
         print("Database has unmerged changes       : ", end="")
         print_slow.print_slow(unmerged_changes)
-        print("Merge destination DROPBOX           : ", end="")
-        print_slow.print_slow(str(dropbox_account_uuid))
-        print("Merge destination SSH               : ", end="")
-        print_slow.print_slow(str(ssh_account_uuid))
-        print("Merge destination WEBDAV            : ", end="")
-        print_slow.print_slow(str(webdav_account_uuid))
-        print("Merge destination FILE              : ", end="")
-        print_slow.print_slow(str(file_account_uuid))
+        # print("Merge destination DROPBOX           : ", end="")
+        # print_slow.print_slow(str(dropbox_account_uuid))
+        # print("Merge destination SSH               : ", end="")
+        # print_slow.print_slow(str(ssh_account_uuid))
+        # print("Merge destination WEBDAV            : ", end="")
+        # print_slow.print_slow(str(webdav_account_uuid))
+        # print("Merge destination FILE              : ", end="")
+        # print_slow.print_slow(str(file_account_uuid))
         # print("Merge destination local file        : ", end="")
         # print_slow.print_slow(str(default_merge_target_file))
     except KeyboardInterrupt:

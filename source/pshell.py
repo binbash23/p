@@ -138,11 +138,13 @@ SHELL_COMMANDS = [
                  "Change the database name for the database from the connector identified by UUID or SEARCHSTRING."),
     ShellCommand("changeconnectordbpassword", "changeconnectordbpassword <UUID>|SEARCHSTRING",
                  "Change the database password for the database from the connector identified by UUID or SEARCHSTRING."),
-    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>|<SEARCHSTRING>]", "Change password of the dropbox " +
+    ShellCommand("changedropboxdbpassword", "changedropboxdbpassword [<UUID>|<SEARCHSTRING>]",
+                 "Change password of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "password. After re-encrypting the dropbox version of the database, the database will be " +
                  "uploaded again."),
-    ShellCommand("changedropboxdbname", "changedropboxdbname [<UUID>|<SEARCHSTRING>]", "Change database name of the dropbox " +
+    ShellCommand("changedropboxdbname", "changedropboxdbname [<UUID>|<SEARCHSTRING>]",
+                 "Change database name of the dropbox " +
                  "database.\nThe database will be downloaded from the dropbox account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again."),
@@ -151,7 +153,8 @@ SHELL_COMMANDS = [
                  "password. After re-encrypting the ssh version of the database, the database will be " +
                  "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
                  " ssh UUID from the configuration table will be taken."),
-    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword [<UUID>|<SEARCHSTRING>]", "Change password of the webdav " +
+    ShellCommand("changewebdavdbpassword", "changewebdavdbpassword [<UUID>|<SEARCHSTRING>]",
+                 "Change password of the webdav " +
                  "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
                  "password. After re-encrypting the webdav version of the database, the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
@@ -161,7 +164,8 @@ SHELL_COMMANDS = [
                  "database name. Then the database will be " +
                  "uploaded again. If no UUID for the ssh target is given, the eventually configured default" +
                  " ssh UUID from the configuration table will be taken."),
-    ShellCommand("changewebdavdbname", "changewebdavdbname [<UUID>|<SEARCHSTRING>]", "Change the database name of the webdav " +
+    ShellCommand("changewebdavdbname", "changewebdavdbname [<UUID>|<SEARCHSTRING>]",
+                 "Change the database name of the webdav " +
                  "database.\nThe database will be downloaded from the webdav account and you can enter a new " +
                  "database name. Then the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
@@ -356,7 +360,8 @@ SHELL_COMMANDS = [
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
-    ShellCommand("showmergedetail", "showmergedetail <UUID>", "Show the merge history detail for merge event with UUID."),
+    ShellCommand("showmergedetail", "showmergedetail <UUID>",
+                 "Show the merge history detail for merge event with UUID."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
@@ -1710,28 +1715,29 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "showconfig":
-            print("PShell timeout                      : ", end="")
-            print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
-            print("PShell max history size             : ", end="")
-            print_slow.print_slow(colored(str(pshell_max_history_size), "green"))
-            print("Show invalidated accounts           : ", end="")
-            print_slow.print_slow(colored(str(p_database.show_invalidated_accounts), "green"))
-            print("Shadow passwords                    : ", end="")
-            print_slow.print_slow(colored(str(p_database.shadow_passwords), "green"))
-            print("Show accounts verbose               : ", end="")
-            print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
-            print("Show unmerged changes warning       : ", end="")
-            print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
-            print("Show status on startup              : ", end="")
-            print_slow.print_slow(colored(str(show_status_on_startup), "green"))
-            print("Track account history               : ", end="")
-            print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
-            print("Slow print enabled                  : ", end="")
-            print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
-            print("Execute on start                    : ", end="")
-            print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
-            print("Execute on stop                     : ", end="")
-            print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
+            show_config(p_database)
+            # print("PShell timeout                      : ", end="")
+            # print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
+            # print("PShell max history size             : ", end="")
+            # print_slow.print_slow(colored(str(pshell_max_history_size), "green"))
+            # print("Show invalidated accounts           : ", end="")
+            # print_slow.print_slow(colored(str(p_database.show_invalidated_accounts), "green"))
+            # print("Shadow passwords                    : ", end="")
+            # print_slow.print_slow(colored(str(p_database.shadow_passwords), "green"))
+            # print("Show accounts verbose               : ", end="")
+            # print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
+            # print("Show unmerged changes warning       : ", end="")
+            # print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
+            # print("Show status on startup              : ", end="")
+            # print_slow.print_slow(colored(str(show_status_on_startup), "green"))
+            # print("Track account history               : ", end="")
+            # print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
+            # print("Slow print enabled                  : ", end="")
+            # print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
+            # print("Execute on start                    : ", end="")
+            # print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
+            # print("Execute on stop                     : ", end="")
+            # print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
             continue
 
         if shell_command.command == "showlinks":
@@ -2051,3 +2057,43 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # # Unknown command detected
         # print("Command ")
     print("Exiting pshell.")
+
+def show_config(p_database: pdatabase):
+    print("PShell timeout                      : ", end="")
+    print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
+    print("PShell max history size             : ", end="")
+    print_slow.print_slow(colored(str(pshell_max_history_size), "green"))
+    print("Show invalidated accounts           : ", end="")
+    print_slow.print_slow(colored(str(p_database.show_invalidated_accounts), "green"))
+    print("Shadow passwords                    : ", end="")
+    print_slow.print_slow(colored(str(p_database.shadow_passwords), "green"))
+    print("Show accounts verbose               : ", end="")
+    print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
+    print("Show unmerged changes warning       : ", end="")
+    print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
+    print("Show status on startup              : ", end="")
+    print_slow.print_slow(colored(str(show_status_on_startup), "green"))
+    print("Track account history               : ", end="")
+    print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
+    print("Slow print enabled                  : ", end="")
+    print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
+    print("Execute on start                    : ", end="")
+    print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
+    print("Execute on stop                     : ", end="")
+    print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
+    print("Default dropbox merge target        : ", end="")
+    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID))
+    print("Default ssh merge target            : ", end="")
+    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID))
+    print("Default webdav merge target         : ", end="")
+    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID))
+    print("Default file merge target           : ", end="")
+    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+        p_database.database_filename,
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID))
