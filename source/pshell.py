@@ -2082,18 +2082,18 @@ def show_config(p_database: pdatabase):
     print("Execute on stop                     : ", end="")
     print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
     print("Default dropbox merge target        : ", end="")
-    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+    print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
-        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID))
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID), "green"))
     print("Default ssh merge target            : ", end="")
-    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+    print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
-        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID))
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID), "green"))
     print("Default webdav merge target         : ", end="")
-    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+    print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
-        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID))
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID), "green"))
     print("Default file merge target           : ", end="")
-    print_slow.print_slow(pdatabase.get_attribute_value_from_configuration_table(
+    print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
-        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID))
+        pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID), "green"))
