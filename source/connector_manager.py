@@ -6,14 +6,15 @@ The connector manager is responsible for all the stuff that has to do with conne
 a file connector or a dropbox connector. These objects are used to merge p databases to different locations.
 """
 
-import pdatabase
-import ssh_connector
-import dropbox_connector
-import webdav_connector
-import file_connector
+import os
+
 # from termcolor import colored
 import connector_interface
-import os
+import dropbox_connector
+import file_connector
+import pdatabase
+import ssh_connector
+import webdav_connector
 
 
 def get_dropbox_connector(p_database: pdatabase, account_uuid: str = None) -> dropbox_connector.DropboxConnector:
