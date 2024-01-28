@@ -4,8 +4,8 @@
 # file connector
 #
 import os.path
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 # from informal_connector_interface import InformalConnectorInterface
 from connector_interface import ConnectorInterface
