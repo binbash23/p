@@ -3117,6 +3117,19 @@ class PDatabase:
             file_merge_bar.finish()
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
+        if not is_encrypted_database(self.database_filename):
+            print("WARNING !!!")
+            print("The current database is NOT ENCRYPTED!")
+            print("It is strongly recommended NOT to merge an unencrypted database to another location.")
+            try:
+                answer = input("Do you really want to proceed (y/[n]) ? ")
+            except KeyboardInterrupt:
+                print()
+                print("Canceled.")
+                return
+            if answer != "y":
+                return
+
         merge_history_uuid = str(uuid.uuid4())
 
         if connector.get_type() == "file":
