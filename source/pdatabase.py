@@ -605,9 +605,7 @@ def set_attribute_value_in_configuration_table(_database_filename, _attribute_na
         database_connection = sqlite3.connect(_database_filename)
         cursor = database_connection.cursor()
         # First check if the attribute exists and create it if not
-        # print("-> hey")
         if not is_attribute_in_configuration_table(_database_filename, _attribute_name):
-            # print("-> inserting")
             sqlstring = "insert into configuration (attribute, value) values (?, ?)"
             cursor.execute(sqlstring, [_attribute_name, _value])
             database_connection.commit()
@@ -2324,13 +2322,45 @@ class PDatabase:
             print("Re-encrypting " + str(deleted_account_table_count) + " deleted account entries...")
             print("Re-encrypting " + str(shell_history_table_count) + " shell history entries...")
             print("Re-encrypting " + str(alias_table_count) + " alias entries...")
+            print("Re-encrypting 2 executeonstart/-stop commands...")
             max_value = (account_count +
                          account_history_count +
                          deleted_account_table_count +
                          shell_history_table_count +
-                         alias_table_count)
+                         alias_table_count +
+                         2)
             bar = progressbar.ProgressBar(maxval=max_value)
             bar.start()
+            results_found = 0
+
+            # reencrypt execute on stop command
+            current_execute_on_stop_command = self.get_execute_on_stop_command()
+            if current_execute_on_stop_command != "":
+                new_execute_on_stop_command = self.encrypt_string_with_custom_password(
+                    current_execute_on_stop_command, new_password)
+                # set_attribute_value_in_configuration_table(self.database_filename,
+                #                                            CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND,
+                #                                            new_execute_on_stop_command)
+                sqlstring = "update configuration set value=? where attribute=?"
+                cursor.execute(sqlstring, [new_execute_on_stop_command,
+                                           CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND])
+            bar.update(bar.currval + 1)
+            results_found += 1
+
+            # reencrypt execute on start command
+            current_execute_on_start_command = self.get_execute_on_start_command()
+            if current_execute_on_start_command != "":
+                new_execute_on_start_command = self.encrypt_string_with_custom_password(
+                    current_execute_on_start_command, new_password)
+                # set_attribute_value_in_configuration_table(self.database_filename,
+                #                                            CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_START_COMMAND,
+                #                                            new_execute_on_start_command)
+                sqlstring = "update configuration set value=? where attribute=?"
+                cursor.execute(sqlstring, [new_execute_on_start_command,
+                                           CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_START_COMMAND])
+            bar.update(bar.currval + 1)
+            results_found += 1
+
             # Disable the update_change_date_trigger
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
 
@@ -2338,7 +2368,7 @@ class PDatabase:
             sqlstring = SQL_SELECT_ALL_ACCOUNTS
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()
-            results_found = 0
+            # results_found = 0
             for row in result:
                 results_found += 1
                 # get current account data (enrypted)
@@ -2368,7 +2398,8 @@ class PDatabase:
                                     "where uuid = '" + str(current_uuid) + "'"
                 cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
                                                    new_current_password, new_current_type, new_current_connector_type))
-                bar.update(results_found)
+                # bar.update(results_found)
+                bar.update(bar.currval + 1)
 
             # reencrypt account_history table
             sqlstring = SQL_SELECT_ALL_ACCOUNT_HISTORY
@@ -2406,7 +2437,8 @@ class PDatabase:
                                     "where uuid = '" + str(current_uuid) + "'"
                 cursor.execute(update_sql_string, (new_current_name, new_current_url, new_current_loginname,
                                                    new_current_password, new_current_type, new_current_connector_type))
-                bar.update(results_found)
+                # bar.update(results_found)
+                bar.update(bar.currval + 1)
 
             # reencrypt deleted_account table
             sqlstring = SQL_SELECT_ALL_FROM_DELETED_ACCOUNT
@@ -2426,7 +2458,8 @@ class PDatabase:
                 # and create new encrypted entry
                 insert_sql_string = "insert into deleted_account (uuid, create_date) values (?, ?)"
                 cursor.execute(insert_sql_string, (new_current_uuid, current_create_date))
-                bar.update(results_found)
+                # bar.update(results_found)
+                bar.update(bar.currval + 1)
 
             # reencrypt shell history table
             sqlstring = SQL_SELECT_ALL_FROM_SHELL_HISTORY
@@ -2445,6 +2478,7 @@ class PDatabase:
                                                                                     new_password)
                 update_sql_string = "update shell_history set execution_date = ?, user_input = ? where uuid = ?"
                 cursor.execute(update_sql_string, (new_current_execution_date, new_current_user_input, current_uuid))
+                bar.update(bar.currval + 1)
 
             # reencrypt alias table
             sqlstring = SQL_SELECT_ALL_FROM_ALIAS
@@ -2460,6 +2494,7 @@ class PDatabase:
                                                                                  new_password)
                 update_sql_string = "update alias set command = ? where alias = ?"
                 cursor.execute(update_sql_string, (new_current_command, current_alias))
+                bar.update(bar.currval + 1)
 
             bar.finish()
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
