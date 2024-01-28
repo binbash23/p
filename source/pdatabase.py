@@ -3153,9 +3153,9 @@ class PDatabase:
 
     def merge_database_with_connector(self, connector: ConnectorInterface):
         if not is_encrypted_database(self.database_filename):
-            print("WARNING !!!")
-            print("The current database is NOT ENCRYPTED!")
-            print("It is strongly recommended NOT to merge an unencrypted database to another location.")
+            print("!!! WARNING !!!")
+            print("! The current database is NOT ENCRYPTED !")
+            print("It is STRONGLY recommended NOT to merge an unencrypted database to another location!")
             try:
                 answer = input("Do you really want to proceed (y/[n]) ? ")
             except KeyboardInterrupt:
