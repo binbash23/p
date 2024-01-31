@@ -419,7 +419,7 @@ def find_uuid_for_searchstring_interactive(searchstring: str, p_database: pdatab
         print("")
         try:
             index = input("Multiple accounts found. Please specify the # you need: ")
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             print()
             index = ""
         if index == "":
@@ -1176,8 +1176,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             if p_database.invalidate_account(uuid_to_invalidate):
                 print("Account with UUID: " + uuid_to_invalidate + " has been invalidated.")
-            # else:
-            #     print("UUID is empty.")
             continue
 
         if shell_command.command == "list":
