@@ -17,7 +17,7 @@ _hash = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=5
 ```
 and the salt is static but long and random (see source code)
 
-Try it out. Gimme feedback. 
+Try it out. 
 
 The program code can be understood by everyone who codes at least a 
 little it.
@@ -29,21 +29,20 @@ Jens
 Use the [wiki](https://github.com/binbash23/p/wiki) for more help.
 
 ### Binaries/executeable program:
-You can use the python code or the binaries that I have compiled to the following folders.
+You can use the python code or the binaries.
 
-For Linux (x86), use the 'p' executeable here:
+For Linux (x86), use the 'p' executeable:
 
 [p/dist/linux/p](https://github.com/binbash23/p/raw/master/dist/linux/p)
 
-For Raspberry Pi's (arm), use the 'p' executeable here:
+For Raspberry Pi's (arm), use the 'p' executeable:
 
 [p/dist/raspberry/p](https://github.com/binbash23/p/raw/master/dist/raspberry/p)
 
-and for Windows (x86), use the 'p.exe' executeable here: 
+and for Windows (x86), use the 'p.exe' executeable: 
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
 
-I copy the linux and the windows binary to an usb stick and also my p.db file (which holds all the encrypted accounts). With this usb stick I have all my accounts reachable on any computer even without internet!
 
 ### How do I start?
 
