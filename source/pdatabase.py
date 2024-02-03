@@ -1165,7 +1165,7 @@ def get_database_has_unmerged_changes(database_filename: str) -> str:
 
 
 def _create_fernet(salt, password_bytes: bytes, iteration_count: int) -> Fernet:
-    _hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=iteration_count)
+    _hash = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=iteration_count)
     key = base64.urlsafe_b64encode(_hash.derive(password_bytes))
     f = Fernet(key)
     return f
