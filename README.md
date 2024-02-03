@@ -13,7 +13,7 @@ a new proprietary encryption function. I use open source cryptography
 which has been tested and which is hopefully bugfree :)
 For the people who want to know, I use this for the symetric encryption method:
 ```
-_hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+_hash = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=500000)
 ```
 and the salt is static but long and random (see source code)
 
