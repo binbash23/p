@@ -35,6 +35,10 @@ For Linux, use the 'p' executeable here:
 
 [p/dist/linux/p](https://github.com/binbash23/p/raw/master/dist/linux/p)
 
+For Raspberry Pi's, use the 'p' executeable here:
+
+[p/dist/linux/p](https://github.com/binbash23/p/raw/master/dist/raspberry/p)
+
 and for Windows, use the 'p.exe' executeable here: 
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
