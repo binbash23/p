@@ -13,7 +13,7 @@ a new proprietary encryption function. I use open source cryptography
 which has been tested and which is hopefully bugfree :)
 For the people who want to know, I use this for the symetric encryption method:
 ```
-_hash = PBKDF2HMAC(algorithm=hashes.SHA256, length=32, salt=salt, iterations=500000)
+_hash = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=500000)
 ```
 and the salt is static but long and random (see source code)
 
@@ -31,11 +31,15 @@ Use the [wiki](https://github.com/binbash23/p/wiki) for more help.
 ### Binaries/executeable program:
 You can use the python code or the binaries that I have compiled to the following folders.
 
-For Linux, use the 'p' executeable here:
+For Linux (x86), use the 'p' executeable here:
 
 [p/dist/linux/p](https://github.com/binbash23/p/raw/master/dist/linux/p)
 
-and for Windows, use the 'p.exe' executeable here: 
+For Raspberry Pi's (arm), use the 'p' executeable here:
+
+[p/dist/raspberry/p](https://github.com/binbash23/p/raw/master/dist/raspberry/p)
+
+and for Windows (x86), use the 'p.exe' executeable here: 
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
 

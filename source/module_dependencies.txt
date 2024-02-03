@@ -9,17 +9,17 @@ Python module dependencies for password manager p.
 
 You have to install the following modules to run p.py:
 
-termcolor
-colorama
-pyperclip3
-cryptography
-progressbar
-dropbox
-inputimeout
-getpass
-webdav4
-pysftp
-wget
+pip install termcolor
+pip install colorama
+pip install pyperclip3
+pip install cryptography
+pip install progressbar
+pip install dropbox
+pip install inputimeout
+pip install getpass
+pip install webdav4
+pip install pysftp
+pip install wget
 
 If you use Ubuntu/Linux and want to use the clipboard features:
 ---------------------------------------------------------------
