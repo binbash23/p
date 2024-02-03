@@ -1747,6 +1747,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_WIN), "green"))
             print("p binary linux           : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_LINUX), "green"))
+            print("p binary raspberry pi    : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_RASPBERRY), "green"))
             print("p updater binary windows : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN), "green"))
             print("p updater binary linux   : ", end="")
