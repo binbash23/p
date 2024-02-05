@@ -86,7 +86,7 @@ class SshConnector(ConnectorInterface):
         return exists
 
     def get_remote_base_path(self) -> str:
-        return self._remote_base_path
+        return self._ssh_remote_base_path
 
 
 def main():
