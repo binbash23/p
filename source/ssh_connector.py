@@ -32,6 +32,8 @@ class SshConnector(ConnectorInterface):
         else:
             self._ssh_server_hostname = self._ssh_server_url
 
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
         self._ssh_connection = pysftp.Connection(host=self._ssh_server_hostname, username=self._ssh_login,
                                                  password=self._ssh_password)
 
