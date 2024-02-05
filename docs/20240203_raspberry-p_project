@@ -1,0 +1,32 @@
+
+20240203 jens heine <binbash@gmx.net>
+
+raspberry-p project
+===================
+
+
+A Secure Password Safe Project
+
+---------------
+- Szenario #1 -
+---------------
+
+raspberry open a WIFI network and client connect to it to access p.
+
+
+raspberry-pi  ------- opens WIFI network <--------> Handy
+                          		 <--------> Laptop
+                        		 <--------> PC
+                        		 <--------> Tablet
+
+---------------
+- Szenario #2 -
+---------------
+
+raspberry connects to known networks and clients in the known network(s) can use p.
+
+raspberry-pi  ------- connects to known WIFI network <--------> Handy
+                          		 	     <--------> Laptop
+                        			     <--------> PC
+                        			     <--------> Tablet
+

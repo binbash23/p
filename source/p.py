@@ -16,12 +16,13 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.01.28"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.03"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
 URL_DOWNLOAD_BINARY_P_LINUX = "https://github.com/binbash23/p/raw/master/dist/linux/p"
+URL_DOWNLOAD_BINARY_P_RASPBERRY = "https://github.com/binbash23/p/raw/master/dist/raspberry/p"
 URL_DOWNLOAD_BINARY_P_UPDATER_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/updater.exe"
 URL_DOWNLOAD_BINARY_P_UPDATER_LINUX = "https://github.com/binbash23/p/raw/master/dist/linux/updater"
 DOWNLOAD_P_UPDATE_FILENAME_WIN = "p.exe_latest"
