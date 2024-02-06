@@ -1671,7 +1671,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p.set_attribute_value_in_configuration_table(
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID,
-                shell_command.arguments[1].strip())
+                new_dropbox_account_uuid)
             continue
 
         if shell_command.command == "shadowpasswords":
