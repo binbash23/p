@@ -572,6 +572,17 @@ def os_is_windows() -> bool:
         return False
 
 
+def is_aarch64_architecture() -> bool:
+    if os_is_windows():
+        return False
+    try:
+        if os.uname()[4][7] == 'aarch64':
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def clear_console():
     # windows
     if os_is_windows():
@@ -1963,12 +1974,21 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             try:
                 if os_is_windows():
+                    print("Detected system is windows")
                     download_url = p.URL_DOWNLOAD_BINARY_P_WIN
                     download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
                     p_filename = p.P_FILENAME_WIN
                     p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN
                     p_updater = p.P_UPDATER_FILENAME_WIN
+                elif is_aarch64_architecture():
+                    print("Detected system is linux/arm")
+                    download_url = p.URL_DOWNLOAD_BINARY_P_RASPBERRY
+                    download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
+                    p_filename = p.P_FILENAME_LINUX
+                    p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
+                    p_updater = p.P_UPDATER_FILENAME_LINUX
                 else:
+                    print("Detected system is linux")
                     download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
                     download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
                     p_filename = p.P_FILENAME_LINUX
@@ -2057,6 +2077,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # # Unknown command detected
         # print("Command ")
     print("Exiting pshell.")
+
 
 def show_config(p_database: pdatabase):
     print("PShell timeout                      : ", end="")
