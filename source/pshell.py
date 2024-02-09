@@ -563,7 +563,7 @@ def load_pshell_configuration(p_database: pdatabase.PDatabase):
         p_database.track_account_history = parse_bool(config_value)
 
 
-def os_is_windows() -> bool:
+def is_windows_os() -> bool:
     # windows
     if os.name == 'nt':
         return True
@@ -572,11 +572,30 @@ def os_is_windows() -> bool:
         return False
 
 
+def is_posix_os() -> bool:
+    if os.name == 'posix':
+        return True
+    # for mac and linux os.name is posix
+    else:
+        return False
+
+
 def is_aarch64_architecture() -> bool:
-    if os_is_windows():
+    if is_windows_os():
         return False
     try:
-        if os.uname()[4][7] == 'aarch64':
+        if os.uname().machine == 'aarch64':
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def is_x86_64_architecture() -> bool:
+    if is_windows_os():
+        return False
+    try:
+        if os.uname().machine == 'x86_64':
             return True
     except Exception:
         pass
@@ -585,7 +604,7 @@ def is_aarch64_architecture() -> bool:
 
 def clear_console():
     # windows
-    if os_is_windows():
+    if is_windows_os():
         os.system('cls')
     # for mac and linux os.name is posix
     else:
@@ -1973,27 +1992,32 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
                 continue
             try:
-                if os_is_windows():
+                if is_windows_os():
                     print("Detected system is windows")
                     download_url = p.URL_DOWNLOAD_BINARY_P_WIN
                     download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_WIN
                     p_filename = p.P_FILENAME_WIN
                     p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN
                     p_updater = p.P_UPDATER_FILENAME_WIN
-                elif is_aarch64_architecture():
-                    print("Detected system is linux/arm")
-                    download_url = p.URL_DOWNLOAD_BINARY_P_RASPBERRY
-                    download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
-                    p_filename = p.P_FILENAME_LINUX
-                    p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
-                    p_updater = p.P_UPDATER_FILENAME_LINUX
+                elif is_posix_os():
+                    if is_x86_64_architecture():
+                        print("Detected system is linux x86_64")
+                        download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
+                        download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
+                        p_filename = p.P_FILENAME_LINUX
+                        p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
+                        p_updater = p.P_UPDATER_FILENAME_LINUX
+                    elif is_aarch64_architecture():
+                        print("Detected system is linux on arm_64")
+                        download_url = p.URL_DOWNLOAD_BINARY_P_RASPBERRY
+                        download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
+                        p_filename = p.P_FILENAME_LINUX
+                        p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
+                        p_updater = p.P_UPDATER_FILENAME_LINUX
                 else:
-                    print("Detected system is linux")
-                    download_url = p.URL_DOWNLOAD_BINARY_P_LINUX
-                    download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
-                    p_filename = p.P_FILENAME_LINUX
-                    p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
-                    p_updater = p.P_UPDATER_FILENAME_LINUX
+                    print("Error: Detected system is unknown: " + str(os.uname()))
+                    continue
+
                 print("Downloading latest p binary to: " + download_p_filename)
                 print("Please wait, this can take a while...")
                 # req = requests.get(download_url)
@@ -2007,7 +2031,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     continue
                 print("Download ready.")
 
-                if os_is_windows():
+                if is_windows_os():
                     if not os.path.exists(p_updater):
                         print("updater executable not found.")
                         print("Downloading it...")
