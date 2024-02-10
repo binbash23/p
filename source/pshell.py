@@ -804,7 +804,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command.synopsis)
                 continue
             try:
-                os.system(shell_command.arguments[1])
+                os.system("bash -i -c \"" + shell_command.arguments[1] + "\"")
             except Exception:
                 print()
             continue
