@@ -799,7 +799,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             try:
                 # os.system("bash -i -c \"" + shell_command.arguments[1] + "\"")
-                os.system(". ~/.bash_profile;" + shell_command.arguments[1])
+                # os.system(". ~/.bash_profile;" + shell_command.arguments[1])
+                os.system("export PATH=~/bin;$PATH;" + shell_command.arguments[1])
             except Exception:
                 print()
             continue
