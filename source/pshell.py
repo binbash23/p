@@ -652,10 +652,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
-                    try:
-                        input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
-                    except:
-                        pass
+                    input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                 else:
                     input_line = input(prompt_string)
                 user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
@@ -801,7 +798,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command.synopsis)
                 continue
             try:
-                os.system("bash -i -c \"" + shell_command.arguments[1] + "\"")
+                # os.system("bash -i -c \"" + shell_command.arguments[1] + "\"")
+                os.system(". ~/bash_profile;" + shell_command.arguments[1])
             except Exception:
                 print()
             continue
