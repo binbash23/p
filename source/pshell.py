@@ -806,7 +806,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 os.system(shell_command.arguments[1])
             except Exception:
-                pass
+                print()
             continue
 
         if shell_command.command == "add":
