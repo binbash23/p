@@ -652,7 +652,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             try:
                 # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
-                    input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    try:
+                        input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    except:
+                        pass
                 else:
                     input_line = input(prompt_string)
                 user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
@@ -701,12 +704,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     user_input = ""
                     break
 
-        # # it is possible to search with "/SEARCHSTR" and to execute an os command with "!CMD"
-        # # so I separate / and ! here from the rest
-        # if user_input.startswith("/"):
-        #     user_input = user_input.replace("/", "/ ", 1)
-        # if user_input.startswith("!"):
-        #     user_input = user_input.replace("!", "! ", 1)
 
         # Create shell_command object from user_input
         shell_command = expand_string_2_shell_command(user_input)
