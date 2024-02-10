@@ -803,7 +803,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("COMMAND is missing.")
                 print(shell_command.synopsis)
                 continue
-            os.system("bash -i -c \"" + shell_command.arguments[1] + \"")
+            os.system("bash -i -c \"" + shell_command.arguments[1] + "\"")
             continue
 
         if shell_command.command == "add":
