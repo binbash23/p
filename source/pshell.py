@@ -359,6 +359,7 @@ SHELL_COMMANDS = [
                  "downloads etc."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
+    ShellCommand("showallmergehistorydetails", "showallmergehistorydetails", "Show the history details of all database merge events."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
@@ -1814,6 +1815,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             print("Error: on or off expected.")
             continue
+
+        if shell_command.command == "showallmergehistorydetails":
+            pdatabase.print_all_merge_history_details(p_database.database_filename)
 
         if shell_command.command == "showmergehistory":
             pdatabase.print_merge_history(p_database.database_filename)

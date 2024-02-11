@@ -86,6 +86,13 @@ merge_history
 WHERE
 execution_date = (select max(execution_date) from merge_history)
 """
+SQL_SELECT_ALL_MERGE_HISTORY_UUIDS_ORDERED_BY_EXECUTION_DATE = """
+SELECT
+uuid
+FROM
+merge_history
+order by execution_date 
+"""
 SQL_GET_MAX_CHANGE_DATE_IN_DATABASE = """
 SELECT
   max(change_date)
@@ -691,19 +698,6 @@ def set_database_name(database_filename, new_database_name: str):
                                                new_database_name)
 
 
-# def print_merge_history(database_filename):
-#     try:
-#         database_connection = sqlite3.connect(database_filename)
-#         cursor = database_connection.cursor()
-#         sqlstring = "select * from merge_history"
-#         sqlresult = cursor.execute(sqlstring)
-#         result = sqlresult.fetchall()
-#         for row in result:
-#             print(row)
-#     except Exception as e:
-#         print("Error getting merge history entries from database.")
-#     finally:
-#         database_connection.close()
 
 def print_merge_history(database_filename, merge_history_uuid=None) -> int:
     database_connection = None
@@ -750,7 +744,34 @@ def get_latest_merge_history_uuid(database_filename: str) -> str:
         database_connection.close()
 
 
-def print_latest_merge_history_detail(database_filename):
+def get_all_merge_history_uuids(database_filename: str) -> [str]:
+    database_connection = None
+    uuids = []
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlresult = cursor.execute(SQL_SELECT_ALL_MERGE_HISTORY_UUIDS_ORDERED_BY_EXECUTION_DATE)
+        result = sqlresult.fetchall()
+        for row in result:
+            # print("->" + str(row))
+            uuids.extend([row[0]])
+        return uuids
+    except Exception as e:
+        print("Error selecting all uuids from merge_history: " + str(e))
+    finally:
+        database_connection.close()
+
+
+def print_all_merge_history_details(database_filename: str):
+    uuids = get_all_merge_history_uuids(database_filename)
+    for _uuid in uuids:
+        print_merge_history_detail(database_filename, _uuid)
+    print()
+    print(str(len(uuids)) + " merge history(s) found.")
+    print()
+
+
+def print_latest_merge_history_detail(database_filename: str):
     latest_merge_uuid = get_latest_merge_history_uuid(database_filename)
     if latest_merge_uuid:
         print_merge_history_detail(database_filename, latest_merge_uuid)
