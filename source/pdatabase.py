@@ -470,6 +470,8 @@ SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY = "delete from account_history"
 SQL_SELECT_COUNT_ALL_FROM_DELETED_ACCOUNT = "select count(*) from deleted_account"
 SQL_SELECT_COUNT_ALL_FROM_SHELL_HISTORY = "select count(*) from shell_history"
 SQL_SELECT_COUNT_ALL_FROM_ALIAS = "select count(*) from alias"
+SQL_SELECT_COUNT_ALL_FROM_MERGE_HISTORY = "select count(*) from merge_history"
+SQL_SELECT_COUNT_ALL_FROM_MERGE_HISTORY_DETAIL = "select count(*) from merge_history_detail"
 SQL_SELECT_ALL_FROM_DELETED_ACCOUNT = "select uuid, create_date from deleted_account"
 SQL_SELECT_ALL_FROM_SHELL_HISTORY = "select uuid, create_date, execution_date, user_input from shell_history"
 SQL_SELECT_ALL_FROM_ALIAS = "select alias, command from alias"
@@ -974,7 +976,45 @@ def get_shell_history_table_count(database_filename):
     return count
 
 
-def get_alias_table_count(database_filename):
+def get_merge_history_detail_table_count(database_filename: str) -> int:
+    count = 0
+    database_connection = None
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_MERGE_HISTORY_DETAIL
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count merge_history_detail entries.")
+        count = result[0]
+    except Exception:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
+
+def get_merge_history_table_count(database_filename: str) -> int:
+    count = 0
+    database_connection = None
+    try:
+        database_connection = sqlite3.connect(database_filename)
+        cursor = database_connection.cursor()
+        sqlstring = SQL_SELECT_COUNT_ALL_FROM_MERGE_HISTORY
+        sqlresult = cursor.execute(sqlstring)
+        result = sqlresult.fetchone()
+        if result is None:
+            raise ValueError("Error: Could not count merge_history entries.")
+        count = result[0]
+    except Exception:
+        raise
+    finally:
+        database_connection.close()
+    return count
+
+
+def get_alias_table_count(database_filename: str) -> int:
     count = 0
     database_connection = None
     try:
@@ -1012,7 +1052,7 @@ def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     return count
 
 
-def get_account_count(database_filename, also_count_invalidated_accounts: bool = True):
+def get_account_count(database_filename: str, also_count_invalidated_accounts: bool = True)-> int:
     count = 0
     database_connection = None
     try:
@@ -1034,7 +1074,7 @@ def get_account_count(database_filename, also_count_invalidated_accounts: bool =
     return count
 
 
-def print_database_statistics(database_filename):
+def print_database_statistics(database_filename: str):
     if not os.path.exists(database_filename):
         print(colored("Can not show database statistics because database file does not exist.", "red"))
         return
@@ -1058,18 +1098,6 @@ def print_database_statistics(database_filename):
                                                                    CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE)
     schema_version = get_attribute_value_from_configuration_table(database_filename,
                                                                   CONFIGURATION_TABLE_ATTRIBUTE_SCHEMA_VERSION)
-    # dropbox_account_uuid = \
-    #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID)
-    # ssh_account_uuid = \
-    #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID)
-    # file_account_uuid = \
-    #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID)
-    # webdav_account_uuid = \
-    #     get_attribute_value_from_configuration_table(database_filename,
-    #                                                  CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID)
     database_name = \
         get_attribute_value_from_configuration_table(database_filename,
                                                      CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME)
@@ -1112,18 +1140,12 @@ def print_database_statistics(database_filename):
         print_slow.print_slow(str(last_merge_database))
         print("Last Merge Date          : ", end="")
         print_slow.print_slow(str(last_merge_date))
+        print("Merge history entries    : ", end="")
+        print_slow.print_slow(str(get_merge_history_table_count(database_filename)))
+        print("Merge history details    : ", end="")
+        print_slow.print_slow(str(get_merge_history_detail_table_count(database_filename)))
         print("Unmerged changes         : ", end="")
         print_slow.print_slow(unmerged_changes)
-        # print("Merge destination DROPBOX           : ", end="")
-        # print_slow.print_slow(str(dropbox_account_uuid))
-        # print("Merge destination SSH               : ", end="")
-        # print_slow.print_slow(str(ssh_account_uuid))
-        # print("Merge destination WEBDAV            : ", end="")
-        # print_slow.print_slow(str(webdav_account_uuid))
-        # print("Merge destination FILE              : ", end="")
-        # print_slow.print_slow(str(file_account_uuid))
-        # print("Merge destination local file        : ", end="")
-        # print_slow.print_slow(str(default_merge_target_file))
     except KeyboardInterrupt:
         print()
 
