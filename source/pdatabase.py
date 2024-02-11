@@ -1879,6 +1879,7 @@ class PDatabase:
         return uuids
 
     def show_unmerged_changes(self):
+        change_count = 0
         last_merge_date = get_last_merge_date(self.database_filename)
         last_change_date = get_last_change_date_in_database(self.database_filename)
         print()
@@ -1893,7 +1894,8 @@ class PDatabase:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
             print()
-        print(str(len(uuids)) + " change(s)")
+        print(str(len(uuids)) + " account(s) created")
+        change_count += len(uuids)
 
         print()
         print("<Changed accounts since last merge>")
@@ -1903,7 +1905,8 @@ class PDatabase:
             account = self.get_account_by_uuid_and_decrypt(current_uuid)
             self.print_formatted_account(account, show_history_count=False, print_slowly=False)
             print()
-        print(str(len(uuids)) + " change(s)")
+        print(str(len(uuids)) + " account(s) changed")
+        change_count += len(uuids)
 
         print()
         print("<Deleted account uuid's since last merge>")
@@ -1911,7 +1914,10 @@ class PDatabase:
         uuids = self.get_deleted_account_uuids_decrypted_since(last_merge_date)
         for current_uuid in uuids:
             print(current_uuid)
-        print(str(len(uuids)) + " change(s)")
+        print(str(len(uuids)) + " account(s) deleted")
+        change_count += len(uuids)
+        print()
+        print("Total changes: " + str(change_count))
 
         print()
 
