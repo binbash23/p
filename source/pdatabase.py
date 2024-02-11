@@ -2856,14 +2856,10 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            # print("Attaching merge database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Attaching merge database " + merge_database_filename)
             merge_history_detail_string_list.extend(["Attaching merge database " + merge_database_filename])
             sqlstring = "attach '" + merge_database_filename + "' as merge_database"
             cursor.execute(sqlstring)
 
-            # print("Updating merge database schema...")
             sqlstring = SQL_CREATE_MERGE_DATABASE_SCHEMA
             cursor.executescript(sqlstring)
             database_connection.commit()
@@ -2872,10 +2868,8 @@ class PDatabase:
             # step #0.1 do the complicated deleted accounts logic here:
             #
             deleted_uuids_in_local_db = self.get_deleted_account_uuids_decrypted()
-            # print("deleted_in_local: " + str(deleted_uuids_in_local_db))
             deleted_uuids_in_remote_db = self.get_deleted_account_uuids_decrypted_from_merge_database(
                 merge_database_filename)
-            # print("deleted_in_remote: " + str(deleted_uuids_in_remote_db))
             deleted_uuids_in_local_db_note_in_remote = []
             deleted_uuids_in_remote_db_not_in_local = []
             if deleted_uuids_in_local_db != deleted_uuids_in_remote_db:
@@ -2883,23 +2877,15 @@ class PDatabase:
                     set(deleted_uuids_in_local_db) - set(deleted_uuids_in_remote_db)
                 deleted_uuids_in_remote_db_not_in_local = \
                     set(deleted_uuids_in_remote_db) - set(deleted_uuids_in_local_db)
-            # print(colored("Step #0: Synchronizing deleted accounts in local and remote database...", "green"))
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Step #0: Synchronizing deleted accounts in local and remote database...")
             merge_history_detail_string_list.extend(
                 ["Step #0: Synchronizing deleted accounts in local and remote database..."])
             if len(deleted_uuids_in_remote_db_not_in_local) > 0:
                 print("Found " + colored(str(len(deleted_uuids_in_remote_db_not_in_local)), "red") +
                       " account(s) in remote db which are not in local deleted_account table...")
-                # append_merge_history_detail(self.database_filename, merge_history_uuid,
-                #                             "Found " + str(len(deleted_uuids_in_remote_db_not_in_local)) +
-                #                             " account(s) in remote db which are not in local deleted_account table...")
                 merge_history_detail_string_list.extend(["Found " + str(len(deleted_uuids_in_remote_db_not_in_local)) +
                                                          " account(s) in remote db which are not in local deleted_account table..."])
             for delete_uuid in deleted_uuids_in_remote_db_not_in_local:
                 print("Searching account with UUID " + delete_uuid + " in local database:")
-                # append_merge_history_detail(self.database_filename, merge_history_uuid,
-                #                             "Searching account with UUID " + delete_uuid + " in local database:")
                 merge_history_detail_string_list.extend(
                     ["Searching account with UUID " + delete_uuid + " in local database:"])
                 account_found = self.search_account_by_uuid(delete_uuid)
@@ -2913,16 +2899,9 @@ class PDatabase:
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
                 print("UUID " + delete_uuid + " added to local deleted_account table..")
-                # append_merge_history_detail(self.database_filename, merge_history_uuid,
-                #                             "UUID " + delete_uuid + " added to local deleted_account table.")
                 merge_history_detail_string_list.extend(
                     ["UUID " + delete_uuid + " added to local deleted_account table."])
             if len(deleted_uuids_in_local_db_note_in_remote) > 0:
-                # print("Deleting " + colored(str(len(deleted_uuids_in_local_db_note_in_remote)), "red") +
-                #       " account(s) in remote db which have been deleted in local db...")
-                # append_merge_history_detail(self.database_filename, merge_history_uuid,
-                #                             "Deleting " + str(len(deleted_uuids_in_local_db_note_in_remote)) +
-                #                             " account(s) in remote db which have been deleted in local db...")
                 merge_history_detail_string_list.extend(
                     ["Deleting " + str(len(deleted_uuids_in_local_db_note_in_remote)) +
                      " account(s) in remote db which have been deleted in local db..."])
@@ -2930,9 +2909,6 @@ class PDatabase:
                 cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-            # print(str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted.")
             merge_history_detail_string_list.extend(
                 [str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted."])
             database_connection.commit()
@@ -2965,58 +2941,24 @@ class PDatabase:
             #
             # Step #1 Sync new accounts from remote merge database into main database
             #
-            # print(colored("Step #1: Analyzing Origin Database - " + self.database_filename
-            #               + " " + get_database_name(self.database_filename), "green"))
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Step #1: Analyzing Origin Database - " + self.database_filename
-            #                             + " " + get_database_name(self.database_filename))
             merge_history_detail_string_list.extend(["Step #1: Analyzing Origin Database - " + self.database_filename
                                                      + " " + get_database_name(self.database_filename)])
-            # print("Dropping update_date trigger (origin database)...")
             cursor.execute(SQL_MERGE_DROP_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
-            # print("Updating " + colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local), "red")
-            #       + " local account(s) that have newer change dates in the remote database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Updating " + str(count_uuids_in_remote_with_newer_update_date_than_in_local)
-            #                             + " local account(s) that have newer change dates in the remote database...")
             merge_history_detail_string_list.extend(
                 ["Updating " + str(count_uuids_in_remote_with_newer_update_date_than_in_local)
                  + " local account(s) that have newer change dates in the remote database..."])
             cursor.execute(SQL_MERGE_DELETE_ACCOUNTS_IN_ORIGIN_THAT_EXIST_IN_REMOTE_WITH_NEWER_CHANGE_DATE)
-            # print("Fetching " + colored(str(count_uuids_in_remote_that_do_not_exist_in_local), "red")
-            #       + " new account(s) from the remote database into the origin database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Fetching " + str(count_uuids_in_remote_that_do_not_exist_in_local)
-            #                             + " new account(s) from the remote database into the origin database...")
             merge_history_detail_string_list.extend(["Fetching " + str(count_uuids_in_remote_that_do_not_exist_in_local)
                                                      + " new account(s) from the remote database into the origin database..."])
             cursor.execute(SQL_MERGE_INSERT_MISSING_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE)
 
-            # print("Fetching " + colored(str(count_history_uuids_in_remote_that_do_not_exist_in_local), "red")
-            #       + " new account history entries from the remote database into the origin database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Fetching " + str(count_history_uuids_in_remote_that_do_not_exist_in_local)
-            #                             + " new account history entries from the remote database into the origin "
-            #                               "database...")
             merge_history_detail_string_list.extend(
                 ["Fetching " + str(count_history_uuids_in_remote_that_do_not_exist_in_local)
                  + " new account history entries from the remote database into the origin "
                    "database..."])
             cursor.execute(SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE)
 
-            # print("Re-Creating update_date trigger (origin database)...")
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
-            # print("Origin database is now up to date (" +
-            #       colored(str(count_uuids_in_remote_with_newer_update_date_than_in_local +
-            #                   count_uuids_in_remote_that_do_not_exist_in_local +
-            #                   count_history_uuids_in_remote_that_do_not_exist_in_local +
-            #                   len(deleted_uuids_in_remote_db_not_in_local)), "red") + " changes have been done)")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Origin database is now up to date (" +
-            #                             str(count_uuids_in_remote_with_newer_update_date_than_in_local +
-            #                                 count_uuids_in_remote_that_do_not_exist_in_local +
-            #                                 count_history_uuids_in_remote_that_do_not_exist_in_local +
-            #                                 len(deleted_uuids_in_remote_db_not_in_local)) + " changes have been done)")
             merge_history_detail_string_list.extend(["Origin database is now up to date (" +
                                                      str(count_uuids_in_remote_with_newer_update_date_than_in_local +
                                                          count_uuids_in_remote_that_do_not_exist_in_local +
@@ -3031,39 +2973,18 @@ class PDatabase:
             #
             # Step #2 Sync new accounts from main database into remote database
             #
-            # print(colored("Step #2: Analyzing Remote Database - " + merge_database_filename
-            #               + " " + get_database_name(merge_database_filename), "green"))
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Step #2: Analyzing Remote Database - " + merge_database_filename
-            #                             + " " + get_database_name(merge_database_filename))
             merge_history_detail_string_list.extend(["Step #2: Analyzing Remote Database - " + merge_database_filename
                                                      + " " + get_database_name(merge_database_filename)])
             # print("Dropping update_date trigger (remote database)...")
             cursor.execute(SQL_MERGE_DROP_REMOTE_ACCOUNT_CHANGE_DATE_TRIGGER)
-            # print("Updating " + colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote), "red")
-            #       + " remote account(s) that have newer change dates in the origin database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Updating " + str(count_uuids_in_local_with_newer_update_date_than_in_remote)
-            #                             + " remote account(s) that have newer change dates in the origin database...")
             merge_history_detail_string_list.extend(
                 ["Updating " + str(count_uuids_in_local_with_newer_update_date_than_in_remote)
                  + " remote account(s) that have newer change dates in the origin database..."])
             cursor.execute(SQL_MERGE_DELETE_ACCOUNTS_IN_REMOTE_THAT_EXIST_IN_ORIGIN_WITH_NEWER_CHANGE_DATE)
-            # print("Pushing " + colored(str(count_uuids_in_local_that_do_not_exist_in_remote), "red")
-            #       + " new account(s) from the origin database into the remote database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Pushing " + str(count_uuids_in_local_that_do_not_exist_in_remote)
-            #                             + " new account(s) from the origin database into the remote database...")
             merge_history_detail_string_list.extend(["Pushing " + str(count_uuids_in_local_that_do_not_exist_in_remote)
                                                      + " new account(s) from the origin database into the remote database..."])
             cursor.execute(SQL_MERGE_INSERT_MISSING_UUIDS_FROM_ORIGIN_INTO_REMOTE_DATABASE)
 
-            # print("Pushing " + colored(str(count_history_uuids_in_local_that_do_not_exist_in_remote), "red")
-            #       + " new account history entries from the origin database into the remote database...")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Pushing " + str(count_history_uuids_in_local_that_do_not_exist_in_remote)
-            #                             + " new account history entries from the origin database into the remote "
-            #                               "database...")
             merge_history_detail_string_list.extend(
                 ["Pushing " + str(count_history_uuids_in_local_that_do_not_exist_in_remote)
                  + " new account history entries from the origin database into the remote "
@@ -3077,18 +2998,6 @@ class PDatabase:
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
             cursor.execute("update merge_database.configuration set value = datetime(CURRENT_TIMESTAMP, 'localtime')" +
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
-            # print("Remote database is now up to date (" +
-            #       colored(str(count_uuids_in_local_with_newer_update_date_than_in_remote +
-            #                   count_uuids_in_local_that_do_not_exist_in_remote +
-            #                   count_history_uuids_in_local_that_do_not_exist_in_remote +
-            #                   len(deleted_uuids_in_local_db_note_in_remote)), "red") + " changes have been done)")
-            # append_merge_history_detail(self.database_filename, merge_history_uuid,
-            #                             "Remote database is now up to date (" +
-            #                             str(count_uuids_in_local_with_newer_update_date_than_in_remote +
-            #                                 count_uuids_in_local_that_do_not_exist_in_remote +
-            #                                 count_history_uuids_in_local_that_do_not_exist_in_remote +
-            #                                 len(deleted_uuids_in_local_db_note_in_remote)) + "changes have "
-            #                                                                                  "been done)")
             merge_history_detail_string_list.extend(["Remote database is now up to date (" +
                                                      str(count_uuids_in_local_with_newer_update_date_than_in_remote +
                                                          count_uuids_in_local_that_do_not_exist_in_remote +
@@ -3219,20 +3128,14 @@ class PDatabase:
             return
 
         bar = progressbar.ProgressBar(maxval=4)
-        # bar.start()
         if not connector.exists(self.get_database_filename_without_path()):
-            # print()
             if not self._create_initial_connector_database_interactive(TEMP_MERGE_DATABASE_FILENAME):
                 return
             bar.start()
-            # print("Merging local database into initial remote database...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Merging local database into initial remote database...")
             return_code = self._merge_database(TEMP_MERGE_DATABASE_FILENAME, merge_history_uuid)
             bar.update(1)
-            # print("Uploading initial database: '" +
-            #       TEMP_MERGE_DATABASE_FILENAME + "' as '" +
-            #       self.get_database_filename_without_path() + "' to connector...")
             append_merge_history_detail(self.database_filename, merge_history_uuid,
                                         "Uploading initial database: '" +
                                         TEMP_MERGE_DATABASE_FILENAME + "' as '" +
