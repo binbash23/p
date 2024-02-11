@@ -811,13 +811,13 @@ def append_merge_history(merge_history_uuid: str,
     database_connection = None
     try:
         if return_code == "0":
-            return_code = "0 - No changes"
+            return_code = "No changes"
         elif return_code == "1":
-            return_code = "1 - Changes in local database"
+            return_code = "Changes in local database"
         elif return_code == "2":
-            return_code = "2 - Changes in remote database"
+            return_code = "Changes in remote database"
         elif return_code == "3":
-            return_code = "3 - Changes in local and remote database"
+            return_code = "Changes in local and remote database"
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
         execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
