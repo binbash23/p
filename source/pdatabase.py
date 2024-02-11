@@ -698,7 +698,6 @@ def set_database_name(database_filename, new_database_name: str):
                                                new_database_name)
 
 
-
 def print_merge_history(database_filename, merge_history_uuid=None) -> int:
     database_connection = None
     try:
@@ -1073,7 +1072,7 @@ def get_account_history_count(database_filename: str, account_uuid: str) -> int:
     return count
 
 
-def get_account_count(database_filename: str, also_count_invalidated_accounts: bool = True)-> int:
+def get_account_count(database_filename: str, also_count_invalidated_accounts: bool = True) -> int:
     count = 0
     database_connection = None
     try:
@@ -2103,7 +2102,7 @@ class PDatabase:
             database_connection.close()
         return account_array
 
-    def search_account_by_uuid(self, search_uuid) -> bool:
+    def search_account_by_uuid(self, search_uuid, silent: bool = False) -> bool:
         database_connection = None
         try:
             database_connection = sqlite3.connect(self.database_filename)
@@ -2115,7 +2114,8 @@ class PDatabase:
             sqlresult = cursor.execute(sqlstring)
             row = sqlresult.fetchone()
             if row is None:
-                print("UUID " + search_uuid + " not found.")
+                if not silent:
+                    print("UUID " + search_uuid + " not found.")
                 return False
             print()
             account = Account(uuid=row[0],
@@ -2870,10 +2870,10 @@ class PDatabase:
             deleted_uuids_in_local_db = self.get_deleted_account_uuids_decrypted()
             deleted_uuids_in_remote_db = self.get_deleted_account_uuids_decrypted_from_merge_database(
                 merge_database_filename)
-            deleted_uuids_in_local_db_note_in_remote = []
+            deleted_uuids_in_local_db_not_in_remote = []
             deleted_uuids_in_remote_db_not_in_local = []
             if deleted_uuids_in_local_db != deleted_uuids_in_remote_db:
-                deleted_uuids_in_local_db_note_in_remote = \
+                deleted_uuids_in_local_db_not_in_remote = \
                     set(deleted_uuids_in_local_db) - set(deleted_uuids_in_remote_db)
                 deleted_uuids_in_remote_db_not_in_local = \
                     set(deleted_uuids_in_remote_db) - set(deleted_uuids_in_local_db)
@@ -2885,10 +2885,10 @@ class PDatabase:
                 merge_history_detail_string_list.extend(["Found " + str(len(deleted_uuids_in_remote_db_not_in_local)) +
                                                          " account(s) in remote db which are not in local deleted_account table..."])
             for delete_uuid in deleted_uuids_in_remote_db_not_in_local:
-                print("Searching account with UUID " + delete_uuid + " in local database:")
+                # print("Searching account with UUID " + delete_uuid + " in local database:")
                 merge_history_detail_string_list.extend(
                     ["Searching account with UUID " + delete_uuid + " in local database:"])
-                account_found = self.search_account_by_uuid(delete_uuid)
+                account_found = self.search_account_by_uuid(delete_uuid, silent=True)
                 if account_found:
                     answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
                     if answer != "y" and answer != "":
@@ -2898,19 +2898,19 @@ class PDatabase:
                     print("Account deleted.")
                 cursor.execute("insert into deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
-                print("UUID " + delete_uuid + " added to local deleted_account table..")
+                # print("UUID " + delete_uuid + " added to local deleted_account table")
                 merge_history_detail_string_list.extend(
-                    ["UUID " + delete_uuid + " added to local deleted_account table."])
-            if len(deleted_uuids_in_local_db_note_in_remote) > 0:
+                    ["UUID " + delete_uuid + " added to local deleted_account table"])
+            if len(deleted_uuids_in_local_db_not_in_remote) > 0:
                 merge_history_detail_string_list.extend(
-                    ["Deleting " + str(len(deleted_uuids_in_local_db_note_in_remote)) +
+                    ["Deleting " + str(len(deleted_uuids_in_local_db_not_in_remote)) +
                      " account(s) in remote db which have been deleted in local db..."])
-            for delete_uuid in deleted_uuids_in_local_db_note_in_remote:
+            for delete_uuid in deleted_uuids_in_local_db_not_in_remote:
                 cursor.execute("delete from merge_database.account where uuid = '" + delete_uuid + "'")
                 cursor.execute("insert into merge_database.deleted_account (uuid) values ('" +
                                self.encrypt_string_if_password_is_present(delete_uuid) + "')")
             merge_history_detail_string_list.extend(
-                [str(len(deleted_uuids_in_local_db_note_in_remote)) + " Account(s) deleted."])
+                [str(len(deleted_uuids_in_local_db_not_in_remote)) + " Account(s) deleted."])
             database_connection.commit()
 
             #
@@ -2959,11 +2959,14 @@ class PDatabase:
             cursor.execute(SQL_MERGE_INSERT_MISSING_HISTORY_UUIDS_FROM_REMOTE_INTO_ORIGIN_DATABASE)
 
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
+
+            total_changes_in_local_db = (count_uuids_in_remote_with_newer_update_date_than_in_local +
+                                          count_uuids_in_remote_that_do_not_exist_in_local +
+                                          count_history_uuids_in_remote_that_do_not_exist_in_local +
+                                          len(deleted_uuids_in_remote_db_not_in_local))
             merge_history_detail_string_list.extend(["Origin database is now up to date (" +
-                                                     str(count_uuids_in_remote_with_newer_update_date_than_in_local +
-                                                         count_uuids_in_remote_that_do_not_exist_in_local +
-                                                         count_history_uuids_in_remote_that_do_not_exist_in_local +
-                                                         len(deleted_uuids_in_remote_db_not_in_local)) + " changes have been done)"])
+                                                     str(total_changes_in_local_db) + " changes have been done)"])
+
             # remember that there were changes in local db for return code:
             return_code = 0
             if count_uuids_in_remote_with_newer_update_date_than_in_local + \
@@ -2998,19 +3001,42 @@ class PDatabase:
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
             cursor.execute("update merge_database.configuration set value = datetime(CURRENT_TIMESTAMP, 'localtime')" +
                            " where attribute = ?", [CONFIGURATION_TABLE_ATTRIBUTE_LAST_MERGE_DATE])
+
+            total_changes_in_remote_db = (count_uuids_in_local_with_newer_update_date_than_in_remote +
+                                          count_uuids_in_local_that_do_not_exist_in_remote +
+                                          count_history_uuids_in_local_that_do_not_exist_in_remote +
+                                          len(deleted_uuids_in_local_db_not_in_remote))
             merge_history_detail_string_list.extend(["Remote database is now up to date (" +
-                                                     str(count_uuids_in_local_with_newer_update_date_than_in_remote +
-                                                         count_uuids_in_local_that_do_not_exist_in_remote +
-                                                         count_history_uuids_in_local_that_do_not_exist_in_remote +
-                                                         len(deleted_uuids_in_local_db_note_in_remote)) + " changes have "
-                                                                                                          "been done)"])
+                                                     str(total_changes_in_remote_db) + " changes have been done)"])
+
+            merge_history_detail_string_list.extend(["< MERGE SUMMARY >"])
+            merge_history_detail_string_list.extend(["Local  - Deleted accounts            : " +
+                                                     str(len(deleted_uuids_in_remote_db_not_in_local))])
+            merge_history_detail_string_list.extend(["Local  - Inserted accounts           : " +
+                                                     str(count_uuids_in_remote_that_do_not_exist_in_local)])
+            merge_history_detail_string_list.extend(["Local  - Inserted accounts histories : " +
+                                                     str(count_history_uuids_in_remote_that_do_not_exist_in_local)])
+            merge_history_detail_string_list.extend(["Local  - Changed accounts            : " +
+                                                     str(count_uuids_in_remote_with_newer_update_date_than_in_local)])
+
+            merge_history_detail_string_list.extend(["Remote - Deleted accounts            : " +
+                                                     str(len(deleted_uuids_in_local_db_not_in_remote))])
+            merge_history_detail_string_list.extend(["Remote - Inserted accounts           : " +
+                                                     str(count_uuids_in_local_that_do_not_exist_in_remote)])
+            merge_history_detail_string_list.extend(["Remote - Inserted accounts histories : " +
+                                                     str(count_history_uuids_in_local_that_do_not_exist_in_remote)])
+            merge_history_detail_string_list.extend(["Remote - Changed accounts            : " +
+                                                     str(count_uuids_in_local_with_newer_update_date_than_in_remote)])
+            merge_history_detail_string_list.extend(["Total changes                        : " +
+                                                     str(total_changes_in_local_db + total_changes_in_remote_db)])
+
             # Finally commit it
             database_connection.commit()
             # remember that there were changes in remote db for return code
             # (and also check for deleted accs in remote db):
             if (
                     count_uuids_in_local_with_newer_update_date_than_in_remote + count_uuids_in_local_that_do_not_exist_in_remote > 0) or (
-                    len(deleted_uuids_in_local_db_note_in_remote) > 0):
+                    len(deleted_uuids_in_local_db_not_in_remote) > 0):
                 return_code += 2
         except Exception:
             raise
