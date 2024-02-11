@@ -659,6 +659,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             except KeyboardInterrupt:
                 print()
                 continue
+            except EOFError:
+                print()
+                user_input_list = ["exit"]
             except TimeoutOccurred:
                 pass
 
