@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-/home/melvin/.local/bin/pyinstaller p.py --onefile
+/home/melvin/.local/bin/pyinstaller p.py --onefile --bootloader-ignore-signals --log-level=WARN
 
 cp dist/p ../dist/linux/p
 

@@ -1991,7 +1991,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             # print("Your current directory is: " + os.getcwd())
             # print("cwd->" + os.getcwd())
             # print("exec_dir->" + os.path.dirname(sys.argv[0]))
-            os.chdir(os.path.dirname(sys.argv[0]))
+            exec_dir = os.path.dirname(sys.argv[0])
+            if exec_dir != "":
+                os.chdir(exec_dir)
             # print("cwd new->" + os.getcwd())
             try:
                 input("Press enter to start or strg-c to cancel...")
