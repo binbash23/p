@@ -1954,8 +1954,12 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
         if shell_command.command == "updatep":
             print("Starting update process.")
-            print("Please make sure that you are in the directory where the p binary is located.")
-            print("Your current directory is: " + os.getcwd())
+            # print("Please make sure that you are in the directory where the p binary is located.")
+            # print("Your current directory is: " + os.getcwd())
+            # print("cwd->" + os.getcwd())
+            # print("exec_dir->" + os.path.dirname(sys.argv[0]))
+            os.chdir(os.path.dirname(sys.argv[0]))
+            # print("cwd new->" + os.getcwd())
             try:
                 input("Press enter to start or strg-c to cancel...")
             except KeyboardInterrupt:
