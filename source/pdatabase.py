@@ -1934,6 +1934,8 @@ class PDatabase:
         uuids = self.get_deleted_account_uuids_decrypted_since(last_merge_date)
         for current_uuid in uuids:
             print(current_uuid)
+        if len(uuids) > 0:
+            print()
         print(str(len(uuids)) + " account(s) deleted")
         change_count += len(uuids)
         print()
@@ -3010,24 +3012,26 @@ class PDatabase:
                                                      str(total_changes_in_remote_db) + " changes have been done)"])
 
             merge_history_detail_string_list.extend(["< MERGE SUMMARY >"])
-            merge_history_detail_string_list.extend(["Local  - Deleted accounts            : " +
+
+            merge_history_detail_string_list.extend(["Remote - Deleted account uuids  : " +
+                                                     str(len(deleted_uuids_in_local_db_not_in_remote))])
+            merge_history_detail_string_list.extend(["Remote - New accounts           : " +
+                                                     str(count_uuids_in_local_that_do_not_exist_in_remote)])
+            merge_history_detail_string_list.extend(["Remote - New account histories  : " +
+                                                     str(count_history_uuids_in_local_that_do_not_exist_in_remote)])
+            merge_history_detail_string_list.extend(["Remote - Changed accounts       : " +
+                                                     str(count_uuids_in_local_with_newer_update_date_than_in_remote)])
+
+            merge_history_detail_string_list.extend(["Local  - Deleted account uuids  : " +
                                                      str(len(deleted_uuids_in_remote_db_not_in_local))])
-            merge_history_detail_string_list.extend(["Local  - Inserted accounts           : " +
+            merge_history_detail_string_list.extend(["Local  - New accounts           : " +
                                                      str(count_uuids_in_remote_that_do_not_exist_in_local)])
-            merge_history_detail_string_list.extend(["Local  - Inserted accounts histories : " +
+            merge_history_detail_string_list.extend(["Local  - New account histories  : " +
                                                      str(count_history_uuids_in_remote_that_do_not_exist_in_local)])
-            merge_history_detail_string_list.extend(["Local  - Changed accounts            : " +
+            merge_history_detail_string_list.extend(["Local  - Changed accounts       : " +
                                                      str(count_uuids_in_remote_with_newer_update_date_than_in_local)])
 
-            merge_history_detail_string_list.extend(["Remote - Deleted accounts            : " +
-                                                     str(len(deleted_uuids_in_local_db_not_in_remote))])
-            merge_history_detail_string_list.extend(["Remote - Inserted accounts           : " +
-                                                     str(count_uuids_in_local_that_do_not_exist_in_remote)])
-            merge_history_detail_string_list.extend(["Remote - Inserted accounts histories : " +
-                                                     str(count_history_uuids_in_local_that_do_not_exist_in_remote)])
-            merge_history_detail_string_list.extend(["Remote - Changed accounts            : " +
-                                                     str(count_uuids_in_local_with_newer_update_date_than_in_remote)])
-            merge_history_detail_string_list.extend(["Total changes                        : " +
+            merge_history_detail_string_list.extend(["Total changes                   : " +
                                                      str(total_changes_in_local_db + total_changes_in_remote_db)])
 
             # Finally commit it
