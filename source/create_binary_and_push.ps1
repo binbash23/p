@@ -1,4 +1,4 @@
-pyinstaller .\p.py --onefile --bootloader-ignore-signals --log-level=WARN
+pyinstaller p.py --onefile --bootloader-ignore-signals --log-level=WARN
 
 cp dist\p.exe ..\dist\windows\p.exe
 
