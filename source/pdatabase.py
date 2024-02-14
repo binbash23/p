@@ -2725,7 +2725,8 @@ class PDatabase:
                 encrypted_value = self.encrypt_string_if_password_is_present(random_string)
             else:
                 print(colored("Creating an UNENCRYPTED database without any password!", 'red'))
-                print(colored("You can encrypt the database later with the -c option.", "red"))
+                time.sleep(3)
+                # print(colored("You can encrypt the database later with the -c option.", "red"))
                 encrypted_value = CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED
             cursor.execute(sqlstring, ("DATABASE_PASSWORD_TEST", encrypted_value))
             # add creation date of database
@@ -3274,7 +3275,8 @@ def is_valid_database_password(_database_filename: str, _database_password_bytes
             print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
             return False
         if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password_bytes == b"":
-            print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
+            # print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
+            # time.sleep(3)
             return True
         else:
             if _database_password_bytes == b"":

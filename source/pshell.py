@@ -852,8 +852,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
-            # if not account_uuid:
-            #     continue
             try:
                 connector = connector_manager.get_dropbox_connector(p_database, account_uuid)
                 connector_manager.change_database_password_from_connector(p_database, connector)
@@ -1333,11 +1331,18 @@ def start_pshell(p_database: pdatabase.PDatabase):
             new_p_database = None
             if os.path.exists(new_database_filename):
                 try:
+                    try_no = 1
                     new_database_password = pwinput.pwinput("Enter database password: ")
                     while not pdatabase.is_valid_database_password(new_database_filename,
-                                                                   new_database_password.encode("UTF-8")):
+                                                                   new_database_password.encode("UTF-8"))\
+                            and try_no < 3:
+                        try_no += 1
                         print(colored("Error: Password is wrong.", "red"))
                         new_database_password = pwinput.pwinput("Enter database password: ")
+                    if not pdatabase.is_valid_database_password(new_database_filename,
+                                                                   new_database_password.encode("UTF-8")):
+                        print(colored("Error: Password is wrong.", "red"))
+                        continue
                 except KeyboardInterrupt:
                     print()
                     continue
@@ -1361,6 +1366,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
             if not new_p_database:
                 new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
+
             start_pshell(new_p_database)
             input("Press enter to exit.")
             sys.exit()
