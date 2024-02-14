@@ -7,6 +7,8 @@
 import optparse
 from optparse import OptionGroup
 
+import pwinput
+
 from dropbox_connector import *
 from pdatabase import *
 from pshell import *
@@ -16,7 +18,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.11"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.14"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -49,8 +51,8 @@ def add(p_database: PDatabase, account_name=""):
         account.loginname = input("Loginname     : ")
         if p_database.shadow_passwords:
             while True:
-                password1 = getpass.getpass("Password      : ")
-                password2 = getpass.getpass("Confirm       : ")
+                password1 = pwinput.pwinput("Password      : ")
+                password2 = pwinput.pwinput("Confirm       : ")
                 if (password1 == password2) or (password1 is None and password2 is None):
                     account.password = password1
                     break
@@ -105,8 +107,8 @@ def edit(p_database: PDatabase, edit_uuid: str):
             change_shadowed_password = input("Do you want to change the password (y/[n]) : ")
             if change_shadowed_password == "y":
                 while True:
-                    password1 = getpass.getpass("New password    : ")
-                    password2 = getpass.getpass("Confirm         : ")
+                    password1 = pwinput.pwinput("New password    : ")
+                    password2 = pwinput.pwinput("Confirm         : ")
                     if (password1 == password2) or (password1 is None and password2 is None):
                         new_password = password1
                         break
@@ -361,7 +363,12 @@ def main():
                     print("Logical database name     : [empty]")
                 else:
                     print("Logical database name     : " + current_database_name)
-                database_password = getpass.getpass("Enter database password   : ")
+
+                database_password = pwinput.pwinput("Enter database password   : ")
+                while not is_valid_database_password(database_filename, database_password.encode("UTF-8")):
+                    print("Error: Password is wrong.")
+                    database_password = pwinput.pwinput("Enter database password   : ")
+
             except KeyboardInterrupt:
                 print()
                 return
@@ -372,8 +379,8 @@ def main():
             print("> If you do not want to encrypt the database, leave the password empty.")
             print()
             try:
-                database_password = getpass.getpass("Enter database password   : ")
-                database_password_confirm = getpass.getpass("Confirm database password : ")
+                database_password = pwinput.pwinput("Enter database password   : ")
+                database_password_confirm = pwinput.pwinput("Confirm database password : ")
                 print("If you want you can set an optional logical database name now.")
                 database_logical_name = input("Enter a database name     : ")
             except KeyboardInterrupt:
@@ -383,6 +390,7 @@ def main():
                 print(colored("Error: Passwords do not match.", "red"))
                 input("Press enter to exit.")
                 sys.exit(1)
+
     if database_password is None:
         print(colored("Database password is not set! Enter password on command line or use -p or -E option.", "red"))
         input("Press enter to exit.")

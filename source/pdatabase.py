@@ -6,18 +6,17 @@
 import base64
 import binascii
 import datetime
-# import logging
 import os
 import os.path
 import sqlite3
 import time
 import uuid
-from getpass import getpass
 from re import IGNORECASE
 from re import finditer
 
 import colorama
 import progressbar
+import pwinput
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
@@ -1244,13 +1243,13 @@ def _print_found_n_results(n_results: int):
 
 
 def read_confirmed_database_password_from_user() -> str:
-    new_password = getpass("Enter new database password   : ")
-    new_password_confirm = getpass("Confirm new database password : ")
+    new_password = pwinput.pwinput("Enter new database password   : ")
+    new_password_confirm = pwinput.pwinput("Confirm new database password : ")
     while new_password != new_password_confirm:
         # logging.error("Passwords do not match.")
         print("Passwords do not match.")
-        new_password = getpass("Enter new database password   : ")
-        new_password_confirm = getpass("Confirm new database password : ")
+        new_password = pwinput.pwinput("Enter new database password   : ")
+        new_password_confirm = pwinput.pwinput("Confirm new database password : ")
     return new_password
 
 

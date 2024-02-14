@@ -5,13 +5,13 @@
 # Password/account database for managing all your accounts
 #
 import datetime
-import getpass
 import os
 import sys
 import textwrap
 import time
 import uuid
 
+import pwinput
 import pyperclip3
 import wget
 from inputimeout import inputimeout, TimeoutOccurred
@@ -359,7 +359,8 @@ SHELL_COMMANDS = [
                  "downloads etc."),
     ShellCommand("showinvalidated", "showinvalidated [on|off]", "Show invalidated accounts. If empty " +
                  "the current status will be shown."),
-    ShellCommand("showallmergehistorydetails", "showallmergehistorydetails", "Show the history details of all database merge events."),
+    ShellCommand("showallmergehistorydetails", "showallmergehistorydetails",
+                 "Show the history details of all database merge events."),
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
@@ -689,7 +690,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
                 print(prompt_string)
                 try:
-                    user_input_pass = getpass.getpass("Enter database password: ")
+                    user_input_pass = pwinput.pwinput("Enter database password: ")
                 except KeyboardInterrupt:
                     print()
                     return
@@ -704,7 +705,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
                         manual_locked = False
                     user_input = ""
                     break
-
 
         # Create shell_command object from user_input
         shell_command = expand_string_2_shell_command(user_input)
@@ -1330,35 +1330,37 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(shell_command.synopsis)
                 continue
             new_database_filename = shell_command.arguments[1].strip()
+            new_p_database = None
             if os.path.exists(new_database_filename):
                 try:
-                    new_database_password = getpass.getpass("Enter database password: ")
+                    new_database_password = pwinput.pwinput("Enter database password: ")
+                    while not pdatabase.is_valid_database_password(new_database_filename,
+                                                                   new_database_password.encode("UTF-8")):
+                        print(colored("Error: Password is wrong.", "red"))
+                        new_database_password = pwinput.pwinput("Enter database password: ")
                 except KeyboardInterrupt:
                     print()
                     continue
             else:
                 print(colored("Database does not exist.", "red"))
                 try:
-                    new_database_password = getpass.getpass("Enter password for new database    : ")
-                    new_database_password_confirm = getpass.getpass("Confirm password for new database  : ")
+                    new_database_password = pwinput.pwinput("Enter password for new database    : ")
+                    new_database_password_confirm = pwinput.pwinput("Confirm password for new database  : ")
+                    while new_database_password != new_database_password_confirm:
+                        print(colored("Error: Passwords do not match.", "red"))
+                        new_database_password = pwinput.pwinput("Enter password for new database    : ")
+                        new_database_password_confirm = pwinput.pwinput("Confirm password for new database  : ")
+                    try:
+                        new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
+                    except Exception as e:
+                        print("Error: " + str(e))
+                        continue
                 except KeyboardInterrupt:
                     print()
                     continue
-                if new_database_password != new_database_password_confirm:
-                    print(colored("Error: Passwords do not match.", "red"))
-                    input("Press enter to exit.")
-                    sys.exit(1)
-            if new_database_password is None:
-                print(colored("Database password is not set! Enter password on command line or use -p or -E option.",
-                              "red"))
-                input("Press enter to exit.")
-                sys.exit(1)
 
-            # Now try to open/create the database:
-            if not pdatabase.is_valid_database_password(new_database_filename, new_database_password.encode("UTF-8")):
-                print("Error opening database: Password is wrong.")
-                continue
-            new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
+            if not new_p_database:
+                new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
             start_pshell(new_p_database)
             input("Press enter to exit.")
             sys.exit()
@@ -1896,8 +1898,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 if pdatabase.get_attribute_value_from_configuration_table(
                         p_database.database_filename,
                         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHADOW_PASSWORDS) == 'True':
-                    new_password = getpass.getpass("New password     : ")
-                    new_password_confirm = getpass.getpass("Confirm password : ")
+                    new_password = pwinput.pwinput("New password     : ")
+                    new_password_confirm = pwinput.pwinput("Confirm password : ")
                     if (new_password != new_password_confirm) \
                             or (new_password is None and new_password_confirm is None):
                         print("Error: Passwords do not match.")

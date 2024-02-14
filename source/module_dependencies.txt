@@ -16,7 +16,7 @@ pip install cryptography
 pip install progressbar
 pip install dropbox
 pip install inputimeout
-pip install getpass
+pip install pwinput
 pip install webdav4
 pip install pysftp
 pip install wget
