@@ -679,7 +679,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         time_diff = now_date - last_activity_date
         if manual_locked or (int(pshell_max_idle_minutes_timeout) != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
-            while True:
+            try_no = 0
+            while try_no < 3:
+                try_no += 1
                 if manual_locked:
                     clear_console()
                     print(p.VERSION)
