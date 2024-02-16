@@ -1699,6 +1699,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 p_database.database_filename,
                 pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_DATABASE_NAME,
                 new_database_name)
+            print("Database name set to: " + new_databasename)
             continue
 
         if shell_command.command == "setdropboxaccountuuid":
