@@ -21,6 +21,10 @@ pip install webdav4
 pip install pysftp
 pip install wget
 
+or in one line:
+
+pip install termcolor colorama pyperclip3 cryptography progressbar dropbox inputimeout pwinput webdav4 pysftp wget
+
 If you use Ubuntu/Linux and want to use the clipboard features:
 ---------------------------------------------------------------
 
