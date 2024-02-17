@@ -613,6 +613,30 @@ def clear_console():
         os.system('clear')
 
 
+def is_valid_alias(new_alias: str) -> bool:
+    """
+    Checks if an alias which is to be created now is usefull and not dangerous for further operation.
+    It is not allowed to create an alias which coveres the alias command itself.
+    Args:
+        new_alias:
+
+    Returns:
+        True if new_alias is a string that can be used as an alias
+
+    """
+    list_of_numbers_from_0_to_99 = []
+    r = range(100)
+    for n in r:
+        if new_alias == str(n):
+            return True
+
+    # if not expand_string_2_shell_command(new_alias):
+    #     return True
+    # if expand_string_2_shell_command(new_alias) == "alias":
+    #     return False
+    return False
+
+
 def start_pshell(p_database: pdatabase.PDatabase):
     global pshell_max_idle_minutes_timeout
     global pshell_max_history_size
@@ -787,7 +811,20 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # and proceed parsing the command...:
 
         # check if the command is an alias. then the alias must be replaced with the stored command(s)
-        if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
+        # alias_command = p_database.get_alias_command_decrypted(shell_command.command)
+        # if alias_command != "":
+        #     user_input_list.extend(alias_command.split(PSHELL_COMMAND_DELIMITER))
+        #     continue
+
+        # if shell_command.command in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
+        #     # Read stored command(s) from database and populate user_input_list
+        #     alias_command = p_database.get_alias_command_decrypted(shell_command.command)
+        #     if alias_command == "":
+        #         print("Error: Alias " + shell_command.command + " is not set")
+        #     else:
+        #         user_input_list.extend(alias_command.split(PSHELL_COMMAND_DELIMITER))
+        #     continue
+        if is_valid_alias(shell_command.command):
             # Read stored command(s) from database and populate user_input_list
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             if alias_command == "":
@@ -831,9 +868,16 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:  # 2 arguments
                 alias_argument_list = shell_command.arguments[1].split(maxsplit=1)
                 current_alias = alias_argument_list[0]
-                if current_alias not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
-                    print("Error: Only aliases from 0..9 are allowed.")
+                # if not is_valid_alias(current_alias):
+                #     print("Error: The alias '" + current_alias + "' is not allowed.")
+                #     continue
+                # if current_alias not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
+                #     print("Error: Only aliases from 0..9 are allowed.")
+                #     continue
+                if not is_valid_alias(current_alias):
+                    print("Error: Only aliases from 0..99 are allowed.")
                     continue
+
                 else:
                     if len(alias_argument_list) == 1:
                         command = p_database.get_alias_command_decrypted(current_alias)
