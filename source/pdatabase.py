@@ -1524,7 +1524,9 @@ class PDatabase:
                 # print("->" + str(row))
                 current_alias = row[0]
                 current_command = self.decrypt_string_if_password_is_present(row[1])
-                alias_commands.append(" [" + current_alias + "] - " + current_command)
+                number_prefix = (" [" + current_alias + "]").ljust(6)
+                alias_commands.append(number_prefix + "- " + current_command)
+                # alias_commands.append(" [" + current_alias + "] - " + current_command)
         except Exception:
             print("Error getting all alias from database.")
             return alias_commands
@@ -1539,9 +1541,6 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = "select command from alias where alias = " + alias
-            # sqlstring = "select command from alias where alias = ?"
-            # print("alias_>" + alias)
-            # sqlresult = cursor.execute(sqlstring, (alias))
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchone()
             if result is None:
@@ -1550,8 +1549,8 @@ class PDatabase:
             decrypted_command = self.decrypt_string_if_password_is_present(encrypted_command)
             alias_command = decrypted_command
         except Exception as e:
-            print("Error getting alias from database.")
-            print(str(e))
+            print("Error getting alias from database: " + str(e))
+            # print(str(e))
             return alias_command
         finally:
             database_connection.close()
