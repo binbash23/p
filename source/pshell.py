@@ -102,17 +102,6 @@ SHELL_COMMANDS = [
     ShellCommand("/", "/ <SEARCHSTRING>", "/ is an alias to the search command. For " +
                  "more info see the help for the search command. It is also possible to search like this: " +
                  "'/SEARCHSTRING' (without the space after the slash)."),
-    ShellCommand("0", "0", "Alias. This alias can be set with the alias command."),
-    ShellCommand("1", "1", "Alias. This alias can be set with the alias command."),
-    ShellCommand("2", "2", "Alias. This alias can be set with the alias command."),
-    ShellCommand("3", "3", "Alias. This alias can be set with the alias command."),
-    ShellCommand("4", "4", "Alias. This alias can be set with the alias command."),
-    ShellCommand("5", "5", "Alias. This alias can be set with the alias command."),
-    ShellCommand("6", "6", "Alias. This alias can be set with the alias command."),
-    ShellCommand("7", "7", "Alias. This alias can be set with the alias command."),
-    ShellCommand("8", "8", "Alias. This alias can be set with the alias command."),
-    ShellCommand("9", "9", "Alias. This alias can be set with the alias command."),
-    ShellCommand("10", "10", "Alias. This alias can be set with the alias command."),
     ShellCommand("add", "add [ACCOUNT_NAME]", "Add a new account.\nExample:\n" +
                  "UUID            : 51689195-4977-4c06-a19f-ac70823fbd4a \n-> The UUID is an unique identifier for the account\n" +
                  "Name            : user@gmx.de GMX EMail Account        \n-> Choose a name for the new account\n" +
@@ -387,6 +376,8 @@ SHELL_COMMANDS = [
                  "then creation, change and invalidation timestamps will be shown."),
     ShellCommand("version", "version", "Show program version info.")
 ]
+for n in range(100):
+    SHELL_COMMANDS.extend([ShellCommand(str(n), str(n), "Alias. This alias can be set with the alias command.")])
 SHELL_COMMANDS.sort()
 
 DEFAULT_PSHELL_MAX_IDLE_TIMEOUT_MIN = 30
@@ -624,7 +615,7 @@ def is_valid_alias(new_alias: str) -> bool:
         True if new_alias is a string that can be used as an alias
 
     """
-    list_of_numbers_from_0_to_99 = []
+    # list_of_numbers_from_0_to_99 = []
     r = range(100)
     for n in r:
         if new_alias == str(n):
@@ -807,6 +798,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             else:
                 current_shell_history_entry = ShellHistoryEntry(user_input=last_user_input)
         # else:
+
         p_database.add_shell_history_entry(current_shell_history_entry, pshell_max_history_size)
         # and proceed parsing the command...:
 
@@ -826,12 +818,15 @@ def start_pshell(p_database: pdatabase.PDatabase):
         #     continue
         if is_valid_alias(shell_command.command):
             # Read stored command(s) from database and populate user_input_list
+            # print("->read alias from db")
             alias_command = p_database.get_alias_command_decrypted(shell_command.command)
             if alias_command == "":
                 print("Error: Alias " + shell_command.command + " is not set")
             else:
                 user_input_list.extend(alias_command.split(PSHELL_COMMAND_DELIMITER))
             continue
+        # else:
+            # print("->not valid")
 
         # continue with command processing
 
