@@ -110,8 +110,8 @@ SHELL_COMMANDS = [
                  "Password        : 123secret                            \n-> The password for the account\n" +
                  "Type            : Emailaccount                         \n-> Choose a name for the type of this account\n" +
                  "Connectortype   :                                      \n-> If this is a connector account, put ssh/dropbox/file or webdav here\n"),
-    ShellCommand("alias", "alias [0-9 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
-                 "programmable command. Possible alias names are the numbers from 0 to 9.\nTo set the " +
+    ShellCommand("alias", "alias [0-99 [<COMMAND>]]", "Show or set an alias. An alias is like a " +
+                 "programmable command. Possible alias names are the numbers from 0 to 99.\nTo set the " +
                  "command 'sc email' on the alias 1 you have to type: 'alias 1 sc Email'. After that you" +
                  " can run the command by just typing '1'.\nTo see all aliases just type 'alias'. If you want " +
                  "to see the command programmed on the alias 3 for example, type 'alias 3'.\nTo unset an alias, " +
@@ -1161,6 +1161,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Saving git formatted full documentation to: " + p.GIT_FULL_DOCUMENTATION_FILENAME)
             lines = ""
             for sc in SHELL_COMMANDS:
+                # Skip aliases
+                if is_valid_alias(sc.command):
+                    continue
                 lines = lines + sc.generate_git_manual()
             try:
                 doc_file = open(p.GIT_FULL_DOCUMENTATION_FILENAME, "w")
@@ -1199,9 +1202,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print(colored(" Complete list of p commands:", "green"))
                 print()
                 for shell_command in SHELL_COMMANDS:
-                    # print(str(shell_command))
+                    # Skip aliases
+                    if is_valid_alias(shell_command.command):
+                        continue
                     print(colored(shell_command.synopsis, "green"))
-                    # print()
             else:
                 help_command = expand_string_2_shell_command(shell_command.arguments[1])
                 if help_command is not None:
