@@ -832,7 +832,9 @@ def append_merge_history(merge_history_uuid: str,
                     "create_date DESC LIMIT " + str(max_merge_history_size) + ") "
         cursor = database_connection.cursor()
         cursor.execute(sqlstring)
-        # database_connection.commit()
+        sqlstring = "DELETE FROM merge_history_detail WHERE merge_history_uuid NOT IN (SELECT uuid FROM merge_history)"
+        cursor = database_connection.cursor()
+        cursor.execute(sqlstring)
 
         database_connection.commit()
     except Exception as e:
