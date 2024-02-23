@@ -715,6 +715,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     print("Error: password is wrong.")
                     if try_no >= 3:
                         "Exiting pshell."
+                        time.sleep(2)
                         sys.exit(1)
                     time.sleep(2)
                 else:
