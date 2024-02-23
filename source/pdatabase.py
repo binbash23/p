@@ -805,7 +805,8 @@ def append_merge_history(merge_history_uuid: str,
                          database_name_remote: str = "",
                          connector: str = "",
                          connector_type: str = "",
-                         return_code: str = ""):
+                         return_code: str = "",
+                         max_merge_history_size: int = 20):
     database_connection = None
     try:
         if return_code == "0":
@@ -818,12 +819,20 @@ def append_merge_history(merge_history_uuid: str,
             return_code = "Changes in local and remote database"
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
+        set_database_pragmas_to_secure_mode(database_connection, cursor)
         execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sqlstring = ("insert into merge_history (uuid, execution_date, database_name_local, database_uuid_local, " +
                      "database_name_remote, database_uuid_remote, connector, connector_type, return_code) " +
                      "values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
         cursor.execute(sqlstring, (merge_history_uuid, execution_date, database_name_local, database_uuid_local,
                                    database_name_remote, database_uuid_remote, connector, connector_type, return_code))
+
+        # Delete entries to restrict size of history tables
+        sqlstring = "DELETE FROM merge_history WHERE uuid NOT IN (SELECT uuid FROM merge_history ORDER BY " + \
+                    "create_date DESC LIMIT " + str(max_merge_history_size) + ") "
+        cursor = database_connection.cursor()
+        cursor.execute(sqlstring)
+        # database_connection.commit()
 
         database_connection.commit()
     except Exception as e:
@@ -1253,6 +1262,28 @@ def read_confirmed_database_password_from_user() -> str:
     return new_password
 
 
+def set_database_pragmas_to_secure_mode(database_connection, cursor):
+    # logging.debug("Setting PRAGMA journal_mode = WAL for database.")
+    # cursor.execute("PRAGMA journal_mode = WAL")
+    cursor.execute("PRAGMA journal_mode = DELETE")
+    database_connection.commit()
+    # logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
+    # cursor.execute("PRAGMA auto_vacuum = FULL")
+    # database_connection.commit()
+    # Set secure_delete_mode
+    # logging.debug("Setting PRAGMA secure_delete = True for database.")
+    cursor.execute("PRAGMA secure_delete = True")
+    database_connection.commit()
+
+
+def print_current_secure_delete_mode(cursor):
+    sqlstring = "pragma secure_delete"
+    try:
+        print("SQLite secure_delete mode: " + str(cursor.execute(sqlstring).fetchall()[0][0]))
+    except Exception:
+        raise
+
+
 class PDatabase:
     # DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
     # DEFAULT_ITERATION_COUNT = 500000
@@ -1331,13 +1362,6 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    def print_current_secure_delete_mode(self, cursor):
-        sqlstring = "pragma secure_delete"
-        try:
-            print("SQLite secure_delete mode: " + str(cursor.execute(sqlstring).fetchall()[0][0]))
-        except Exception:
-            raise
-
     def duplicate_account(self, copy_uuid):
         if copy_uuid is None or copy_uuid == "":
             print("Error copying account: UUID is empty.")
@@ -1385,8 +1409,8 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
+            print_current_secure_delete_mode(cursor)
             sqlstring = "delete from account where uuid = '" + str(delete_uuid) + "'"
             cursor.execute(sqlstring)
             # remember deleted uuid in deleted_account table for merge information
@@ -1427,7 +1451,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "select count(*) FROM account_history h WHERE h.account_uuid not in (select uuid from account)"
             sqlresult = cursor.execute(sqlstring)
             # database_connection.commit()
@@ -1446,7 +1470,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "delete FROM account_history WHERE account_uuid not in (select uuid from account)"
             cursor.execute(sqlstring)
             database_connection.commit()
@@ -1461,7 +1485,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "delete from shell_history"
             cursor.execute(sqlstring)
             database_connection.commit()
@@ -1475,7 +1499,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             sqlstring = "delete from merge_history"
             cursor.execute(sqlstring)
             sqlstring = "delete from merge_history_detail"
@@ -1585,6 +1609,7 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             execution_date_encrypted = \
                 self.encrypt_string_if_password_is_present(str(shell_history_entry.execution_date))
             command_encrypted = self.encrypt_string_if_password_is_present(shell_history_entry.user_input)
@@ -2239,8 +2264,8 @@ class PDatabase:
         try:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
+            print_current_secure_delete_mode(cursor)
 
             # 1. First backup old version of the account
             if get_attribute_value_from_configuration_table(self.database_filename,
@@ -2642,36 +2667,6 @@ class PDatabase:
         finally:
             database_connection.close()
 
-    # def is_valid_database_password(self, _database_filename: str, _database_password: str) -> bool:
-    #     try:
-    #         value = get_attribute_value_from_configuration_table(_database_filename,
-    #                                                              CONFIGURATION_TABLE_ATTRIBUTE_PASSWORD_TEST)
-    #         if value is None or value == "":
-    #             print("Could not fetch a valid DATABASE_PASSWORD_TEST value from configuration table.")
-    #             return False
-    #         if value == CONFIGURATION_TABLE_PASSWORD_TEST_VALUE_WHEN_NOT_ENCRYPTED and _database_password == "":
-    #             print(colored("Warning: The account database " + _database_filename + " is NOT encrypted.", "red"))
-    #             return True
-    #         else:
-    #             if _database_password == "":
-    #                 return False
-    #             else:
-    #                 self.decrypt_string_if_password_is_present_with_custom_password(value, _database_password)
-    #     except (InvalidSignature, InvalidToken) as e:
-    #         return False
-    #     return True
-
-    def set_database_pragmas_to_secure_mode(self, database_connection, cursor):
-        # logging.debug("Setting PRAGMA journal_mode = WAL for database.")
-        cursor.execute("PRAGMA journal_mode = WAL")
-        database_connection.commit()
-        # logging.debug("Setting PRAGMA auto_vacuum = FULL for database.")
-        cursor.execute("PRAGMA auto_vacuum = FULL")
-        database_connection.commit()
-        # Set secure_delete_mode
-        # logging.debug("Setting PRAGMA secure_delete = True for database.")
-        cursor.execute("PRAGMA secure_delete = True")
-        database_connection.commit()
 
     def create_and_initialize_database(self, initial_database_name: str = None):
         database_connection = None
@@ -2679,7 +2674,7 @@ class PDatabase:
             database_connection = None
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             # Set undo mode
             # logging.debug("Setting PRAGMA journal_mode = WAL for database.")
             # cursor.execute("PRAGMA journal_mode = WAL")
@@ -2709,7 +2704,7 @@ class PDatabase:
             print("Creating new p database: \"" + self.database_filename + "\" ...")
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
             cursor.executescript(SQL_CREATE_DATABASE_SCHEMA)
             new_database_uuid = uuid.uuid4()
             print("Creating new UUID for database: " + str(new_database_uuid))
@@ -3055,8 +3050,8 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = SQL_DELETE_ALL_FROM_ACCOUNT_HISTORY
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
+            print_current_secure_delete_mode(cursor)
             cursor.execute(sqlstring)
             database_connection.commit()
         except Exception:
@@ -3070,8 +3065,8 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             sqlstring = SQL_DELETE_ALL_FROM_DELETED_ACCOUNT
-            self.set_database_pragmas_to_secure_mode(database_connection, cursor)
-            self.print_current_secure_delete_mode(cursor)
+            set_database_pragmas_to_secure_mode(database_connection, cursor)
+            print_current_secure_delete_mode(cursor)
             cursor.execute(sqlstring)
             database_connection.commit()
         except Exception:
