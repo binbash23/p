@@ -206,6 +206,7 @@ SHELL_COMMANDS = [
                  "the different database files."),
     ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
                  "random password with LENGTH characters. When LENGTH is not set, a 10 char password will be generated."),
+    ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
@@ -1177,7 +1178,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error generating git documentation: " + str(e))
             continue
 
-        if shell_command.command == "generatepassword":
+        if shell_command.command == "generatepassword" or shell_command.command == "gp":
             password_length = 10
             if len(shell_command.arguments) == 2:
                 try:
