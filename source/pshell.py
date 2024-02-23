@@ -1430,7 +1430,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 user_input_list.extend(["quit"])
                 exit_is_pending = True
                 continue
-            # clear_console()
+            clear_console()
             break
 
         if shell_command.command == "generatenewdatabaseuuid":
