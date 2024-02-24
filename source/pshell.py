@@ -224,6 +224,10 @@ SHELL_COMMANDS = [
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
+    ShellCommand("m2d", "m2d [<UUID>|<SERACHSTRING>]", "Alias for merge2dropbox."),
+    ShellCommand("m2f", "m2f [<UUID>|<SERACHSTRING>]", "Alias for merge2file."),
+    ShellCommand("m2s", "m2s [<UUID>|<SERACHSTRING>]", "Alias for merge2ssh."),
+    ShellCommand("m2w", "m2w [<UUID>|<SERACHSTRING>]", "Alias for merge2webdav."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
@@ -1318,7 +1322,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error setting pshell max history size: " + str(e))
             continue
 
-        if shell_command.command == "merge2dropbox":
+        if shell_command.command == "merge2dropbox" or shell_command.command == "m2d":
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
@@ -1329,7 +1333,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: " + str(e))
             continue
 
-        if shell_command.command == "merge2file":
+        if shell_command.command == "merge2file" or shell_command.command == "m2f":
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
@@ -1340,7 +1344,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: " + str(e))
             continue
 
-        if shell_command.command == "merge2ssh":
+        if shell_command.command == "merge2ssh" or shell_command.command == "m2s":
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
@@ -1351,7 +1355,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("Error: " + str(e))
             continue
 
-        if shell_command.command == "merge2webdav":
+        if shell_command.command == "merge2webdav" or shell_command.command == "m2w":
             account_uuid = None
             if len(shell_command.arguments) > 1:
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
