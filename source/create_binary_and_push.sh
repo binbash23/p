@@ -5,9 +5,9 @@ set -e
 
 cp dist/p ../dist/linux/p
 
-#git add ../dist/linux/p -f
+git add ../dist/linux/p -f
 
-#git status
+git status
 
-#git commit -m "New linux binary"
+git commit -m "linux binary"
 
