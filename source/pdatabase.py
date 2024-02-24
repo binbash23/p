@@ -3,11 +3,13 @@
 #
 # Copyright
 #
+import csv
 import base64
 import binascii
 import datetime
 import os
 import os.path
+import pathlib
 import sqlite3
 import time
 import uuid
@@ -2015,7 +2017,7 @@ class PDatabase:
             database_connection.close()
         _print_found_n_results(results_found)
 
-    def get_accounts_decrypted(self, search_string: str) -> []:
+    def get_accounts_decrypted(self, search_string: str = "") -> [Account]:
         account_array = []
         database_connection = None
         try:
@@ -3240,6 +3242,31 @@ class PDatabase:
         set_attribute_value_in_configuration_table(self.database_filename,
                                                    CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND,
                                                    execute_on_stop_command_encrypted)
+
+    def export_database_to_csv(self, csv_filename: str = "p_export.csv", search_string: str = ""):
+        accounts = self.get_accounts_decrypted(search_string=search_string)
+        accounts_to_export = len(accounts)
+
+        if accounts_to_export == 0:
+            print("No accounts found to export.")
+            return
+
+        with open(csv_filename, 'w') as file:
+            csv_writer = csv.writer(file, delimiter=";", quoting=1)
+            header_row = ["UUID", "Name", "URL", "Loginname", "Password", "Type", "Connectortype"]
+            csv_writer.writerow(header_row)
+
+            for account in accounts:
+                csv_writer.writerow(
+                    [account.uuid,
+                     account.name,
+                     account.url,
+                     account.loginname,
+                     account.password,
+                     account.type,
+                     account.connector_type]
+                )
+        print(str(accounts_to_export) + " account(s) exported to file: " + os.path.abspath(csv_filename))
 
 
 def is_valid_database_password(_database_filename: str, _database_password_bytes: bytes) -> bool:

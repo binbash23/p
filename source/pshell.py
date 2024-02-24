@@ -198,6 +198,8 @@ SHELL_COMMANDS = [
     ShellCommand("!", "! <COMMAND>", "Execute COMMAND in native shell. It is also possible " +
                  "to execute the command without the space before the slash like '!dir' for example."),
     ShellCommand("exit", "exit", "Quit pshell."),
+    ShellCommand("export2csv", "export2csv [<SEARCHSTRING>]", "Export accounts to an unencrypted csv " +
+                 "file. If you add a <SEARCHSTRING> you can restrict the accounts to export to accounts that match this string."),
     ShellCommand("forgetaccounthistory", "forgetaccounthistory", "Delete all older/archived versions of accounts."),
     ShellCommand("generategithelp", "generategithelp", "Generate full help documentation in git style"),
     ShellCommand("generatenewdatabaseuuid", "generatenewdatabaseuuid", "Generate a " +
@@ -1447,6 +1449,24 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 continue
             clear_console()
             break
+
+        if shell_command.command == "export2csv":
+            print(colored("WARNING: You are going to export accounts to an unencrypted csv file!!!", "red"))
+            print(colored("Are you really sure you want to do this?", "red"))
+            answer = input(colored("Enter \"yes\" to continue: ", "red"))
+            if answer != "yes":
+                continue
+
+            password = pwinput.pwinput(colored("Please enter master password: ", "red"))
+            if not pdatabase.is_valid_database_password(p_database.database_filename, bytes(password, "UTF-8")):
+                print(colored("Password is wrong."), "red")
+                continue
+
+            search_string = ""
+            if len(shell_command.arguments) > 1:
+                search_string = shell_command.arguments[1].strip()
+            p_database.export_database_to_csv(search_string=search_string)
+            continue
 
         if shell_command.command == "generatenewdatabaseuuid":
             new_database_uuid = str(uuid.uuid4())
