@@ -347,6 +347,7 @@ SHELL_COMMANDS = [
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
                  " account with <UUID>. If you do not know the uuid, use a <SEARCHSTRING> and you can choose from " +
                  "possible existing accounts which include your <SEARCHSTRING>."),
+    ShellCommand("sco", "sco", "ALias for showconfig"),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showlinks", "showlinks", "Show links to github homepage, binary " +
@@ -358,6 +359,7 @@ SHELL_COMMANDS = [
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
+    ShellCommand("slm", "slm", "Alias for showlatestmerge."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
@@ -1431,7 +1433,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
 
             start_pshell(new_p_database)
-            input("Press enter to exit.")
+            # input("Press enter to exit.")
             sys.exit()
 
         if shell_command.command == "quit" or shell_command.command == "exit":
@@ -1818,30 +1820,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
             p_database.search_account_history(uuid_to_show_accounthistory_from)
             continue
 
-        if shell_command.command == "showconfig":
+        if shell_command.command == "showconfig" or shell_command.command == "sco":
             show_config(p_database)
-            # print("PShell timeout                      : ", end="")
-            # print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
-            # print("PShell max history size             : ", end="")
-            # print_slow.print_slow(colored(str(pshell_max_history_size), "green"))
-            # print("Show invalidated accounts           : ", end="")
-            # print_slow.print_slow(colored(str(p_database.show_invalidated_accounts), "green"))
-            # print("Shadow passwords                    : ", end="")
-            # print_slow.print_slow(colored(str(p_database.shadow_passwords), "green"))
-            # print("Show accounts verbose               : ", end="")
-            # print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
-            # print("Show unmerged changes warning       : ", end="")
-            # print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
-            # print("Show status on startup              : ", end="")
-            # print_slow.print_slow(colored(str(show_status_on_startup), "green"))
-            # print("Track account history               : ", end="")
-            # print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
-            # print("Slow print enabled                  : ", end="")
-            # print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
-            # print("Execute on start                    : ", end="")
-            # print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
-            # print("Execute on stop                     : ", end="")
-            # print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
             continue
 
         if shell_command.command == "showlinks":
@@ -1862,10 +1842,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "showinvalidated":
-            # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                # print("on/off is missing.")
-                # print(shell_command)
                 current_status = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
                     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_PSHELL_SHOW_INVALIDATED_ACCOUNTS)
@@ -1894,7 +1871,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "showmergehistory":
             pdatabase.print_merge_history(p_database.database_filename)
 
-        if shell_command.command == "showlatestmerge":
+        if shell_command.command == "showlatestmerge" or shell_command.command == "slm":
             pdatabase.print_latest_merge_history_detail(p_database.database_filename)
 
         if shell_command.command == "showmergedetail":
@@ -1931,7 +1908,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "showunmergedwarning":
-            # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
                 print("Status: " + str(show_unmerged_changes_warning_on_startup))
                 continue
@@ -1992,8 +1968,8 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print("COMMAND is missing.")
                 print(shell_command.synopsis)
                 continue
-            # print("->" + shell_command.arguments[1])
-            print("Executing sql command: <" + shell_command.arguments[1] + ">")
+            print("Executing sql command:")
+            print(shell_command.arguments[1])
             try:
                 p_database.execute_sql(shell_command.arguments[1])
             except Exception as e:
@@ -2022,7 +1998,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
                 print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
-                # print(shell_command)
                 continue
             try:
                 pshell_max_idle_minutes_timeout = int(shell_command.arguments[1])
@@ -2035,10 +2010,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
             continue
 
         if shell_command.command == "trackaccounthistory":
-            # print(shell_command.arguments)
             if len(shell_command.arguments) == 1:
-                # print("on/off is missing.")
-                # print(shell_command)
                 current_status = pdatabase.get_attribute_value_from_configuration_table(
                     p_database.database_filename,
                     pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_TRACK_ACCOUNT_HISTORY)

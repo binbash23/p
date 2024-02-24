@@ -648,7 +648,7 @@ def is_attribute_in_configuration_table(_database_filename, _attribute_name):
     return True
 
 
-def get_attribute_value_from_configuration_table(_database_filename, _attribute_name):
+def get_attribute_value_from_configuration_table(_database_filename, _attribute_name) -> str:
     if _database_filename is None or _database_filename == "":
         raise ValueError("Database name must not be empty!")
     if _attribute_name is None or _attribute_name == "":
@@ -667,7 +667,7 @@ def get_attribute_value_from_configuration_table(_database_filename, _attribute_
         raise
     finally:
         database_connection.close()
-    return value
+    return str(value)
 
 
 def is_encrypted_database(database_filename):
