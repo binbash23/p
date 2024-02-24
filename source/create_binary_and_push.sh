@@ -12,3 +12,7 @@ git status
 
 git commit -m "linux binary"
 
+read -p "Press enter to git push..."
+
+git push
+
