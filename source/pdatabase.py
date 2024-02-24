@@ -849,15 +849,10 @@ def append_merge_history_detail(database_filename: str, merge_history_uuid: str,
         database_connection = sqlite3.connect(database_filename)
         cursor = database_connection.cursor()
 
-        # print("PRAGMA lock_status: " + str(cursor.execute("PRAGMA lock_status").fetchall()[0][0]))
-        # print("Writing: " + text)
-        # print("PRAGMA busy_timeout: " + str(cursor.execute("PRAGMA busy_timeout=10000").fetchall()[0][0]))
-
         execution_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
         sqlstring = ("insert into merge_history_detail (merge_history_uuid, execution_date, text) " +
                      "values (?, ?, ?)")
         cursor.execute(sqlstring, (merge_history_uuid, execution_date, text))
-        # print("---> executed: " + sqlstring + merge_history_uuid + execution_date + text)
         database_connection.commit()
     except Exception as e:
         print("Error writing merge history detail entry to database:\n" + text + "\n" + str(e))
@@ -1337,7 +1332,7 @@ class PDatabase:
             print(colored("If the password is lost, the password database can not be opened anymore!", 'red'))
             print(colored("To create a new database, remove the old one and start p again.", 'red'))
             time.sleep(3)
-            raise Exception("Database password is wrong.")
+            raise Exception("Database Password is wrong.")
 
     def set_default_values_in_configuration_table(self):
         if get_attribute_value_from_configuration_table(self.database_filename,
@@ -2628,16 +2623,6 @@ class PDatabase:
         else:
             return encrypted_text
 
-    # def decrypt_string_if_password_is_present_with_custom_password(self, encrypted_text: str, _database_password):
-    #     if encrypted_text == "" or encrypted_text is None:
-    #         return ""
-    #     if _database_password != "":
-    #         _fernet = create_fernet(self.salt, _database_password, self.iteration_count)
-    #         decrypted_string = _fernet.decrypt(bytes(encrypted_text, "UTF-8")).decode("UTF-8")
-    #         return decrypted_string
-    #     else:
-    #         return encrypted_text
-
     def add_account_and_encrypt(self, account: Account):
         account.name = self.encrypt_string_if_password_is_present(account.name)
         account.url = self.encrypt_string_if_password_is_present(account.url)
@@ -2668,7 +2653,6 @@ class PDatabase:
             raise
         finally:
             database_connection.close()
-
 
     def create_and_initialize_database(self, initial_database_name: str = None):
         database_connection = None
@@ -2787,11 +2771,6 @@ class PDatabase:
             database_connection.close()
         print()
         _print_found_n_results(results_found)
-
-    # def get_database_password_as_string(self) -> str:
-    #     if self.database_password == "":
-    #         return ""
-    #     return bytes(self.database_password).decode("UTF-8")
 
     def get_database_password_as_string(self) -> str:
         if self._database_password_bytes == b"":
@@ -2959,9 +2938,9 @@ class PDatabase:
             cursor.execute(SQL_MERGE_CREATE_LOCAL_ACCOUNT_CHANGE_DATE_TRIGGER)
 
             total_changes_in_local_db = (count_uuids_in_remote_with_newer_update_date_than_in_local +
-                                          count_uuids_in_remote_that_do_not_exist_in_local +
-                                          count_history_uuids_in_remote_that_do_not_exist_in_local +
-                                          len(deleted_uuids_in_remote_db_not_in_local))
+                                         count_uuids_in_remote_that_do_not_exist_in_local +
+                                         count_history_uuids_in_remote_that_do_not_exist_in_local +
+                                         len(deleted_uuids_in_remote_db_not_in_local))
             merge_history_detail_string_list.extend(["Origin database is now up to date (" +
                                                      str(total_changes_in_local_db) + " changes have been done)"])
 

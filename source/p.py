@@ -18,7 +18,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.24"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.25"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -369,15 +369,11 @@ def main():
                     try_no += 1
                     database_password = pwinput.pwinput("Enter database password   : ")
                     if is_valid_database_password(database_filename, database_password.encode("UTF-8")):
+                        print("Access granted.")
                         break
-                    print("Error: Password is wrong.")
+                    print("Access denied: Password is wrong.")
                 if not is_valid_database_password(database_filename, database_password.encode("UTF-8")):
                     sys.exit(1)
-
-                # database_password = pwinput.pwinput("Enter database password   : ")
-                # while not is_valid_database_password(database_filename, database_password.encode("UTF-8")):
-                #     print("Error: Password is wrong.")
-                #     database_password = pwinput.pwinput("Enter database password   : ")
 
             except KeyboardInterrupt:
                 print()
@@ -396,22 +392,11 @@ def main():
                         break
                     print(colored("Error: Passwords do not match.", "red"))
 
-                # database_password = pwinput.pwinput("Enter database password   : ")
-                # database_password_confirm = pwinput.pwinput("Confirm database password : ")
-                # while database_password != database_password_confirm:
-                #     print(colored("Error: Passwords do not match.", "red"))
-                #     database_password = pwinput.pwinput("Enter database password   : ")
-                #     database_password_confirm = pwinput.pwinput("Confirm database password : ")
-
                 print("If you want you can set an optional logical database name now.")
                 database_logical_name = input("Enter a database name     : ")
             except KeyboardInterrupt:
                 print()
                 return
-            # if database_password != database_password_confirm:
-            #     print(colored("Error: Passwords do not match.", "red"))
-            #     input("Press enter to exit.")
-            #     sys.exit(1)
 
     if database_password is None:
         print(colored("Database password is not set! Enter password on command line or use -p or -E option.", "red"))

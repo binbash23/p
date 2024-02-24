@@ -636,7 +636,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
     global show_status_on_startup
     load_pshell_configuration(p_database)
 
-    clear_console()
+    # clear_console()
     user_input = ""
     user_input_list = []
     exit_is_pending = False
@@ -695,33 +695,43 @@ def start_pshell(p_database: pdatabase.PDatabase):
         time_diff = now_date - last_activity_date
         if manual_locked or (int(pshell_max_idle_minutes_timeout) != 0 and
                              int(time_diff.total_seconds() / 60) >= int(pshell_max_idle_minutes_timeout)):
+            clear_console()
+            print(p.VERSION)
+
             try_no = 0
-            while try_no < 3:
+            while True:
                 try_no += 1
+
+                # Print correct info:
                 if manual_locked:
-                    clear_console()
-                    print(p.VERSION)
+                    # clear_console()
+                    # print(p.VERSION)
                     print(colored("PShell locked.", "red"))
                 else:
-                    clear_console()
-                    print(p.VERSION)
+                    # clear_console()
+                    # print(p.VERSION)
                     print(colored("PShell locked (timeout " + str(pshell_max_idle_minutes_timeout) + " min)", "red"))
                 print(prompt_string)
+
+                # Read password from user:
                 try:
                     user_input_pass = pwinput.pwinput("Enter database password: ")
                 except KeyboardInterrupt:
                     print()
                     return
+
+                # Check password from user and the number of tries
                 if user_input_pass is None or user_input_pass != p_database.get_database_password_as_string():
-                    print("Error: password is wrong.")
+                    # Password is wrong
+                    print("Access denied: Password is wrong.")
                     if try_no >= 3:
                         "Exiting pshell."
                         time.sleep(2)
                         sys.exit(1)
-                    time.sleep(2)
+                    # time.sleep(1)
                 else:
                     # password is ok
-                    clear_console()
+                    # clear_console()
                     print(colored("PShell unlocked.", "green"))
                     if manual_locked:
                         manual_locked = False
@@ -731,10 +741,9 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # Create shell_command object from user_input
         shell_command = expand_string_2_shell_command(user_input)
 
-        # check for empty string
+        # check for empty command string
         if shell_command is None:
             if user_input == "":
-                # print("Empty command.")
                 pass
             else:
                 print("Unknown command '" + user_input + "'")
@@ -1387,11 +1396,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
                                                                    new_database_password.encode("UTF-8"))\
                             and try_no < 3:
                         try_no += 1
-                        print(colored("Error: Password is wrong.", "red"))
+                        print(colored("Access denied: Password is wrong.", "red"))
                         new_database_password = pwinput.pwinput("Enter database password: ")
                     if not pdatabase.is_valid_database_password(new_database_filename,
                                                                    new_database_password.encode("UTF-8")):
-                        print(colored("Error: Password is wrong.", "red"))
+                        print(colored("Access denied: Password is wrong.", "red"))
                         continue
                 except KeyboardInterrupt:
                     print()
@@ -2173,6 +2182,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
         # # Unknown command detected
         # print("Command ")
     print("Exiting pshell.")
+    time.sleep(2)
 
 
 def show_config(p_database: pdatabase):
