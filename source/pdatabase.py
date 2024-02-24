@@ -3,13 +3,12 @@
 #
 # Copyright
 #
-import csv
 import base64
 import binascii
+import csv
 import datetime
 import os
 import os.path
-import pathlib
 import sqlite3
 import time
 import uuid
@@ -2479,7 +2478,7 @@ class PDatabase:
             # results_found = 0
             for row in result:
                 results_found += 1
-                # get current account_history data (enrypted)
+                # get current account_history data (encrypted)
                 current_uuid = row[0]
                 current_account_uuid = row[1]
                 current_name = row[2]
