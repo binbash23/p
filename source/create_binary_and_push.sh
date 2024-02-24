@@ -1,13 +1,18 @@
 #!/bin/bash
 set -e
 
-/home/melvin/.local/bin/pyinstaller p.py --onefile --bootloader-ignore-signals --log-level=WARN
+#pyinstaller p.py --onefile --bootloader-ignore-signals --log-level=WARN --clean
+pyinstaller p.py --onefile --bootloader-ignore-signals --clean
 
 cp dist/p ../dist/linux/p
 
-#git add ../dist/linux/p -f
+git add ../dist/linux/p -f
 
-#git status
+git status
 
-#git commit -m "New linux binary"
+git commit -m "linux binary"
+
+read -p "Press enter to git push..."
+
+git push
 
