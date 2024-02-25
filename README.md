@@ -37,7 +37,7 @@ For Linux (x86), use the 'p' executeable:
 
 For Raspberry Pi's (arm), use the 'p' executeable:
 
-[p/dist/raspberry/p](https://github.com/binbash23/p/raw/master/dist/raspberry/p)
+[p/dist/arm64/p](https://github.com/binbash23/p/raw/master/dist/arm64/p)
 
 and for Windows (x86), use the 'p.exe' executeable: 
 
