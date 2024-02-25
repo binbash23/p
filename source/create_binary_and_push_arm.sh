@@ -23,3 +23,5 @@ read -p "Press enter to git push..."
 
 git push
 
+git status
+
