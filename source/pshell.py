@@ -99,6 +99,7 @@ class ShellCommand:
 
 
 SHELL_COMMANDS = [
+    # ShellCommand(".", ". <SEARCHSTRING>", "The dot is an alias for search."),
     ShellCommand("/", "/ <SEARCHSTRING>", "/ is an alias to the search command. For " +
                  "more info see the help for the search command. It is also possible to search like this: " +
                  "'/SEARCHSTRING' (without the space after the slash)."),
@@ -208,7 +209,7 @@ SHELL_COMMANDS = [
                  "the different database files."),
     ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
                  "random password with LENGTH characters. When LENGTH is not set, a 10 char password will be generated."),
-    ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword."),
+    ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword.\nUse 'help gp' for more info."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
@@ -226,10 +227,10 @@ SHELL_COMMANDS = [
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
-    ShellCommand("m2d", "m2d [<UUID>|<SERACHSTRING>]", "Alias for merge2dropbox."),
-    ShellCommand("m2f", "m2f [<UUID>|<SERACHSTRING>]", "Alias for merge2file."),
-    ShellCommand("m2s", "m2s [<UUID>|<SERACHSTRING>]", "Alias for merge2ssh."),
-    ShellCommand("m2w", "m2w [<UUID>|<SERACHSTRING>]", "Alias for merge2webdav."),
+    ShellCommand("m2d", "m2d [<UUID>|<SERACHSTRING>]", "Alias for merge2dropbox.\nUse 'help m2d' for more info."),
+    ShellCommand("m2f", "m2f [<UUID>|<SERACHSTRING>]", "Alias for merge2file.\nUse 'help m2f' for more info."),
+    ShellCommand("m2s", "m2s [<UUID>|<SERACHSTRING>]", "Alias for merge2ssh.\nUse 'help m2s' for more info."),
+    ShellCommand("m2w", "m2w [<UUID>|<SERACHSTRING>]", "Alias for merge2webdav.\nUse 'help msw' for more info."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
@@ -304,8 +305,9 @@ SHELL_COMMANDS = [
                  "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
-    ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp."),
-    ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help texts."),
+    ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp.\nUse 'help she' for more info."),
+    ShellCommand("shv", "shv <SEARCHSTRING>", "Alias for searchhelpverbose.\nUse 'help shv' for more info."),
+    ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help descriptions."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>|<SEARCHSTRING>",
@@ -337,7 +339,7 @@ SHELL_COMMANDS = [
                  " shadow passwords is on, the password will be read hidden so that none can gather it from " +
                  "your screen. If you do not no the <UUID>, use a <SEARCHSTRING> and you will be offered possible " +
                  "accounts the change the password for."),
-    ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts"),
+    ShellCommand("st", "st <SEARCHSTRING>", "Search for SEARCHSTRING in the type field of all accounts."),
     ShellCommand("setdatabasename", "setdatabasename <NAME>", "Set database to NAME. This is a logical name for " +
                  "the current database. To unset the database name, set it to '-'"),
     ShellCommand("setdropboxaccountuuid", "setdropboxaccountuuid <UUID>",
@@ -349,7 +351,7 @@ SHELL_COMMANDS = [
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
                  " account with <UUID>. If you do not know the uuid, use a <SEARCHSTRING> and you can choose from " +
                  "possible existing accounts which include your <SEARCHSTRING>."),
-    ShellCommand("sco", "sco", "ALias for showconfig"),
+    ShellCommand("sco", "sco", "Alias for showconfig.\nUse 'help sco' for more info."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showlinks", "showlinks", "Show links to github homepage, binary " +
@@ -361,7 +363,9 @@ SHELL_COMMANDS = [
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
-    ShellCommand("slm", "slm", "Alias for showlatestmerge."),
+    ShellCommand("slm", "slm", "Alias for showlatestmerge.\nUse 'help slm' for more info."),
+    ShellCommand("smh", "smh", "Alias for showmergehistory.\nUse 'help showmergehistory' for more info."),
+    ShellCommand("sam", "sam", "Alias for showallmergehistorydetails.\nUse 'help showallmergehistorydetails' for more info."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
@@ -1533,7 +1537,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 print()
             continue
 
-        if shell_command.command == "searchhelpverbose":
+        if shell_command.command == "searchhelpverbose" or shell_command.command == "shv":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
@@ -1885,10 +1889,10 @@ def start_pshell(p_database: pdatabase.PDatabase):
             print("Error: on or off expected.")
             continue
 
-        if shell_command.command == "showallmergehistorydetails":
+        if shell_command.command == "showallmergehistorydetails" or shell_command.command == "sam":
             pdatabase.print_all_merge_history_details(p_database.database_filename)
 
-        if shell_command.command == "showmergehistory":
+        if shell_command.command == "showmergehistory" or shell_command.command == "smh":
             pdatabase.print_merge_history(p_database.database_filename)
 
         if shell_command.command == "showlatestmerge" or shell_command.command == "slm":
