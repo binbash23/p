@@ -653,7 +653,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
     # clear_console()
     user_input = ""
     if arg_user_input_list is None:
-        user_input_list = [str]
+        user_input_list = []
     else:
         user_input_list = arg_user_input_list
 
