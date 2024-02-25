@@ -265,15 +265,12 @@ def main():
     parser.add_option("-I", "--search-uuid", action="store", dest="search_uuid", help="Search account by UUID")
     parser.add_option("-l", "--list", action="store_true", dest="list", default=False,
                       help="List all accounts")
-    # parser.add_option("-m", "--merge-last-known", action="store_true", dest="merge_last_known",
-    #                   help="Merge with last known remote database.")
-    # parser.add_option("-M", "--merge-database", action="store", dest="merge_database",
-    #                   help="Merge two databases and synchronize them. Both databases will be synchronized " +
-    #                        "to an equal state. Both passwords must be the same!")
     parser.add_option("-p", "--database-password", action="store", dest="database_password",
                       help="Set database password. If you want to use an empty password use -E")
     parser.add_option("-q", "--query", action="store_true", dest="query", default=False,
                       help="Query p. Start interactive p shell.")
+    parser.add_option("-Q", "--execute-query", action="store", dest="execute_query",
+                      help="Pass command(s) to the pshell and execute them. Separate multiple commands with a ';'.")
     parser.add_option("-r", "--revalidate", action="store", dest="revalidate_uuid",
                       help="Revalidate/activate account by UUID")
     parser.add_option("-s", "--search", action="store", dest="search_string",
@@ -286,13 +283,6 @@ def main():
                       help="Show p version info")
     parser.add_option("-x", "--show_invalidated", action="store_true", dest="show_invalidated", default=False,
                       help="Show also invalidated accounts (default=False)")
-    # parser.add_option("-y", "--set-dropbox-token-uuid", action="store", dest="dropbox_token_uuid",
-    #                   help="Set dropbox-access-token account uuid to sync your database into dropbox.")
-    # parser.add_option("-Y", "--merge-with-dropbox", action="store_true", dest="merge_with_dropbox", default=False,
-    #                   help="Merge your local database with dropbox.")
-    # parser.add_option("-z", "--set-dropbox-application-uuid", action="store", dest="dropbox_application_uuid",
-    #                   help="Set dropbox application account uuid. The username must be the application key and " +
-    #                        "the password the application secret.")
     parser.add_option("-Z", "--start-dropbox-configuration", action="store_true", dest="start_dropbox_configuration",
                       default=False, help="Start the dropbox configuration. You need the dropbox application key" +
                                           " and the dropbox application secret for this.")
@@ -320,6 +310,12 @@ def main():
         # Version is printed per default on startup
         # print(VERSION)
         sys.exit(0)
+
+    # Check if there are commands on the command line to be executed in the pshell
+    if options.execute_query:
+        _args_user_input_list = str(options.execute_query).strip().split(PSHELL_COMMAND_DELIMITER)
+    else:
+        _args_user_input_list = None
 
     # check if the users wants to start the dropbox configuration process
     if options.start_dropbox_configuration:
@@ -424,7 +420,7 @@ def main():
 
     # check if the interactive shell should be opened
     if options.query:
-        start_pshell(p_database)
+        start_pshell(p_database, _args_user_input_list)
         input("Press enter to exit.")
         sys.exit(0)
 
@@ -470,9 +466,9 @@ def main():
     # when there are no options but a search string, search for the string in database
     if len(sys.argv) == 2 and sys.argv[1] is not None:
         p_database.search_accounts(sys.argv[1])
+
     # start the interactive p shell mode
-    #    if len(sys.argv) == 1:
-    start_pshell(p_database)
+    start_pshell(p_database, _args_user_input_list)
 
 
 if __name__ == '__main__':

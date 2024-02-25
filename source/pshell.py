@@ -307,7 +307,8 @@ SHELL_COMMANDS = [
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
     ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp.\nUse 'help she' for more info."),
     ShellCommand("shv", "shv <SEARCHSTRING>", "Alias for searchhelpverbose.\nUse 'help shv' for more info."),
-    ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>", "Search for SEARCHSTRING in all help descriptions."),
+    ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>",
+                 "Search for SEARCHSTRING in all help descriptions."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>|<SEARCHSTRING>",
@@ -365,7 +366,8 @@ SHELL_COMMANDS = [
                  "Show the merge history detail for merge event with UUID."),
     ShellCommand("slm", "slm", "Alias for showlatestmerge.\nUse 'help slm' for more info."),
     ShellCommand("smh", "smh", "Alias for showmergehistory.\nUse 'help showmergehistory' for more info."),
-    ShellCommand("sam", "sam", "Alias for showallmergehistorydetails.\nUse 'help showallmergehistorydetails' for more info."),
+    ShellCommand("sam", "sam",
+                 "Alias for showallmergehistorydetails.\nUse 'help showallmergehistorydetails' for more info."),
     ShellCommand("showlatestmerge", "showlatestmerge", "Show the merge history detail for the latest merge event."),
     ShellCommand("showstatusonstartup", "showstatusonstartup [on|off]",
                  "Show status when pshell starts."),
@@ -641,7 +643,7 @@ def is_valid_alias(new_alias: str) -> bool:
     return False
 
 
-def start_pshell(p_database: pdatabase.PDatabase):
+def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = None):
     global pshell_max_idle_minutes_timeout
     global pshell_max_history_size
     global show_unmerged_changes_warning_on_startup
@@ -650,7 +652,11 @@ def start_pshell(p_database: pdatabase.PDatabase):
 
     # clear_console()
     user_input = ""
-    user_input_list = []
+    if arg_user_input_list is None:
+        user_input_list = [str]
+    else:
+        user_input_list = arg_user_input_list
+
     exit_is_pending = False
 
     execute_on_start_command = p_database.get_execute_on_start_command()
@@ -669,7 +675,6 @@ def start_pshell(p_database: pdatabase.PDatabase):
     manual_locked = False
     if pshell_max_history_size < 1:
         p_database.delete_all_shell_history_entries()
-    # shell_history_array = p_database.get_shell_history_entries_decrypted()
 
     while user_input != "quit":
         # while True:
@@ -852,7 +857,7 @@ def start_pshell(p_database: pdatabase.PDatabase):
                 user_input_list.extend(alias_command.split(PSHELL_COMMAND_DELIMITER))
             continue
         # else:
-            # print("->not valid")
+        # print("->not valid")
 
         # continue with command processing
 
@@ -1405,13 +1410,13 @@ def start_pshell(p_database: pdatabase.PDatabase):
                     try_no = 1
                     new_database_password = pwinput.pwinput("Enter database password: ")
                     while not pdatabase.is_valid_database_password(new_database_filename,
-                                                                   new_database_password.encode("UTF-8"))\
+                                                                   new_database_password.encode("UTF-8")) \
                             and try_no < 3:
                         try_no += 1
                         print(colored("Access denied: Password is wrong.", "red"))
                         new_database_password = pwinput.pwinput("Enter database password: ")
                     if not pdatabase.is_valid_database_password(new_database_filename,
-                                                                   new_database_password.encode("UTF-8")):
+                                                                new_database_password.encode("UTF-8")):
                         print(colored("Access denied: Password is wrong.", "red"))
                         continue
                 except KeyboardInterrupt:
