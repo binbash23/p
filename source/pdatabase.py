@@ -513,6 +513,8 @@ CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND = "EXECUTE_ON_STOP_COMMAND
 TEMP_MERGE_DATABASE_FILENAME = "temp_merge_database.db"
 DEFAULT_SALT = b"98uAS (H CQCH AISDUHU/ZASD/7zhdw7e-;568!"  # The salt for the encryption is static. This might become a problem?!
 DEFAULT_ITERATION_COUNT = 500000
+CSV_DEFAULT_EXPORT_FILENAME = "export.csv"
+CSV_DEFAULT_IMPORT_FILENAME = "import.csv"
 
 
 class ShellHistoryEntry:
@@ -2624,7 +2626,7 @@ class PDatabase:
         else:
             return encrypted_text
 
-    def add_account_and_encrypt(self, account: Account):
+    def add_account_and_encrypt(self, account: Account) -> bool:
         account.name = self.encrypt_string_if_password_is_present(account.name)
         account.url = self.encrypt_string_if_password_is_present(account.url)
         account.loginname = self.encrypt_string_if_password_is_present(account.loginname)
@@ -2649,11 +2651,13 @@ class PDatabase:
             database_connection.commit()
             print("New account added: [UUID " + str(account.uuid) + "]")
         except sqlite3.IntegrityError:
-            print("Error: UUID " + str(account.uuid) + " already exists in database!")
+            print("Error: UUID [" + str(account.uuid) + "] already exists in database!")
+            return False
         except Exception:
             raise
         finally:
             database_connection.close()
+        return True
 
     def create_and_initialize_database(self, initial_database_name: str = None):
         database_connection = None
@@ -3242,7 +3246,7 @@ class PDatabase:
                                                    CONFIGURATION_TABLE_ATTRIBUTE_EXECUTE_ON_STOP_COMMAND,
                                                    execute_on_stop_command_encrypted)
 
-    def export_database_to_csv(self, csv_filename: str = "p_export.csv", search_string: str = ""):
+    def export_accounts_to_csv(self, csv_filename: str = CSV_DEFAULT_EXPORT_FILENAME, search_string: str = ""):
         accounts = self.get_accounts_decrypted(search_string=search_string)
         accounts_to_export = len(accounts)
 
@@ -3250,8 +3254,8 @@ class PDatabase:
             print("No accounts found to export.")
             return
 
-        with open(csv_filename, 'w') as file:
-            csv_writer = csv.writer(file, delimiter=";", quoting=1)
+        with open(csv_filename, 'w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=";", quoting=1)
             header_row = ["UUID", "Name", "URL", "Loginname", "Password", "Type", "Connectortype"]
             csv_writer.writerow(header_row)
 
@@ -3266,6 +3270,40 @@ class PDatabase:
                      account.connector_type]
                 )
         print(str(accounts_to_export) + " account(s) exported to file: " + os.path.abspath(csv_filename))
+
+    def import_accounts_from_csv(self, csv_filename: str = CSV_DEFAULT_IMPORT_FILENAME):
+        with open(csv_filename, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=";", quoting=1)
+            row_number = 0
+            rows_inserted = 0
+            rows_not_inserted = 0
+            for row in csv_reader:
+                row_number += 1
+                # Skip header line
+                if row_number == 1:
+                    continue
+                print("Inserting account name : " + row[1])
+                _account = Account()
+                if row[0] == "":
+                    _account.uuid = str(uuid.uuid4())
+                else:
+                    _account.uuid = row[0]
+                _account.name = row[1]
+                _account.url = row[2]
+                _account.loginname = row[3]
+                _account.password = row[4]
+                _account.type = row[5]
+                _account.connector_type = row[6]
+                try:
+                    if self.add_account_and_encrypt(_account):
+                        rows_inserted += 1
+                    else:
+                        rows_not_inserted += 1
+                except Exception as e:
+                    print(str(e))
+                    rows_not_inserted += 1
+            print("Rows inserted     : " + str(rows_inserted))
+            print("Rows not inserted : " + str(rows_not_inserted))
 
 
 def is_valid_database_password(_database_filename: str, _database_password_bytes: bytes) -> bool:

@@ -7,8 +7,6 @@
 import optparse
 from optparse import OptionGroup
 
-import pwinput
-
 from dropbox_connector import *
 from pdatabase import *
 from pshell import *
@@ -18,7 +16,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.25"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.26"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"

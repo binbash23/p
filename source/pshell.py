@@ -216,6 +216,7 @@ SHELL_COMMANDS = [
     ShellCommand("history", "history [MAX_ENTRIES]", "Show history of all user inputs in the the pshell.\n" +
                  "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
+    ShellCommand("importcsv", "importcsv [<CSV_FILENAME>]", "Import a csv file with accounts. If <CSV_FILENAME> is not given, "),
     ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
                  "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
                  " to invalidate.\nIf you invalidate an account the account will be invisible in normal operation." +
@@ -1273,6 +1274,15 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("Idle time: " + idle_time_str)
             continue
 
+        if shell_command.command == "importcsv":
+            try:
+                if len(shell_command.arguments) == 1:
+                    p_database.import_accounts_from_csv()
+                else:
+                    p_database.import_accounts_from_csv(shell_command.arguments[1].strip())
+            except Exception as e:
+                print(str(e))
+
         if shell_command.command == "invalidate":
             if len(shell_command.arguments) == 1:
                 print("SEARCHSTRING or UUID is missing.")
@@ -1474,7 +1484,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             search_string = ""
             if len(shell_command.arguments) > 1:
                 search_string = shell_command.arguments[1].strip()
-            p_database.export_database_to_csv(search_string=search_string)
+            p_database.export_accounts_to_csv(search_string=search_string)
             continue
 
         if shell_command.command == "generatenewdatabaseuuid":
