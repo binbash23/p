@@ -11,18 +11,11 @@ password safes that exist and you write the password safe by yourself.
 This is what I do here. The code is short, simple and I did NOT invent
 a new proprietary encryption function. I use open source cryptography
 which has been tested and which is hopefully bugfree :)
-For the people who want to know, I use this for the symetric encryption method:
-```
-_hash = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=500000)
-```
-and the salt is static but long and random (see source code)
+For the people who want to know, I use then PBKDF2HMAC algorithm for the symetric encryption.
 
-Try it out. 
+Beware: This tool is close to the system and therefore a kind of a hackerz choice. I consciously wrote the program so that you have full control over the database and the system (i.e. the "sql" command).
 
-The program code can be understood by everyone who codes at least a 
-little it.
-
-keep coding,
+Keep coding,
 Jens
 
 ### Use the wiki
