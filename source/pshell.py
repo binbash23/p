@@ -1839,6 +1839,10 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                     "True")
                 continue
             if shell_command.arguments[1] == "off":
+                password = pwinput.pwinput(colored("Please enter master password: ", "red"))
+                if not pdatabase.is_valid_database_password(p_database.database_filename, bytes(password, "UTF-8")):
+                    print(colored("Password is wrong."), "red")
+                    continue
                 p_database.shadow_passwords = False
                 pdatabase.set_attribute_value_in_configuration_table(
                     p_database.database_filename,
