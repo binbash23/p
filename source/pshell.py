@@ -216,7 +216,8 @@ SHELL_COMMANDS = [
     ShellCommand("history", "history [MAX_ENTRIES]", "Show history of all user inputs in the the pshell.\n" +
                  "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed."),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
-    ShellCommand("importcsv", "importcsv [<CSV_FILENAME>]", "Import a csv file with accounts. If <CSV_FILENAME> is not given, "),
+    ShellCommand("importcsv", "importcsv [<CSV_FILENAME>]", "Import a csv file with accounts. " +
+                 "If <CSV_FILENAME> is not given, p will try to use the default filename: 'import.csv'."),
     ShellCommand("invalidate", "invalidate <UUID>|<SEARCHSTRING>", "Invalidate account with UUID or SEARCHSTRING. " +
                  "If you do not know the UUID, just enter a searchstring and you will be offered possible accounts" +
                  " to invalidate.\nIf you invalidate an account the account will be invisible in normal operation." +
