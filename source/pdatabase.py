@@ -3254,7 +3254,7 @@ class PDatabase:
             print("No accounts found to export.")
             return
 
-        with open(csv_filename, 'w') as csv_file:
+        with open(csv_filename, 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=";", quoting=1)
             header_row = ["UUID", "Name", "URL", "Loginname", "Password", "Type", "Connectortype"]
             csv_writer.writerow(header_row)
@@ -3272,7 +3272,7 @@ class PDatabase:
         print(str(accounts_to_export) + " account(s) exported to file: " + os.path.abspath(csv_filename))
 
     def import_accounts_from_csv(self, csv_filename: str = CSV_DEFAULT_IMPORT_FILENAME):
-        with open(csv_filename, 'r') as csv_file:
+        with open(csv_filename, 'r', newline='') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=";", quoting=1)
             row_number = 0
             rows_inserted = 0
