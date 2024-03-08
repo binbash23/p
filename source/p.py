@@ -5,6 +5,8 @@
 # Password/account database for managing all your accounts
 #
 import optparse
+import os
+import sys
 from optparse import OptionGroup
 
 from dropbox_connector import *
@@ -16,7 +18,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.02.27"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.08"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -235,6 +237,22 @@ def start_dropbox_configuration():
     print()
 
 
+def list_db_files(path: str, extension: str = ".db") -> []:
+    file_array = []
+    for file_object in os.listdir(path):
+        if os.path.isfile(os.path.join(path, file_object)):
+            # print("isfile--->" + file_object)
+            if str(file_object).endswith(extension):
+                file_array.append(file_object)
+    return file_array
+
+
+def multiple_db_files_exist(path: str, extension: str = ".db") -> bool:
+    if len(list_db_files(path, extension)) > 1:
+        return True
+    return False
+
+
 #
 # main
 #
@@ -324,15 +342,33 @@ def main():
     # Get password and database file name. then open/create database file
     # First get database filename
     global database_filename
+    database_filename_is_explicit_set = False
     # check if the p_database info is set in environment variable
     try:
         if os.environ['P_DATABASE']:
             database_filename = os.environ['P_DATABASE']
+            database_filename_is_explicit_set = True
     except KeyError:
         # no environment variable with that name found
         pass
     if options.database is not None and options.database != "":
         database_filename = options.database
+        database_filename_is_explicit_set = True
+
+    if not database_filename_is_explicit_set:
+        if multiple_db_files_exist("."):
+            print("Which database do you want to access?")
+            print()
+            db_filenames = list_db_files(".")
+            i = 1
+            for filename in db_filenames:
+                print(str(i) + " - " + filename)
+                i += 1
+            print()
+            filename_nr = input("Enter number: ")
+            print()
+            database_filename = db_filenames[int(filename_nr)-1]
+
     absolute_filename = os.path.abspath(database_filename)
     print("Database filename         : " + absolute_filename)
 
