@@ -54,12 +54,16 @@ class ShellCommand:
     def print_manual(self):
         print()
         print("COMMAND")
+        print()
         print(" " + colored(self.command, "green"))
         print()
         print("SYNOPSIS")
-        print(" " + self.synopsis)
+        print()
+        # print(" " + self.synopsis)
+        print(" " + colored(self.synopsis, "green"))
         print()
         print("DESCRIPTION")
+        print()
         formatted_description = []
         for line in self.description.splitlines():
             for sub_line in textwrap.wrap(line,
