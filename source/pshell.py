@@ -279,7 +279,8 @@ SHELL_COMMANDS = [
                  "Merge local database with a webdav target which has to be accessible with the account UUID.\n" +
                  "If UUID is not given, the configuration table will be searched for a default webdav account UUID " +
                  "and, if one is found, it will be used to connect to the webdav target. You can use the " +
-                 "command 'setwebdavaccountuuid' to set the default webdav account UUID. The account has to have connector type set to 'webdav'.\n" +
+                 "command 'setwebdavaccountuuid' to set the default webdav account UUID. The account has to have" +
+                 " connector type set to 'webdav'.\n" +
                  "Example account for a webdav connector:\n" +
                  "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
                  "Name            : <FREE_TEXT>\n" +
@@ -293,10 +294,13 @@ SHELL_COMMANDS = [
                  "Merge with with the account with UUID or the account that matches SEARCHSTRING.\n" +
                  "If SEARCHSTRING is not a unique account you will be asked, which account should be used.\n" +
                  "The target account has to have the attribute connector_type set to one of these values:\n" +
-                 "file, ssh, webdav, dropbox depending on the kind of protocol that has to be used to connect to the account.\n"),
-    ShellCommand("opendatabase", "opendatabase <DATABASE_FILENAME>", "Try to open a p database file with the " +
+                 "file, ssh, webdav, dropbox depending on the kind of protocol that has to be used to connect " +
+                 "to the account.\n"),
+    ShellCommand("opendatabase", "opendatabase [<DATABASE_FILENAME>]", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
-                 " be created.\nWith this command you can switch between multiple p databases."),
+                 " be created. If you use the command without a database filename and there are multiple database " +
+                 "files in the current directory, you will be asked to choose one from the list.\nWith this " +
+                 "command you can switch between multiple named p databases."),
     ShellCommand("quit", "quit", "Quit pshell."),
     ShellCommand("redo", "redo [<HISTORY_INDEX>|?]", "Redo the last shell command. The redo command itself will not" +
                  " appear in the command history. You can choose the index of the command in your history if" +
@@ -1411,10 +1415,30 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
         if shell_command.command == "opendatabase":
             if len(shell_command.arguments) == 1:
-                print("DATABASE_FILENAME is missing.")
-                print(shell_command.synopsis)
-                continue
-            new_database_filename = shell_command.arguments[1].strip()
+                if not p.multiple_db_files_exist():
+                    print("DATABASE_FILENAME is missing.")
+                    print(shell_command.synopsis)
+                    continue
+                else:
+                    print("Which database do you want to access?")
+                    print()
+                    db_filenames = p.list_db_files()
+                    i = 1
+                    for filename in db_filenames:
+                        print(str(i) + " - " + filename)
+                        i += 1
+                    print()
+                    try:
+                        filename_nr = input("Enter number: ")
+                        print()
+                        new_database_filename = db_filenames[int(filename_nr) - 1]
+                    except Exception as e:
+                        print("Error: " + str(e))
+                        continue
+            else:
+                new_database_filename = shell_command.arguments[1].strip()
+
+            # new_database_filename = shell_command.arguments[1].strip()
             new_p_database = None
             if os.path.exists(new_database_filename):
                 try:

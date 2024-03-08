@@ -237,7 +237,7 @@ def start_dropbox_configuration():
     print()
 
 
-def list_db_files(path: str, extension: str = ".db") -> []:
+def list_db_files(path: str = ".", extension: str = ".db") -> []:
     file_array = []
     for file_object in os.listdir(path):
         if os.path.isfile(os.path.join(path, file_object)):
@@ -247,7 +247,7 @@ def list_db_files(path: str, extension: str = ".db") -> []:
     return file_array
 
 
-def multiple_db_files_exist(path: str, extension: str = ".db") -> bool:
+def multiple_db_files_exist(path: str = ".", extension: str = ".db") -> bool:
     if len(list_db_files(path, extension)) > 1:
         return True
     return False
@@ -356,18 +356,22 @@ def main():
         database_filename_is_explicit_set = True
 
     if not database_filename_is_explicit_set:
-        if multiple_db_files_exist("."):
+        if multiple_db_files_exist():
             print("Which database do you want to access?")
             print()
-            db_filenames = list_db_files(".")
+            db_filenames = list_db_files()
             i = 1
             for filename in db_filenames:
                 print(str(i) + " - " + filename)
                 i += 1
             print()
-            filename_nr = input("Enter number: ")
-            print()
-            database_filename = db_filenames[int(filename_nr)-1]
+            try:
+                filename_nr = input("Enter number: ")
+                print()
+                database_filename = db_filenames[int(filename_nr)-1]
+            except Exception as e:
+                print("Error: " + str(e))
+                sys.exit(1)
 
     absolute_filename = os.path.abspath(database_filename)
     print("Database filename         : " + absolute_filename)
