@@ -5,8 +5,6 @@
 # Password/account database for managing all your accounts
 #
 import optparse
-import os
-import sys
 from optparse import OptionGroup
 
 from dropbox_connector import *
