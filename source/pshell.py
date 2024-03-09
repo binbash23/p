@@ -352,6 +352,10 @@ SHELL_COMMANDS = [
     ShellCommand("slowprintenabled", "slowprintenabled [on|off]", "Enable, disable or show the " +
                  "status of the slow printing feature. The slow printing feature prints lots of queries a bit slower," +
                  " which looks kinda cool :) But if you think it's annoying, disable it (created for ben)."),
+    ShellCommand("setpassword", "setpassword <UUID>|<SEARCHSTRING>", "Set password for account with UUID or SEARCHSTRING. If" +
+                 " shadow passwords is on, the password will be read hidden so that none can gather it from " +
+                 "your screen. If you do not no the <UUID>, use a <SEARCHSTRING> and you will be offered possible " +
+                 "accounts the change the password for."),
     ShellCommand("sp", "sp <UUID>|<SEARCHSTRING>", "Set password for account with UUID or SEARCHSTRING. If" +
                  " shadow passwords is on, the password will be read hidden so that none can gather it from " +
                  "your screen. If you do not no the <UUID>, use a <SEARCHSTRING> and you will be offered possible " +
@@ -2006,7 +2010,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("Error: on or off expected.")
             continue
 
-        if shell_command.command == "sp":
+        if shell_command.command == "sp" or shell_command.command == "setpassword":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
