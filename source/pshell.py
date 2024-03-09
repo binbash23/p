@@ -52,6 +52,7 @@ class ShellCommand:
             return False
 
     def print_manual(self):
+        print("*********************************************************************************")
         print()
         print("COMMAND")
         print()
@@ -74,6 +75,7 @@ class ShellCommand:
         for row in formatted_description:
             print(row)
         print()
+        print("*********************************************************************************")
 
     def generate_git_manual(self) -> str:
         t = ""
@@ -169,7 +171,8 @@ SHELL_COMMANDS = [
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
     ShellCommand("duplicate", "duplicate <UUID>|<SEARCHSTRING>",
                  "Duplicate account with UUID into a new account. You can also use a SEARCHSTRING to " +
-                 "identify the account to be duplicated."),
+                 "identify the account to be duplicated. After you have duplicated the account you can edit it with " +
+                 "the edit command."),
     ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
@@ -181,7 +184,8 @@ SHELL_COMMANDS = [
     ShellCommand("deletemergehistory", "deletemergehistory",
                  "Delete all information about old merge events."),
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
-                 "Delete orphaned account history entries."),
+                 "Delete orphaned account history entries. When you delete an account which has already " +
+                 "some old versions, these will be orphaned and can be deleted also with this command."),
     ShellCommand("executeonstart", "executeonstart [<COMMAND>]",
                  "You can set a command to be executed when the pshell starts. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on start.\n" +
@@ -217,8 +221,9 @@ SHELL_COMMANDS = [
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
-    ShellCommand("history", "history [MAX_ENTRIES]", "Show history of all user inputs in the the pshell.\n" +
-                 "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed."),
+    ShellCommand("history", "history [MAX_ENTRIES]", "Show the pshell command history.\n" +
+                 "If MAX_ENTRIES is set, only the latest MAX_ENTRIES of the command history will be displayed.\n" +
+                 "To disable the command history, you can use the command 'maxhistorysize 0'"),
     ShellCommand("idletime", "idletime", "Show idletime in seconds after last command."),
     ShellCommand("importcsv", "importcsv [<CSV_FILENAME>]", "Import a csv file with accounts. " +
                  "If <CSV_FILENAME> is not given, p will try to use the default filename: 'import.csv'."),
