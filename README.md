@@ -99,7 +99,7 @@ sudo apt-get install python3-pyperclip xclip
 
 ### Help
 
-For help just type help in the pshell or start p.exe like 
+For help just type [help](https://github.com/binbash23/p/wiki/Full-help-documentation#help) in the pshell or start p.exe like 
 ```
 p.exe -h
 ```
