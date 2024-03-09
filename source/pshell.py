@@ -52,7 +52,7 @@ class ShellCommand:
             return False
 
     def print_manual(self):
-        print("*********************************************************************************")
+        print("********************************************************************************")
         print()
         print("COMMAND")
         print()
@@ -75,7 +75,7 @@ class ShellCommand:
         for row in formatted_description:
             print(row)
         print()
-        print("*********************************************************************************")
+        print("********************************************************************************")
 
     def generate_git_manual(self) -> str:
         t = ""
