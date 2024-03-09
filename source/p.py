@@ -18,7 +18,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.08"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.09"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -374,7 +374,7 @@ def main():
                 sys.exit(1)
 
     absolute_filename = os.path.abspath(database_filename)
-    print("Database filename         : " + absolute_filename)
+    print("Database filename        : " + absolute_filename)
 
     # check here, if statistics should be shown. this must be done without trying to decrypt/create the db connection
     if options.statistics:
@@ -394,14 +394,14 @@ def main():
             try:
                 current_database_name = pdatabase.get_database_name(database_filename)
                 if current_database_name is None or current_database_name == "":
-                    print("Logical database name     : [empty]")
+                    print("Logical database name    : [empty]")
                 else:
-                    print("Logical database name     : " + current_database_name)
+                    print("Logical database name    : " + current_database_name)
 
                 try_no = 0
                 while try_no < 3:
                     try_no += 1
-                    database_password = pwinput.pwinput("Enter database password   : ")
+                    database_password = pwinput.pwinput("Enter database password  : ")
                     if is_valid_database_password(database_filename, database_password.encode("UTF-8")):
                         print("Access granted.")
                         break

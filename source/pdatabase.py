@@ -1135,6 +1135,7 @@ def print_database_statistics(database_filename: str):
         unmerged_changes = colored("No", "green")
 
     try:
+        print("----------------------------------------------------------------")
         print("Database Name            : ", end="")
         print_slow.print_slow(database_name)
         print("Database UUID            : ", end="")
@@ -1174,6 +1175,7 @@ def print_database_statistics(database_filename: str):
         print_slow.print_slow(str(get_merge_history_detail_table_count(database_filename)))
         print("Unmerged changes         : ", end="")
         print_slow.print_slow(unmerged_changes)
+        print("----------------------------------------------------------------")
     except KeyboardInterrupt:
         print()
 
