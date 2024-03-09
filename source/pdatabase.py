@@ -2372,7 +2372,7 @@ class PDatabase:
             database_connection = sqlite3.connect(self.database_filename)
             cursor = database_connection.cursor()
             # Change the PASSWORD_TEST token in configuration table:
-            print("Changing DATABASE_PASSWORD_TEST value in configuration table...")
+            # print("Changing DATABASE_PASSWORD_TEST value in configuration table...")
             if new_password != "":
                 random_string = str(
                     binascii.hexlify(os.urandom(self._DATABASE_PASSWORD_TEST_VALUE_LENGTH)).decode('UTF-8'))
