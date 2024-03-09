@@ -889,7 +889,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             new_account_name = ""
             if len(shell_command.arguments) == 2:
                 new_account_name = shell_command.arguments[1].strip()
-            p.add(p_database, account_name=new_account_name)
+            p.add_account_interactive(p_database, account_name=new_account_name)
             continue
 
         if shell_command.command == "alias":
@@ -1027,7 +1027,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
         if shell_command.command == "changepassword":
             try:
-                p.change_database_password(p_database)
+                p.change_database_password_interactive(p_database)
             except KeyboardInterrupt:
                 print()
                 print("Canceled.")
@@ -1100,7 +1100,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 continue
             uuid_to_edit = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
             if uuid_to_edit is not None:
-                p.edit(p_database, uuid_to_edit)
+                p.edit_account_interactive(p_database, uuid_to_edit)
             continue
 
         if shell_command.command == "deleteorphanedaccounthistoryentries":

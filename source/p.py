@@ -34,7 +34,7 @@ P_UPDATER_FILENAME_LINUX = "updater"
 GIT_FULL_DOCUMENTATION_FILENAME = "Full-help-documentation.md"
 
 
-def add(p_database: PDatabase, account_name=""):
+def add_account_interactive(p_database: PDatabase, account_name=""):
     print("Add account")
     account = Account()
     try:
@@ -70,7 +70,7 @@ def add(p_database: PDatabase, account_name=""):
         print("Canceled")
 
 
-def edit(p_database: PDatabase, edit_uuid: str):
+def edit_account_interactive(p_database: PDatabase, edit_uuid: str):
     account = p_database.get_account_by_uuid_and_decrypt(edit_uuid)
     if account is None:
         print("UUID " + edit_uuid + " not found.")
@@ -155,7 +155,7 @@ def edit(p_database: PDatabase, edit_uuid: str):
         print("Canceled")
 
 
-def change_database_password(p_database: PDatabase) -> bool:
+def change_database_password_interactive(p_database: PDatabase) -> bool:
     new_password = read_confirmed_database_password_from_user()
     return p_database.change_database_password(new_password)
 
@@ -219,7 +219,8 @@ def start_dropbox_configuration():
           " as the url and the application_secret (" + application_secret +
           ") as the login name and the long refresh token as the" +
           " password (" + refresh_access_token +
-          "). The type field can be filled with 'Connector' and the connector type field must be filled with 'dropbox'.")
+          "). The type field can be filled with 'Connector' and the connector type field must be filled " +
+          "with 'dropbox'.")
     print("")
     print("You can set this dropbox account as the default dropbox merge account with this command (in pshell):")
     print("> setdropboxaccountuuid UUID_OF_THE_ACCOUNT_THAT_YOU_HAVE_JUST_CREATED")
@@ -479,7 +480,7 @@ def main():
         p_database.delete_account(options.delete_uuid)
         sys.exit(0)
     if options.edit_uuid is not None:
-        edit(p_database, str(options.edit_uuid).strip())
+        edit_account_interactive(p_database, str(options.edit_uuid).strip())
         sys.exit(0)
     if options.search_uuid is not None:
         p_database.search_account_by_uuid(options.search_uuid)
@@ -491,13 +492,13 @@ def main():
         p_database.revalidate_account(options.revalidate_uuid)
         sys.exit(0)
     if options.change_database_password:
-        change_database_password(p_database)
+        change_database_password_interactive(p_database)
         sys.exit(0)
     if options.list:
         p_database.search_accounts("")
         sys.exit(0)
     if options.add:
-        add(p_database)
+        add_account_interactive(p_database)
         sys.exit(0)
     # when there are no options but a search string, search for the string in database
     if len(sys.argv) == 2 and sys.argv[1] is not None:
