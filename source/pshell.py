@@ -216,7 +216,8 @@ SHELL_COMMANDS = [
                  "to use it as a new instance. You might also set a new database name. This is just for identifying " +
                  "the different database files."),
     ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
-                 "random password with LENGTH characters. When LENGTH is not set, a 10 char password will be generated."),
+                 "random password with LENGTH characters. When LENGTH is not set, a 20 char password will be generated. " +
+                 "You can also use the shortcut for this command: gp."),
     ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword.\nUse 'help gp' for more info."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
@@ -1220,7 +1221,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             continue
 
         if shell_command.command == "generatepassword" or shell_command.command == "gp":
-            password_length = 10
+            password_length = 20
             if len(shell_command.arguments) == 2:
                 try:
                     password_length = int(shell_command.arguments[1])
