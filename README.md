@@ -22,7 +22,7 @@ Jens
 Use the [wiki](https://github.com/binbash23/p/wiki) for more help. The wiki contains some best practices and HOWTO's for using the password tool. The [help command documentation](https://github.com/binbash23/p/wiki/Full-help-documentation) is very useful.
 
 ### Binaries/executeable program:
-You can use the [python code](https://github.com/binbash23/p/tree/master/source) or the binaries.
+You can use the [python code](https://github.com/binbash23/p/tree/master/source) or the binaries. For some more infos howto install, you can have a look here: [Install p on linux](https://github.com/binbash23/p/wiki/Install-p-on-a-linux-system-(best-practice)) and here: [Install p on windows](https://github.com/binbash23/p/wiki/Install-p-on-windows)
 
 For Linux (x86), use the 'p' executeable:
 
@@ -36,10 +36,6 @@ and for Windows (x86), use the 'p.exe' executeable:
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
 
-## Install p on Linux
-[Install p on linux](https://github.com/binbash23/p/wiki/Install-p-on-a-linux-system-(best-practice))
-## Install p on Windows
-[Install p on windows](https://github.com/binbash23/p/wiki/Install-p-on-windows)
 
 ### How do I start?
 
