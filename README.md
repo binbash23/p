@@ -22,7 +22,7 @@ Jens
 Use the [wiki](https://github.com/binbash23/p/wiki) for more help. The wiki contains some best practices and HOWTO's for using the password tool. The [help command documentation](https://github.com/binbash23/p/wiki/Full-help-documentation) is very useful.
 
 ### Binaries/executeable program:
-You can use the python code or the binaries.
+You can use the [python code](https://github.com/binbash23/p/tree/master/source) or the binaries.
 
 For Linux (x86), use the 'p' executeable:
 
