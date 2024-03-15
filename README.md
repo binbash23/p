@@ -39,7 +39,7 @@ and for Windows (x86), use the 'p.exe' executeable:
 
 ### How do I start?
 
-Start the windows binary (p.exe) and a cmd window will appear. Enter the password for your new password database and thats all. You are ready to add new accounts into your encrypted database.
+Start the windows binary (p.exe) and a cmd window will appear. Enter the password for your new [password database](https://github.com/binbash23/p/blob/master/docs/20240316_p_database_file.png) and thats all. You are ready to add new accounts into your encrypted database.
 
 ```
 Using Database: p.db
