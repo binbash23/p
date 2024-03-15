@@ -36,6 +36,10 @@ and for Windows (x86), use the 'p.exe' executeable:
 
 [p/dist/windows/p.exe](https://github.com/binbash23/p/raw/master/dist/windows/p.exe)
 
+## Install p on Linux
+[Install p on linux](https://github.com/binbash23/p/wiki/Install-p-on-a-linux-system-(best-practice))
+## Install p on Windows
+[Install p on windows](https://github.com/binbash23/p/wiki/Install-p-on-windows)
 
 ### How do I start?
 
