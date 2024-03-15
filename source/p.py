@@ -365,7 +365,9 @@ def main():
                 i += 1
             print()
             try:
-                filename_nr = input("Enter number: ")
+                filename_nr = input("Enter number (default=1): ")
+                if filename_nr == "":
+                    filename_nr = "1"
                 print()
                 database_filename = db_filenames[int(filename_nr)-1]
             except Exception as e:
