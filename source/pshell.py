@@ -1169,15 +1169,18 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 connector = connector_manager.get_connector(p_database, account_uuid)
                 filename_to_download = input("Enter filename to download: ")
                 if filename_to_download:
+                    if not connector.exists(filename_to_download):
+                        print("Remote file not found: " + filename_to_download)
+                        continue
                     if os.path.exists(filename_to_download):
                         print("Error: Local file already exists: " + filename_to_download)
                         confirm_overwrite = input("Overwrite local file? (y/[n]): ")
-                        if confirm_overwrite == "y":
-                            print("Downloading file...")
-                            connector.download_file(remote_path=filename_to_download, local_path=filename_to_download)
-                            print("Ready.")
-                        else:
+                        if confirm_overwrite != "y":
                             print("Download canceled.")
+                            continue
+                    print("Downloading file...")
+                    connector.download_file(remote_path=filename_to_download, local_path=filename_to_download)
+                    print("Ready.")
                 # p_database.merge_database_with_connector(connector)
             except Exception as e:
                 print("Error: " + str(e))
