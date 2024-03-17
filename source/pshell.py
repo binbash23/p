@@ -306,6 +306,8 @@ SHELL_COMMANDS = [
                  "The target account has to have the attribute connector_type set to one of these values:\n" +
                  "file, ssh, webdav, dropbox depending on the kind of protocol that has to be used to connect " +
                  "to the account.\n"),
+    ShellCommand("mw", "mw <UUID>|<SEARCHSTRING>",
+                 "Alias for mergewith.\nUse 'help mergewith' for more info."),
     ShellCommand("opendatabase", "opendatabase [<DATABASE_FILENAME>]", "Try to open a p database file with the " +
                  "name DATABASE_FILENAME. If the database does not exist, a new one with the filename will" +
                  " be created. If you use the command without a database filename and there are multiple database " +
@@ -1408,14 +1410,13 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 print("Error: " + str(e))
             continue
 
-        if shell_command.command == "mergewith":
+        if shell_command.command == "mergewith" or shell_command.command == "mw":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
                 continue
             account_uuid = None
             if len(shell_command.arguments) > 1:
-                # account_uuid = shell_command.arguments[1].strip()
                 account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
                                                                       p_database)
             if not account_uuid:
