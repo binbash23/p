@@ -13,8 +13,9 @@ import uuid
 
 import pwinput
 import pyperclip3
+import pytimedinput
 import wget
-from inputimeout import inputimeout, TimeoutOccurred
+# from inputimeout import inputimeout, TimeoutOccurred
 from termcolor import colored
 
 import connector_manager
@@ -710,18 +711,24 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             try:
                 # Eingabe mit timeout oder ohne machen:
                 if int(pshell_max_idle_minutes_timeout) > 0:
-                    input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    # input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
+                    input_line, timed_out = (
+                        pytimedinput.timedInput(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60),
+                                                endCharacters="\x1b\n\r"))
+                    # if timed_out:
+                    #     continue
                 else:
                     input_line = input(prompt_string)
-                user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
+                if not timed_out:
+                    user_input_list = input_line.split(PSHELL_COMMAND_DELIMITER)
             except KeyboardInterrupt:
                 print()
                 continue
             except EOFError:
                 print()
                 user_input_list = ["exit"]
-            except TimeoutOccurred:
-                pass
+            # except TimeoutOccurred:
+            #     pass
 
         if len(user_input_list) > 0:
             user_input = user_input_list.pop(0).strip()
