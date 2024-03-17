@@ -5,6 +5,7 @@
 # Password/account database for managing all your accounts
 #
 import optparse
+import sys
 from optparse import OptionGroup
 
 from dropbox_connector import *
@@ -16,7 +17,7 @@ colorama.init()
 #
 # VARIABLES
 #
-VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.09"
+VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.17"
 database_filename = 'p.db'
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
@@ -361,18 +362,32 @@ def main():
             db_filenames = list_db_files()
             i = 1
             for filename in db_filenames:
-                print(str(i) + " - " + filename)
+                print("[" + str(i) + "] - " + filename)
                 i += 1
+            print("[" + str(i) + "] - Create new database file")
+            print("[" + str(i+1) + "] - Exit")
             print()
-            try:
-                filename_nr = input("Enter number (default=1): ")
-                if filename_nr == "":
-                    filename_nr = "1"
-                print()
-                database_filename = db_filenames[int(filename_nr)-1]
-            except Exception as e:
-                print("Error: " + str(e))
-                sys.exit(1)
+
+            while True:
+                try:
+                    filename_nr = input("Enter number (default=1): ")
+                    if filename_nr == "":
+                        filename_nr = "1"
+                    if filename_nr == str(i):  # enter new database name was selected
+                        print()
+                        database_filename = input("Enter new database filename : ")
+                        break
+                    elif filename_nr == str(i+1):  # Exit selected
+                        print()
+                        sys.exit(0)
+                    else:
+                        database_filename = db_filenames[int(filename_nr) - 1]
+                        break
+                except KeyboardInterrupt as e:
+                    print()
+                except Exception as e:
+                    print("Error: " + str(e))
+                    # sys.exit(1)
 
     absolute_filename = os.path.abspath(database_filename)
     print("Database filename        : " + absolute_filename)
