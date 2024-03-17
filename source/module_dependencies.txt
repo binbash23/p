@@ -1,30 +1,19 @@
-
-20221224 jens heine p
-
+#
+# 20221224 jens heine p
+#
 
 Python module dependencies for password manager p.
 --------------------------------------------------
 
 => Note: If you use the p executable you need no modules!
 
-You have to install the following modules to run p.py:
+Best setup a virtual env:
 
-pip install termcolor
-pip install colorama
-pip install pyperclip3
-pip install cryptography
-pip install progressbar
-pip install dropbox
-# pip install inputimeout
-pip install pwinput
-pip install webdav4
-pip install pysftp
-pip install wget
+> python -m venv venv
 
-or in one line:
+and then install all requiered (they are listed in the file requirements.txt) packages with pip:
 
-# pip install termcolor colorama pyperclip3 cryptography progressbar dropbox inputimeout pwinput webdav4 pysftp wget
-pip install termcolor colorama pyperclip3 cryptography progressbar dropbox pwinput webdav4 pysftp wget
+> pip install -r requirements.txt
 
 If you use Ubuntu/Linux and want to use the clipboard features:
 ---------------------------------------------------------------

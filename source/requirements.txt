@@ -1,0 +1,10 @@
+termcolor
+colorama
+pyperclip3 
+cryptography
+progressbar 
+dropbox
+pwinput 
+webdav4
+pysftp
+wget
