@@ -364,6 +364,7 @@ def main():
             for filename in db_filenames:
                 print("[" + str(i) + "] - " + filename)
                 i += 1
+            print()
             print("[" + str(i) + "] - Create new database file")
             print("[" + str(i+1) + "] - Exit")
             print()
