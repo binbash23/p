@@ -186,6 +186,7 @@ SHELL_COMMANDS = [
     ShellCommand("deleteorphanedaccounthistoryentries", "deleteorphanedaccounthistoryentries ",
                  "Delete orphaned account history entries. When you delete an account which has already " +
                  "some old versions, these will be orphaned and can be deleted also with this command."),
+    ShellCommand("downloadfrom", "downloadfrom <UUID>|<SEARCHSTRING>", "Download a file from a connector."),
     ShellCommand("executeonstart", "executeonstart [<COMMAND>]",
                  "You can set a command to be executed when the pshell starts. Executing this command without an" +
                  " argument shows the current command which is configured to be executed on start.\n" +
@@ -1151,6 +1152,37 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             else:
                 print("Canceled")
             continue
+
+
+        if shell_command.command == "downloadfrom":
+            if len(shell_command.arguments) == 1:
+                print("UUID or SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
+                continue
+            account_uuid = None
+            if len(shell_command.arguments) > 1:
+                account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(),
+                                                                      p_database)
+            if not account_uuid:
+                continue
+            try:
+                connector = connector_manager.get_connector(p_database, account_uuid)
+                filename_to_download = input("Enter filename to download: ")
+                if filename_to_download:
+                    if os.path.exists(filename_to_download):
+                        print("Error: Local file already exists: " + filename_to_download)
+                        confirm_overwrite = input("Overwrite local file? (y/[n]): ")
+                        if confirm_overwrite == "y":
+                            print("Downloading file...")
+                            connector.download_file(remote_path=filename_to_download, local_path=filename_to_download)
+                            print("Ready.")
+                        else:
+                            print("Download canceled.")
+                # p_database.merge_database_with_connector(connector)
+            except Exception as e:
+                print("Error: " + str(e))
+            continue
+
 
         if shell_command.command == "executeonstart":
             if len(shell_command.arguments) == 1:

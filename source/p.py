@@ -385,6 +385,7 @@ def main():
                         break
                 except KeyboardInterrupt as e:
                     print()
+                    sys.exit(0)
                 except Exception as e:
                     print("Error: " + str(e))
                     # sys.exit(1)
