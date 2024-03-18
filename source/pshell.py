@@ -220,7 +220,7 @@ SHELL_COMMANDS = [
     ShellCommand("generatepassword", "generatepassword [LENGTH]", "Generate a " +
                  "random password with LENGTH characters. When LENGTH is not set, a 20 char password will be generated. " +
                  "You can also use the shortcut for this command: gp."),
-    ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword.\nUse 'help gp' for more info."),
+    ShellCommand("gp", "gp [LENGTH]", "Alias for the command generatepassword.\nUse 'help generatepassword' for more info."),
     ShellCommand("help", "help [COMMAND]", "Show help for all pshell commands or show the specific help " +
                  "description for COMMAND."),
     ShellCommand("helpverbose", "helpverbose", "Show all help texts for all pshell commands."),
@@ -241,10 +241,10 @@ SHELL_COMMANDS = [
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
     ShellCommand("lock", "lock", "Lock pshell console. You will need to enter the password to unlock the pshell again"),
     ShellCommand("#", "#", "Lock pshell console."),
-    ShellCommand("m2d", "m2d [<UUID>|<SERACHSTRING>]", "Alias for merge2dropbox.\nUse 'help m2d' for more info."),
-    ShellCommand("m2f", "m2f [<UUID>|<SERACHSTRING>]", "Alias for merge2file.\nUse 'help m2f' for more info."),
-    ShellCommand("m2s", "m2s [<UUID>|<SERACHSTRING>]", "Alias for merge2ssh.\nUse 'help m2s' for more info."),
-    ShellCommand("m2w", "m2w [<UUID>|<SERACHSTRING>]", "Alias for merge2webdav.\nUse 'help msw' for more info."),
+    ShellCommand("m2d", "m2d [<UUID>|<SERACHSTRING>]", "Alias for merge2dropbox.\nUse 'help merge2dropbox' for more info."),
+    ShellCommand("m2f", "m2f [<UUID>|<SERACHSTRING>]", "Alias for merge2file.\nUse 'help merge2file' for more info."),
+    ShellCommand("m2s", "m2s [<UUID>|<SERACHSTRING>]", "Alias for merge2ssh.\nUse 'help merge2ssh' for more info."),
+    ShellCommand("m2w", "m2w [<UUID>|<SERACHSTRING>]", "Alias for merge2webdav.\nUse 'help merge2webdav' for more info."),
     ShellCommand("maxhistorysize", "maxhistorysize [MAX_SIZE]", "Show current max history size or set it. This " +
                  "limits the amount of history entries that will be saved in the shell_history table in the " +
                  "database.\nTo disable the pshell history, set this value to 0."),
@@ -325,8 +325,8 @@ SHELL_COMMANDS = [
                  "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
-    ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp.\nUse 'help she' for more info."),
-    ShellCommand("shv", "shv <SEARCHSTRING>", "Alias for searchhelpverbose.\nUse 'help shv' for more info."),
+    ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp.\nUse 'help searchhelp' for more info."),
+    ShellCommand("shv", "shv <SEARCHSTRING>", "Alias for searchhelpverbose.\nUse 'help searchhelpverbose' for more info."),
     ShellCommand("searchhelpverbose", "searchhelpverbose <SEARCHSTRING>",
                  "Search for SEARCHSTRING in all help descriptions."),
     ShellCommand("searchinvalidated", "searchinvalidated <SEARCHSTRING>",
@@ -376,7 +376,7 @@ SHELL_COMMANDS = [
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
                  " account with <UUID>. If you do not know the uuid, use a <SEARCHSTRING> and you can choose from " +
                  "possible existing accounts which include your <SEARCHSTRING>."),
-    ShellCommand("sco", "sco", "Alias for showconfig.\nUse 'help sco' for more info."),
+    ShellCommand("sco", "sco", "Alias for showconfig.\nUse 'help showconfig' for more info."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
     ShellCommand("showlinks", "showlinks", "Show links to github homepage, binary " +
@@ -388,7 +388,7 @@ SHELL_COMMANDS = [
     ShellCommand("showmergehistory", "showmergehistory", "Show the history of all database merge events."),
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
-    ShellCommand("slm", "slm", "Alias for showlatestmerge.\nUse 'help slm' for more info."),
+    ShellCommand("slm", "slm", "Alias for showlatestmerge.\nUse 'help showlatestmerge' for more info."),
     ShellCommand("smh", "smh", "Alias for showmergehistory.\nUse 'help showmergehistory' for more info."),
     ShellCommand("sam", "sam",
                  "Alias for showallmergehistorydetails.\nUse 'help showallmergehistorydetails' for more info."),
