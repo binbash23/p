@@ -1967,16 +1967,18 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_WIN), "green"))
             print("p binary linux           : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_LINUX), "green"))
-            print("p binary raspberry pi    : ", end="")
+            print("p binary arm64           : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_ARM64), "green"))
             print("p updater binary windows : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN), "green"))
-            print("p updater binary linux   : ", end="")
-            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX), "green"))
-            print("p github version arm64   : ", end="")
-            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_ARM64), "green"))
+            # print("p updater binary linux   : ", end="")
+            # print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX), "green"))
             print("p github version windows : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_WIN), "green"))
+            print("p github version linux   : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_LINUX), "green"))
+            print("p github version arm64   : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_ARM64), "green"))
             continue
 
         if shell_command.command == "showinvalidated":
