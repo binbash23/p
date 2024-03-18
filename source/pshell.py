@@ -2358,8 +2358,15 @@ def get_current_version_from_github() -> str:
         web_url_response = urllib3.request(method="GET", url=github_version_url)
         url_content = web_url_response.data.strip()
         github_version = url_content.decode('UTF-8')
+
+        # github_version.replace(os.linesep, "")
+        # github_version.replace("\r\n", "")
+        version_splitted = github_version.splitlines()
+        for line in version_splitted:
+            if line.strip() != "":
+                github_version = line
     except Exception as e:
-        print("Error getting githib version: " + str(e))
+        print("Error getting github version: " + str(e))
     return github_version
 
 
