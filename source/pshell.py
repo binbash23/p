@@ -11,6 +11,8 @@ import textwrap
 import time
 import uuid
 
+import urllib3
+
 import pwinput
 import pyperclip3
 import pytimedinput
@@ -167,6 +169,8 @@ SHELL_COMMANDS = [
                  "database name. Then the database will be " +
                  "uploaded again. If no UUID for the webdav target is given, the eventually configured default" +
                  " webdav UUID from the configuration table will be taken."),
+    ShellCommand("check4update", "check4update",
+                 "Check on github for a newer version of p"),
     ShellCommand("clear", "clear", "Clear console. The screen will be blanked."),
     ShellCommand("clearhistory", "clearhistory", "Clear command history."),
     ShellCommand("cplast", "cplast", "Copy password from the latest found account to the clipboard."),
@@ -1051,6 +1055,11 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             except KeyboardInterrupt:
                 print()
                 print("Canceled.")
+            continue
+
+        if shell_command.command == "check4update":
+            print("Local  version : " + p.VERSION)
+            print("GitHub version : " + get_current_version_from_github())
             continue
 
         if shell_command.command == "clear":
@@ -1959,11 +1968,15 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("p binary linux           : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_LINUX), "green"))
             print("p binary raspberry pi    : ", end="")
-            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_RASPBERRY), "green"))
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_ARM64), "green"))
             print("p updater binary windows : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_WIN), "green"))
             print("p updater binary linux   : ", end="")
             print_slow.print_slow(colored(str(p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX), "green"))
+            print("p github version arm64   : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_ARM64), "green"))
+            print("p github version windows : ", end="")
+            print_slow.print_slow(colored(str(p.URL_DOWNLOAD_P_VERSION_WIN), "green"))
             continue
 
         if shell_command.command == "showinvalidated":
@@ -2191,7 +2204,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                         p_updater = p.P_UPDATER_FILENAME_LINUX
                     elif is_aarch64_architecture():
                         print("Detected system is linux on arm_64")
-                        download_url = p.URL_DOWNLOAD_BINARY_P_RASPBERRY
+                        download_url = p.URL_DOWNLOAD_BINARY_P_ARM64
                         download_p_filename = p.DOWNLOAD_P_UPDATE_FILENAME_LINUX
                         p_filename = p.P_FILENAME_LINUX
                         p_updater_download_url = p.URL_DOWNLOAD_BINARY_P_UPDATER_LINUX
@@ -2325,3 +2338,28 @@ def show_config(p_database: pdatabase):
     print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID), "green"))
+
+def get_current_version_from_github() -> str:
+    github_version = "unknown"
+    github_version_url = None
+    if is_windows_os():
+        # windows stuff
+        github_version_url = p.URL_DOWNLOAD_P_VERSION_WIN
+    elif is_posix_os():
+        # Posix stuff
+        if is_x86_64_architecture():
+            github_version_url = p.URL_DOWNLOAD_P_VERSION_LINUX
+        elif is_aarch64_architecture():
+            github_version_url = p.URL_DOWNLOAD_P_VERSION_ARM64
+    else:
+        print("Error: OS seems not to be windows or posix.")
+        return github_version
+    try:
+        web_url_response = urllib3.request(method="GET", url=github_version_url)
+        url_content = web_url_response.data.strip()
+        github_version = url_content.decode('UTF-8')
+    except Exception as e:
+        print("Error getting githib version: " + str(e))
+    return github_version
+
+

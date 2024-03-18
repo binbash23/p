@@ -11,7 +11,10 @@ pyinstaller p.py --onefile --bootloader-ignore-signals --clean
 
 cp dist/p ../dist/linux/p
 
+dist/p -V > ../dist/linux/version
+
 git add ../dist/linux/p -f
+git add ../dist/linux/version -f
 
 git status
 

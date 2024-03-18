@@ -18,16 +18,19 @@ colorama.init()
 # VARIABLES
 #
 VERSION = "[p] by Jens Heine <binbash@gmx.net> version: 2024.03.18"
-database_filename = 'p.db'
+database_filename = "p.db"
 URL_GITHUB_P_HOME = "https://github.com/binbash23/p"
 URL_GITHUB_P_WIKI = "https://github.com/binbash23/p/wiki"
 URL_DOWNLOAD_BINARY_P_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/p.exe"
 URL_DOWNLOAD_BINARY_P_LINUX = "https://github.com/binbash23/p/raw/master/dist/linux/p"
-URL_DOWNLOAD_BINARY_P_RASPBERRY = "https://github.com/binbash23/p/raw/master/dist/arm64/p"
+URL_DOWNLOAD_BINARY_P_ARM64 = "https://github.com/binbash23/p/raw/master/dist/arm64/p"
 URL_DOWNLOAD_BINARY_P_UPDATER_WIN = "https://github.com/binbash23/p/raw/master/dist/windows/updater.exe"
 URL_DOWNLOAD_BINARY_P_UPDATER_LINUX = "https://github.com/binbash23/p/raw/master/dist/linux/updater"
 DOWNLOAD_P_UPDATE_FILENAME_WIN = "p.exe_latest"
 DOWNLOAD_P_UPDATE_FILENAME_LINUX = "p_latest"
+URL_DOWNLOAD_P_VERSION_WIN = "https://raw.githubusercontent.com/binbash23/p/master/dist/windows/version"
+URL_DOWNLOAD_P_VERSION_LINUX = "https://raw.githubusercontent.com/binbash23/p/master/dist/linux/version"
+URL_DOWNLOAD_P_VERSION_ARM64 = "https://raw.githubusercontent.com/binbash23/p/master/dist/arm64/version"
 P_FILENAME_WIN = "p.exe"
 P_FILENAME_LINUX = "p"
 P_UPDATER_FILENAME_WIN = "updater.exe"
