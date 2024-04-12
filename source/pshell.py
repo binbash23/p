@@ -1495,7 +1495,9 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                         i += 1
                     print()
                     try:
-                        filename_nr = input("Enter number: ")
+                        filename_nr = input("Enter number (default=1): ")
+                        if filename_nr == "":
+                            filename_nr = 1
                         print()
                         new_database_filename = db_filenames[int(filename_nr) - 1]
                     except Exception as e:
