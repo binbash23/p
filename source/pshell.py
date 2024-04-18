@@ -380,6 +380,7 @@ SHELL_COMMANDS = [
     ShellCommand("showaccounthistory", "showaccounthistory <UUID>|<SEARCHSTRING>", "Show change history of" +
                  " account with <UUID>. If you do not know the uuid, use a <SEARCHSTRING> and you can choose from " +
                  "possible existing accounts which include your <SEARCHSTRING>."),
+    ShellCommand("sah", "sah", "Alias for showaccounthistory.\nUse 'help showaccounthistory' for more info."),
     ShellCommand("sco", "sco", "Alias for showconfig.\nUse 'help showconfig' for more info."),
     ShellCommand("showconfig", "showconfig", "Show current configuration of the environment including if account " +
                  "passwords are shadowed, if verbose mode is ..."),
@@ -1944,7 +1945,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("Error: on or off expected.")
             continue
 
-        if shell_command.command == "showaccounthistory":
+        if shell_command.command == "showaccounthistory" or shell_command.command == "sah":
             if len(shell_command.arguments) == 1:
                 print("UUID or SEARCHSTRING is missing.")
                 print(shell_command.synopsis)
