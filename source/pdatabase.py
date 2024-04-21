@@ -1774,7 +1774,7 @@ class PDatabase:
             database_connection.close()
         _print_found_n_results(results_found)
 
-    def search_accounts(self, search_string: str):
+    def search_accounts(self, search_string: str, only_connector_accounts: bool = False):
         results_found = 0
         database_connection = None
         try:
@@ -1783,9 +1783,13 @@ class PDatabase:
             if self.show_invalidated_accounts:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
                             invalid_date, connector_type from account "
+                if only_connector_accounts:
+                    sqlstring = sqlstring + " where connector_type <> '' "
             else:
                 sqlstring = "select uuid, name, url, loginname, password, type, create_date, change_date, \
                             invalid_date, connector_type from account where invalid = 0 "
+                if only_connector_accounts:
+                    sqlstring = sqlstring + " and connector_type <> '' "
             sqlstring = sqlstring + ACCOUNTS_ORDER_BY_STATEMENT
             sqlresult = cursor.execute(sqlstring)
             result = sqlresult.fetchall()

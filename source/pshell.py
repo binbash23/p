@@ -328,6 +328,9 @@ SHELL_COMMANDS = [
     ShellCommand("revalidate", "revalidate <UUID>|<SEARCHSTRING>", "Revalidate account with UUID or use " +
                  "SEARCHSTRING to find the account you want to revalidate."),
     ShellCommand("search", "search <SEARCHSTRING>", "Search for SEARCHSTRING in all account columns."),
+    ShellCommand("searchconnector", "searchconnector <SEARCHSTRING>", "Search for SEARCHSTRING" +
+                 " in all connector account columns. A connector account is an account with the column connectortype " +
+                 "filled with a value."),
     ShellCommand("searchhelp", "searchhelp <SEARCHSTRING>", "Search for all commands that contain SEARCHSTRING."),
     ShellCommand("she", "she <SEARCHSTRING>", "Alias for searchhelp.\nUse 'help searchhelp' for more info."),
     ShellCommand("shv", "shv <SEARCHSTRING>", "Alias for searchhelpverbose.\nUse 'help searchhelpverbose' for more info."),
@@ -1628,6 +1631,21 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 continue
             else:
                 latest_found_account = account_array[len(account_array) - 1]
+            continue
+
+        if shell_command.command == "searchconnector":
+            if len(shell_command.arguments) == 1:
+                print("SEARCHSTRING is missing.")
+                print(shell_command.synopsis)
+                continue
+            p_database.search_accounts(shell_command.arguments[1].strip(), only_connector_accounts=True)
+            # # remember latest found account:
+            # account_array = p_database.get_accounts_decrypted(shell_command.arguments[1].strip())
+            # if len(account_array) == 0:
+            #     latest_found_account = None
+            #     continue
+            # else:
+            #     latest_found_account = account_array[len(account_array) - 1]
             continue
 
         if shell_command.command == "searchhelp" or shell_command.command == "she":
