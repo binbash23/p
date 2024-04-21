@@ -1059,8 +1059,14 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             continue
 
         if shell_command.command == "check4update":
-            print("Local  version : " + p.VERSION)
-            print("GitHub version : " + get_current_version_from_github())
+            local_version = p.VERSION
+            github_version = get_current_version_from_github()
+            print("Local  version : " + local_version)
+            print("GitHub version : " + github_version)
+            if local_version == github_version:
+                print(colored("Current version is up to date", "green"))
+            else:
+                print(colored("A newer version is available", "red"))
             continue
 
         if shell_command.command == "clear":
