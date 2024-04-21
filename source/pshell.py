@@ -394,6 +394,7 @@ SHELL_COMMANDS = [
     ShellCommand("showmergedetail", "showmergedetail <UUID>",
                  "Show the merge history detail for merge event with UUID."),
     ShellCommand("slm", "slm", "Alias for showlatestmerge.\nUse 'help showlatestmerge' for more info."),
+    ShellCommand("smd", "smd", "Alias for showmergedetail.\nUse 'help showmergedetail' for more info."),
     ShellCommand("smh", "smh", "Alias for showmergehistory.\nUse 'help showmergehistory' for more info."),
     ShellCommand("sam", "sam",
                  "Alias for showallmergehistorydetails.\nUse 'help showallmergehistorydetails' for more info."),
@@ -2024,7 +2025,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
         if shell_command.command == "showlatestmerge" or shell_command.command == "slm":
             pdatabase.print_latest_merge_history_detail(p_database.database_filename)
 
-        if shell_command.command == "showmergedetail":
+        if shell_command.command == "showmergedetail" or shell_command.command == "smd":
             if len(shell_command.arguments) == 1:
                 print("Error: Merge history UUID is missing.")
                 print(shell_command.synopsis)
