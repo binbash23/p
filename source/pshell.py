@@ -2147,9 +2147,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
-                # print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min (unlimited)")
-
-                if str(pshell_max_idle_minutes_timeout) == "0":
+                if pshell_max_idle_minutes_timeout == 0:
                     print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min (unlimited)")
                 else:
                     print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
