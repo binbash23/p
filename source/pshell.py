@@ -240,6 +240,7 @@ SHELL_COMMANDS = [
                  " If you search something, invalidated accounts are not visible unless you change the settings (" +
                  "see command 'help showinvalidated')."),
     ShellCommand("list", "list", "List all accounts ordered by the last change date."),
+    ShellCommand("listconnectors", "listconnectors", "List all connector accounts ordered by the last change date."),
     ShellCommand("listconnectorfiles", "listconnectorfiles <UUID>|<SEARCHSTRING>",
                  "List all files in the connector account with <UUID>."),
     ShellCommand("listinvalidated", "listinvalidated", "List all invalidated accounts."),
@@ -1382,6 +1383,10 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
         if shell_command.command == "list":
             p_database.search_accounts("")
+            continue
+
+        if shell_command.command == "listconnectors":
+            p_database.search_accounts("", only_connector_accounts=True)
             continue
 
         if shell_command.command == "listconnectorfiles":
