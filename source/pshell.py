@@ -715,6 +715,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
         if not manual_locked and len(user_input_list) == 0:
             try:
                 # Eingabe mit timeout oder ohne machen:
+                timed_out = False
                 if int(pshell_max_idle_minutes_timeout) > 0:
                     # input_line = inputimeout(prompt=prompt_string, timeout=(int(pshell_max_idle_minutes_timeout) * 60))
                     input_line, timed_out = (
@@ -2146,7 +2147,12 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
         if shell_command.command == "timeout":
             if len(shell_command.arguments) == 1:
-                print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
+                # print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min (unlimited)")
+
+                if str(pshell_max_idle_minutes_timeout) == "0":
+                    print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min (unlimited)")
+                else:
+                    print("PShell max idle timeout is " + str(pshell_max_idle_minutes_timeout) + " min")
                 continue
             try:
                 pshell_max_idle_minutes_timeout = int(shell_command.arguments[1])
