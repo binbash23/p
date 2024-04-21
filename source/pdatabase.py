@@ -740,7 +740,8 @@ def get_latest_merge_history_uuid(database_filename: str) -> str:
         latest_uuid = sqlresult.fetchone()
         return latest_uuid[0]
     except Exception as e:
-        print("Error selecting latest uuid from merge_history: " + str(e))
+        raise Exception("Error selecting latest uuid from merge_history: " + str(e))
+        # print("Error selecting latest uuid from merge_history: " + str(e))
     finally:
         database_connection.close()
 
@@ -773,7 +774,11 @@ def print_all_merge_history_details(database_filename: str):
 
 
 def print_latest_merge_history_detail(database_filename: str):
-    latest_merge_uuid = get_latest_merge_history_uuid(database_filename)
+    latest_merge_uuid = None
+    try:
+        latest_merge_uuid = get_latest_merge_history_uuid(database_filename)
+    except:
+        pass
     if latest_merge_uuid:
         print_merge_history_detail(database_filename, latest_merge_uuid)
     else:
