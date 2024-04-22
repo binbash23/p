@@ -2263,6 +2263,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                     print()
                     print("Download canceled.")
                     continue
+                print()
                 print("Download ready.")
 
                 if is_windows_os():
