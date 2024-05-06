@@ -958,7 +958,10 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             continue
 
         if shell_command.command == "cc":
-            pyperclip3.clear()
+            try:
+                pyperclip3.clear()
+            except Exception as e:
+                print("Error using clipboard: " + str(e))
             continue
 
         if shell_command.command == "changedropboxdbpassword":
@@ -1766,7 +1769,11 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             if latest_found_account is None:
                 print("There is no account to copy.")
                 continue
-            pyperclip3.copy(latest_found_account.password)
+            try:
+                pyperclip3.copy(latest_found_account.password)
+            except Exception as e:
+                print("Error using clipboard: " + str(e))
+                continue
             print("Account   : " + latest_found_account.name)
             print("Clipboard : Password")
             continue
