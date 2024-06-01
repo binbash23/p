@@ -1106,6 +1106,15 @@ def get_account_count(database_filename: str, also_count_invalidated_accounts: b
         database_connection.close()
     return count
 
+def print_console_horizontal_line():
+    term_size = os.get_terminal_size()
+    # print(term_size.columns)
+    cols = term_size.columns
+    i = 2
+    while i < cols:
+        i += 1
+        print("-", end="")
+    print("-")
 
 def print_database_statistics(database_filename: str):
     if not os.path.exists(database_filename):
@@ -1140,7 +1149,8 @@ def print_database_statistics(database_filename: str):
         unmerged_changes = colored("No", "green")
 
     try:
-        print("----------------------------------------------------------------")
+        # print("----------------------------------------------------------------")
+        print_console_horizontal_line()
         print("Database Name            : ", end="")
         print_slow.print_slow(database_name)
         print("Database UUID            : ", end="")
@@ -1180,7 +1190,8 @@ def print_database_statistics(database_filename: str):
         print_slow.print_slow(str(get_merge_history_detail_table_count(database_filename)))
         print("Unmerged changes         : ", end="")
         print_slow.print_slow(unmerged_changes)
-        print("----------------------------------------------------------------")
+        # print("----------------------------------------------------------------")
+        print_console_horizontal_line()
     except KeyboardInterrupt:
         print()
 
