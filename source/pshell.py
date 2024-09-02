@@ -129,6 +129,47 @@ SHELL_COMMANDS = [
                  "with separating the commands by a semicolon.\nExample: 'alias 1 status;version'\nThis will execute " +
                  "the command 'status' and after that the command 'version' when you type '1' on the " +
                  "command line."),
+
+    #  RAZPASS Command help start
+
+    ShellCommand("addconnection", "!addconnection <SSID>", "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !addconnection you can announce a wifi network to the razpass.\nRazpass will then log into this " +
+                 "network prior to starting the\nrazpass Hotspot wifi network. You have to quote the SSID with single ticks." +
+                 "\nExample:\n[razpass] pshell> !addconnection 'Fritz Box 7299'"),
+    ShellCommand("deleteconnection", "!deleteconnection <SSID>", "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !deleteconnection you can remove a wifi connection from the razpasss device." +
+                 "\nExample:\n[razpass] pshell> !deleteconnection 'Fritz Box 7299'"),
+    ShellCommand("halt", "!halt",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !halt you stop the razpass device. It will shutdown." +
+                 "\nExample:\n[razpass] pshell> !halt"),
+    ShellCommand("razpass_update", "!razpass_update",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With this command you can update the razpass scripts from github to the latest version." +
+                 "\nExample:\n[razpass] pshell> !razpass_update"),
+    ShellCommand("passwd", "!passwd",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !passwd command you can change the password of the 'p' user of your razpass device." +
+                 "\nExample:\n[razpass] pshell> !passwd"),
+    ShellCommand("reboot", "!reboot",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !reboot you restart the razpass device. It will shutdown and start up again." +
+                 "\nExample:\n[razpass] pshell> !reboot"),
+    ShellCommand("scanwifi", "!scanwifi",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !scanwifi you scan the environment for other wifi networks and show them up." +
+                 "\nExample:\n[razpass] pshell> !scanwifi"),
+    ShellCommand("showconnections", "!showconnections",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With !showconnections you show all configured network devices of the razpass." +
+                 "\nExample:\n[razpass] pshell> !showconnections"),
+    ShellCommand("sudo passwd", "!sudo passwd",
+                 "Shell command for p which is installed in a razpass environment.\n" +
+                 "With this command you can change the password of the 'root' user of your razpass device." +
+                 "\nExample:\n[razpass] pshell> !sudo passwd"),
+
+    #  RAZPASS Command help end
+
     ShellCommand("cc", "cc", "Clear clipboard. Remove anything from clipboard."),
     ShellCommand("changepassword", "changepassword", "Change the master password of current database.\nThis " +
                  "can take some minutes if there are a lot accounts in it.\nNot only the accounts will " +
