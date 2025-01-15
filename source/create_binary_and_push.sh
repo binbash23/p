@@ -4,6 +4,9 @@
 #
 set -e
 
+# enable venv:
+. ../venv/bin/activate
+
 git pull
 
 #pyinstaller p.py --onefile --bootloader-ignore-signals --log-level=WARN --clean
