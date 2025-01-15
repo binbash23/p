@@ -219,7 +219,8 @@ SHELL_COMMANDS = [
                  "Duplicate account with UUID into a new account. You can also use a SEARCHSTRING to " +
                  "identify the account to be duplicated. After you have duplicated the account you can edit it with " +
                  "the edit command."),
-    ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID to the clipboard."),
+    ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
+    ShellCommand("password", "password <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
