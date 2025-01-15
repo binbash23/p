@@ -220,7 +220,8 @@ SHELL_COMMANDS = [
                  "identify the account to be duplicated. After you have duplicated the account you can edit it with " +
                  "the edit command."),
     ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
-    ShellCommand("password", "password <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
+    #ShellCommand("password", "password <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
+    ShellCommand("get", "get <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
@@ -1128,7 +1129,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             p_database.delete_all_shell_history_entries()
             continue
 
-        if shell_command.command == "copypassword":
+        if shell_command.command == "copypassword" or shell_command.command == "get":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
                 print(shell_command.synopsis)
