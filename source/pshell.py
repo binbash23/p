@@ -221,7 +221,7 @@ SHELL_COMMANDS = [
                  "the edit command."),
     ShellCommand("copypassword", "copypassword <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
     #ShellCommand("password", "password <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
-    ShellCommand("get", "get <UUID>|<SEARCHSTRING>", "Copy password from UUID/searchstring to the clipboard."),
+    ShellCommand("get", "get <UUID>|<SEARCHSTRING>", "Copy login name and then the password from UUID/searchstring to the clipboard."),
     ShellCommand("countorphanedaccounthistoryentries", "countorphanedaccounthistoryentries ",
                  "Count orphaned account history entries."),
     ShellCommand("delete", "delete <UUID>|<SEARCHSTRING>",
@@ -1129,7 +1129,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             p_database.delete_all_shell_history_entries()
             continue
 
-        if shell_command.command == "copypassword" or shell_command.command == "get":
+        if shell_command.command == "copypassword":
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
                 print(shell_command.synopsis)
@@ -1146,6 +1146,28 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 pyperclip3.copy(account.password)
             except Exception as e:
                 print("Error copying password to the clipboard: " + str(e))
+            continue
+
+        if shell_command.command == "get":
+            if len(shell_command.arguments) == 1:
+                print("UUID is missing.")
+                print(shell_command.synopsis)
+                continue
+            # account = p_database.get_account_by_uuid_and_decrypt(shell_command.arguments[1].strip())
+            account_uuid = find_uuid_for_searchstring_interactive(shell_command.arguments[1].strip(), p_database)
+            if not account_uuid:
+                continue
+            account = p_database.get_account_by_uuid_and_decrypt(account_uuid)
+            try:
+                # pyperclip3.copy(password)
+                print("Account   : " + account.name)
+                print("CLIPBOARD : Login name [" + account.loginname + "]")
+                pyperclip3.copy(account.loginname)
+                input("<Press Enter>")
+                print("CLIPBOARD : Password [******]")
+                pyperclip3.copy(account.password)
+            except Exception as e:
+                print("Error copying login name and password to the clipboard: " + str(e))
             continue
 
         if shell_command.command == "countorphanedaccounthistoryentries":
@@ -1424,6 +1446,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             if not uuid_to_invalidate:
                 continue
             if p_database.invalidate_account(uuid_to_invalidate):
+                account = p_database.get_account_by_uuid_and_decrypt(uuid_to_invalidate)
+                p_database.search_account_by_uuid(uuid_to_invalidate)
                 print("Account with UUID: " + uuid_to_invalidate + " has been invalidated.")
             continue
 
