@@ -5,3 +5,4 @@ source/dist
 source/__pycache__
 build
 venv
+**/*.db
