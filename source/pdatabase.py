@@ -1245,6 +1245,9 @@ def color_search_string(text_string, search_string, color):
     # if search_string is None or search_string == "" or text_string is None or text_string == "":
     if search_string is None or search_string == "":
         return text_string
+
+    search_string = search_string.replace("\\", "\\\\")
+
     list_matching_indices = [m.start() for m in finditer(search_string, text_string, flags=IGNORECASE)]
     if len(list_matching_indices) == 0:
         return text_string
