@@ -1,0 +1,7 @@
+#
+# 20250119 jens heine <binbash@gmx.net>
+#
+source/dist
+source/__pycache__
+build
+venv
