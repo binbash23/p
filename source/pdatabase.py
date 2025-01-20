@@ -1273,13 +1273,18 @@ def _print_found_n_results(n_results: int):
 
 
 def read_confirmed_database_password_from_user() -> str:
-    new_password = pwinput.pwinput("Enter new database password   : ")
-    new_password_confirm = pwinput.pwinput("Confirm new database password : ")
-    while new_password != new_password_confirm:
-        # logging.error("Passwords do not match.")
-        print("Passwords do not match.")
+    new_password = ""
+    try:
         new_password = pwinput.pwinput("Enter new database password   : ")
         new_password_confirm = pwinput.pwinput("Confirm new database password : ")
+        while new_password != new_password_confirm:
+            # logging.error("Passwords do not match.")
+            print("Passwords do not match.")
+            new_password = pwinput.pwinput("Enter new database password   : ")
+            new_password_confirm = pwinput.pwinput("Confirm new database password : ")
+    except KeyboardInterrupt:
+        print()
+        print("Ctrl-c detected")
     return new_password
 
 
@@ -2897,7 +2902,10 @@ class PDatabase:
                     ["Searching account with UUID " + delete_uuid + " in local database:"])
                 account_found = self.search_account_by_uuid(delete_uuid, silent=True)
                 if account_found:
-                    answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
+                    try:
+                        answer = input("Delete account in local database with UUID: " + delete_uuid + " ([y]/n) : ")
+                    except KeyboardInterrupt:
+                        answer = "n"
                     if answer != "y" and answer != "":
                         print("Canceled.")
                         continue

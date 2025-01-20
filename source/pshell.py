@@ -1166,6 +1166,9 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 input("<Press Enter>")
                 print("CLIPBOARD : Password [******]")
                 pyperclip3.copy(account.password)
+            except KeyboardInterrupt as ke:
+                print()
+                continue
             except Exception as e:
                 print("Error copying login name and password to the clipboard: " + str(e))
             continue
@@ -1279,6 +1282,9 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                     connector.download_file(remote_path=filename_to_download, local_path=filename_to_download)
                     print("Ready.")
                 # p_database.merge_database_with_connector(connector)
+            except KeyboardInterrupt:
+                print()
+                continue
             except Exception as e:
                 print("Error: " + str(e))
             continue
@@ -1587,6 +1593,9 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                             filename_nr = 1
                         print()
                         new_database_filename = db_filenames[int(filename_nr) - 1]
+                    except KeyboardInterrupt:
+                        print()
+                        continue
                     except Exception as e:
                         print("Error: " + str(e))
                         continue
@@ -1634,7 +1643,6 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
 
             start_pshell(new_p_database)
-            # input("Press enter to exit.")
             sys.exit()
 
         if shell_command.command == "quit" or shell_command.command == "exit":
