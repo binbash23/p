@@ -1618,6 +1618,9 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                                                                 new_database_password.encode("UTF-8")):
                         print(colored("Access denied: Password is wrong.", "red"))
                         continue
+                    else:
+                        print("Access granted.")
+                        continue
                 except KeyboardInterrupt:
                     print()
                     continue
