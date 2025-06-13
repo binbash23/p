@@ -2087,6 +2087,15 @@ class PDatabase:
             database_connection.close()
         return account_array
 
+    def get_all_account_types(self) -> []:
+        account_type_array = []
+        account_array = self.get_accounts_decrypted()
+        for account in account_array:
+            if account.type not in account_type_array:
+                account_type_array.append(str(account.type))
+        account_type_array.sort()
+        return account_type_array
+
     def get_accounts_decrypted_from_invalid_accounts(self, search_string: str) -> []:
         account_array = []
         database_connection = None
