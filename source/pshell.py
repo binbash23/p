@@ -482,6 +482,13 @@ show_unmerged_changes_warning_on_startup = True
 show_status_on_startup = True
 pshell_print_slow_enabled = True
 PSHELL_COMMAND_DELIMITER = ";"
+HELP_INFO_TEXT = "\nEnter 'help' for a list of all commands. \n\nUsefull commands:\n\n" + \
+    "she config       - Search all commands for the string 'config'\n" + \
+    "/SEARCHSTRING    - Search accounts for SEARCHSTRING\n" + \
+    "help sco         - Show detailed help for command 'sco'\n" + \
+    "q                - exit\n" + \
+    "get SEARCHSTRING - first copy user then password of account\n\n" + \
+    "Note: It is sufficient to type the first unique characters of a command.\n"
 
 
 # Try to find the uuid for a given searchstring. If there are multiple accounts that match,
@@ -850,7 +857,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 pass
             else:
                 print("Unknown command '" + user_input + "'")
-                print("Enter 'help' for command help")
+                print(HELP_INFO_TEXT)
             continue
 
         # check if the (next) command is the alias command and there are more commands in the user_input_list.
@@ -910,7 +917,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("Redo command: " + last_user_input)
             if shell_command is None:
                 print("Unknown command '" + last_user_input + "'")
-                print("Enter 'help' for command help")
+                print(HELP_INFO_TEXT)
                 continue
             else:
                 current_shell_history_entry = ShellHistoryEntry(user_input=last_user_input)
