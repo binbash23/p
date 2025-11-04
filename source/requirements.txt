@@ -5,6 +5,7 @@ cryptography
 progressbar 
 dropbox
 webdav4
+paramiko <4.0
 pysftp
 wget
 pyinstaller
