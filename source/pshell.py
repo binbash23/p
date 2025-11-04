@@ -1623,7 +1623,6 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             else:
                 new_database_filename = shell_command.arguments[1].strip()
 
-            # new_database_filename = shell_command.arguments[1].strip()
             new_p_database = None
             if os.path.exists(new_database_filename):
                 try:
@@ -1641,7 +1640,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                         continue
                     else:
                         print("Access granted.")
-                        continue
+                        # continue
                 except KeyboardInterrupt:
                     print()
                     continue
@@ -1667,6 +1666,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 new_p_database = pdatabase.PDatabase(new_database_filename, new_database_password)
 
             start_pshell(new_p_database)
+
             sys.exit()
 
         if shell_command.command == "quit" or shell_command.command == "exit":
