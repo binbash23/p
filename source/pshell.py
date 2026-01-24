@@ -484,6 +484,7 @@ pshell_print_slow_enabled = True
 PSHELL_COMMAND_DELIMITER = ";"
 HELP_INFO_TEXT = "\nEnter 'help' for a list of all commands. \n\nUsefull commands:\n\n" + \
     "she config       - Search all commands for the string 'config'\n" + \
+    "shv config       - Search in all command help texts for the string 'config'\n" + \
     "/SEARCHSTRING    - Search accounts for SEARCHSTRING\n" + \
     "help sco         - Show detailed help for command 'sco'\n" + \
     "q                - exit\n" + \
