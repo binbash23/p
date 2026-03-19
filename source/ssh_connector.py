@@ -50,35 +50,42 @@ class SshConnector(ConnectorInterface):
         return "ssh"
 
     def list_files(self, remote_path="") -> []:
-        remote_path = os.path.join(self._ssh_remote_path, remote_path)
+        # remote_path = os.path.join(self._ssh_remote_path, remote_path) # 20260319 jens heine: see same date changes below
+        remote_path = self._ssh_remote_path + remote_path
         try:
             return self._ssh_connection.listdir(remote_path)
         except Exception as e:
             print("Error: " + str(e))
 
     def upload_file(self, local_path, remote_path=""):
-        remote_path = os.path.join(self._ssh_remote_path, remote_path)
+        # remote_path = os.path.join(self._ssh_remote_path, remote_path) # 20260319 jens heine: see same date changes below
+        remote_path = self._ssh_remote_path + remote_path
         try:
             self._ssh_connection.put(local_path, remote_path)
         except Exception as e:
             print("Error: " + str(e))
 
     def download_file(self, remote_path, local_path="."):
-        remote_path = os.path.join(self._ssh_remote_path, remote_path)
+        # remote_path = os.path.join(self._ssh_remote_path, remote_path) # 20260319 jens heine: see same date changes below
+        remote_path = self._ssh_remote_path + remote_path
         try:
             self._ssh_connection.get(remote_path, local_path)
         except Exception as e:
             print("Error: " + str(e))
 
     def delete_file(self, remote_path):
-        remote_path = os.path.join(self._ssh_remote_path, remote_path)
+        # remote_path = os.path.join(self._ssh_remote_path, remote_path) # 20260319 jens heine: see same date changes below
+        remote_path = self._ssh_remote_path + remote_path
         try:
             self._ssh_connection.remove(remote_path)
         except Exception as e:
             print("Error: " + str(e))
 
     def exists(self, remote_path) -> bool:
-        remote_path = os.path.join(self._ssh_remote_path, remote_path)
+        # remote_path = os.path.join(self._ssh_remote_path, remote_path) # 20260319 jens heine: take path and
+        # seperators only from account entry. do NOT generate it because the target system is not necessary the same
+        # as the source (win/linux)
+        remote_path = self._ssh_remote_path + remote_path
         exists: bool = False
         try:
             exists = self._ssh_connection.exists(remote_path)
