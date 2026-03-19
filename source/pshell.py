@@ -2481,41 +2481,41 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
 
 
 def show_config(p_database: pdatabase):
-    print("PShell timeout                      : ", end="")
+    print("PShell timeout                              [timeout] : ", end="")
     print_slow.print_slow(colored(str(pshell_max_idle_minutes_timeout), "green"))
-    print("PShell max history size             : ", end="")
+    print("PShell max history size              [maxhistorysize] : ", end="")
     print_slow.print_slow(colored(str(pshell_max_history_size), "green"))
-    print("Show invalidated accounts           : ", end="")
+    print("Show invalidated accounts           [showinvalidated] : ", end="")
     print_slow.print_slow(colored(str(p_database.show_invalidated_accounts), "green"))
-    print("Shadow passwords                    : ", end="")
+    print("Shadow passwords                    [shadowpasswords] : ", end="")
     print_slow.print_slow(colored(str(p_database.shadow_passwords), "green"))
-    print("Show accounts verbose               : ", end="")
+    print("Show accounts verbose                       [verbose] : ", end="")
     print_slow.print_slow(colored(str(p_database.show_account_details), "green"))
-    print("Show unmerged changes warning       : ", end="")
+    print("Show unmerged changes warning   [showunmergedwarning] : ", end="")
     print_slow.print_slow(colored(str(show_unmerged_changes_warning_on_startup), "green"))
-    print("Show status on startup              : ", end="")
+    print("Show status on startup          [showstatusonstartup] : ", end="")
     print_slow.print_slow(colored(str(show_status_on_startup), "green"))
-    print("Track account history               : ", end="")
+    print("Track account history           [trackaccounthistory] : ", end="")
     print_slow.print_slow(colored(str(p_database.track_account_history), "green"))
-    print("Slow print enabled                  : ", end="")
+    print("Slow print enabled                 [slowprintenabled] : ", end="")
     print_slow.print_slow(colored(str(print_slow.DELAY_ENABLED), "green"))
-    print("Execute on start                    : ", end="")
+    print("Execute on start                     [executeonstart] : ", end="")
     print_slow.print_slow(colored(str(p_database.get_execute_on_start_command()), "green"))
-    print("Execute on stop                     : ", end="")
+    print("Execute on stop                       [executeonstop] : ", end="")
     print_slow.print_slow(colored(str(p_database.get_execute_on_stop_command()), "green"))
-    print("Default dropbox merge target        : ", end="")
+    print("Default dropbox merge target    [setdropboxconnector] : ", end="")
     print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_DROPBOX_ACCOUNT_UUID), "green"))
-    print("Default ssh merge target            : ", end="")
+    print("Default ssh merge target            [setsshconnector] : ", end="")
     print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_SSH_ACCOUNT_UUID), "green"))
-    print("Default webdav merge target         : ", end="")
+    print("Default webdav merge target      [setwebdavconnector] : ", end="")
     print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_WEBDAV_ACCOUNT_UUID), "green"))
-    print("Default file merge target           : ", end="")
+    print("Default file merge target          [setfileconnector] : ", end="")
     print_slow.print_slow(colored(pdatabase.get_attribute_value_from_configuration_table(
         p_database.database_filename,
         pdatabase.CONFIGURATION_TABLE_ATTRIBUTE_CONNECTOR_DEFAULT_FILE_ACCOUNT_UUID), "green"))
