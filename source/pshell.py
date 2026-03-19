@@ -101,8 +101,8 @@ class ShellCommand:
     def __escape_for_git_doc(self, string: str) -> str:
         if string.startswith("#"):
             string = "\\" + string
-        string = string.replace("<", "\<")
-        string = string.replace(">", "\>")
+        string = string.replace("<", r'\<')
+        string = string.replace(">", r'\>')
         # string = string.replace("'", "\'")
         return string
 
@@ -328,6 +328,7 @@ SHELL_COMMANDS = [
                  "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
                  "and, if one is found, it will be used to connect to the ssh target. You can use the " +
                  "command 'setsshaccountuuid' to set the default ssh account UUID. The account has to have a connector type = 'ssh'.\n" +
+                 "Make sure that you add a trailing path seperator which works on the target system (\"/\" or \"/\")!.\n" +
                  "Example account for a ssh connector:\n" +
                  "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
                  "Name            : <FREE_TEXT>\n" +
@@ -386,13 +387,29 @@ SHELL_COMMANDS = [
                  "Search for SEARCHSTRING in all columns of invalidated accounts."),
     ShellCommand("setfileaccountuuid", "setfileaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a file target. " +
-                 "This account will be used if the command merge2file is called without an account UUID."),
+                 "This account will be used if the command merge2file is called without an account UUID. " +
+                 "You can check the default connector with the command 'showconfig'."),
+    ShellCommand("setfileconnector", "setfileconnector <UUID>|<SEARCHSTRING>",
+                 "Alias for setfileaccountuuid.\nUse 'help setfileaccountuuid' for more info."),
+    ShellCommand("sfc", "sfc <UUID>|<SEARCHSTRING>",
+                 "Alias for setfileaccountuuid.\nUse 'help setfileaccountuuid' for more info."),
     ShellCommand("setsshaccountuuid", "setsshaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a ssh target." +
-                 "This account will be used if the command merge2ssh is called without an account UUID."),
+                 "This account will be used if the command merge2ssh is called without an account UUID. " +
+                 "You can check the default connector with the command 'showconfig'." +
+                 "\nUse 'help merge2ssh' for more info."),
+    ShellCommand("setsshconnector", "setsshconnector <UUID>|<SEARCHSTRING>",
+                 "Alias for setsshaccountuuid.\nUse 'help setsshaccountuuid' for more info."),
+    ShellCommand("ssc", "ssc <UUID>|<SEARCHSTRING>",
+                 "Alias for setsshaccountuuid.\nUse 'help setsshaccountuuid' for more info."),
     ShellCommand("setwebdavaccountuuid", "setwebdavaccountuuid <UUID>|<SEARCHSTRING>",
                  "Set a default account in the configuration table to connect to a webdav target." +
-                 "This account will be used if the command merge2webdav is called without an account UUID."),
+                 "This account will be used if the command merge2webdav is called without an account UUID. " +
+                 "You can check the default connector with the command 'showconfig'."),
+    ShellCommand("setwebdavconnector", "setwebdavconnector <UUID>|<SEARCHSTRING>",
+                 "Alias for setwebdavaccountuuid.\nUse 'help setwebdavaccountuuid' for more info."),
+    ShellCommand("swc", "swc <UUID>|<SEARCHSTRING>",
+                 "Alias for setwebdavaccountuuid.\nUse 'help setwebdavaccountuuid' for more info."),
     ShellCommand("sc", "sc <SEARCHSTRING>", "Search for SEARCHSTRING in all accounts. " +
                  "If one or more account(s) match the SEARCHSTRING, the password of the first account will be copied " +
                  "to the clipboard.\nNote: Linux users need to install pyperclip3 and xclip to use the copy/paste feature!"),
@@ -422,7 +439,12 @@ SHELL_COMMANDS = [
                  "the current database. To unset the database name, set it to '-'"),
     ShellCommand("setdropboxaccountuuid", "setdropboxaccountuuid <UUID>",
                  "Set the default dropbox account uuid in the configuration. Whenever you run merge2dropbox, " +
-                 "this UUID will be used as the default dropbox account."),
+                 "this UUID will be used as the default dropbox account. " +
+                 "You can check the default connector with the command 'showconfig'."),
+    ShellCommand("setdropboxconnector", "setdropboxconnector <UUID>",
+                 "Alias for setdropboxaccountuuid.\nUse 'help setdropboxaccountuuid' for more info."),
+    ShellCommand("sdc", "sdc <UUID>",
+                 "Alias for setdropboxaccountuuid.\nUse 'help setdropboxaccountuuid' for more info."),
     ShellCommand("shadowpasswords", "shadowpasswords [on|off]", "Set shadow passwords to on or off in console output" +
                  " or show current shadow status.\nThis is useful if you are not alone watching the output " +
                  "of this program on the monitor."),
@@ -1394,9 +1416,13 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 print()
                 print(colored(" You can search through all command help texts with 'searchhelp <SEARCHSTRING>'",
                               "green"))
+                print(colored(" or the short version 'she <SEARCHSTRING>'",
+                              "green"))
                 print(colored(" to get a list of commands which contain SEARCHSTRING in their help text.", "green"))
                 print()
                 print(colored(" You can also use 'searchhelpverbose <SEARCHSTRING>' to print the full help text(s)",
+                              "green"))
+                print(colored(" or the short version 'shv <SEARCHSTRING>' to print the full help text(s)",
                               "green"))
                 print(colored(" of commands which contain SEARCHSTRING in their help text.", "green"))
                 print()
@@ -1767,6 +1793,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print()
             print(colored("Searching in all help texts for: '" + search_string + "'", "green"))
             print()
+            print(colored("Commands found: '" + search_string + "'", "green"))
+            print()
             results_found = 0
             for sc in SHELL_COMMANDS:
                 if search_string in sc.command.lower():
@@ -1774,6 +1802,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                     print(colored(sc.command, "green"))
                     # print()
             if results_found > 0:
+                print()
+                print(colored("Use help <COMMAND> for more information.", "green"))
                 print()
             else:
                 print("No results found.")
@@ -1810,7 +1840,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 latest_found_account = account_array[len(account_array) - 1]
             continue
 
-        if shell_command.command == "setfileaccountuuid":
+        if (shell_command.command == "setfileaccountuuid" or shell_command.command == "setfileconnector"
+                or shell_command.command == "sfc"):
             if len(shell_command.arguments) == 1:
                 print("UUID of file account is missing.")
                 print(shell_command.synopsis)
@@ -1827,7 +1858,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 new_file_account_uuid)
             continue
 
-        if shell_command.command == "setsshaccountuuid":
+        if (shell_command.command == "setsshaccountuuid" or shell_command.command == "setsshconnector"
+                or shell_command.command == "ssc"):
             if len(shell_command.arguments) == 1:
                 print("UUID of ssh account is missing.")
                 print(shell_command.synopsis)
@@ -1846,7 +1878,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
                 new_ssh_account_uuid)
             continue
 
-        if shell_command.command == "setwebdavaccountuuid":
+        if shell_command.command == "setwebdavaccountuuid" or shell_command.command == "setwebdavconnector"\
+                or shell_command.command == "swc":
             if len(shell_command.arguments) == 1:
                 print("UUID of webdav account is missing.")
                 print(shell_command.synopsis)
@@ -2036,7 +2069,8 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print("Database name set to: " + new_database_name)
             continue
 
-        if shell_command.command == "setdropboxaccountuuid":
+        if (shell_command.command == "setdropboxaccountuuid" or shell_command.command == "setdropboxconnector"
+                or shell_command.command == "sdc"):
             if len(shell_command.arguments) == 1:
                 print("UUID is missing.")
                 print(shell_command.synopsis)
