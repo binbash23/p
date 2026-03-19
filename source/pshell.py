@@ -1793,7 +1793,7 @@ def start_pshell(p_database: pdatabase.PDatabase, arg_user_input_list: [str] = N
             print()
             print(colored("Searching in all help texts for: '" + search_string + "'", "green"))
             print()
-            print(colored("Commands found: '" + search_string + "'", "green"))
+            print(colored("Commands found for: '" + search_string + "'", "green"))
             print()
             results_found = 0
             for sc in SHELL_COMMANDS:
