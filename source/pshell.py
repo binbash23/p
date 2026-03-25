@@ -328,7 +328,7 @@ SHELL_COMMANDS = [
                  "If UUID is not given, the configuration table will be searched for a default ssh account UUID " +
                  "and, if one is found, it will be used to connect to the ssh target. You can use the " +
                  "command 'setsshaccountuuid' to set the default ssh account UUID. The account has to have a connector type = 'ssh'.\n" +
-                 "Make sure that you add a trailing path seperator which works on the target system (\"/\" or \"/\")!.\n" +
+                 "Make sure that you add a trailing path seperator which works on the target system (\"/\" or \"\\\")!.\n" +
                  "Example account for a ssh connector:\n" +
                  "UUID            : 0266d735-87fe-49c1-b02c-c248e4e2caa0\n" +
                  "Name            : <FREE_TEXT>\n" +
